@@ -18,8 +18,6 @@ import {
   Zap,
   ChevronDown,
   Settings,
-  LogOut,
-  Home,
   X,
 } from 'lucide-react'
 
@@ -31,7 +29,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: SidebarProps) {
-  const { userEmail, logout } = useAuth()
+  const { user } = useAuth()
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     people: true,
     wellbeing: true,
@@ -44,11 +42,6 @@ export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Sid
       ...prev,
       [section]: !prev[section],
     }))
-  }
-
-  const handleLogout = () => {
-    logout()
-    window.location.hash = '#/'
   }
 
   const handleTabClick = (tab: string) => {
@@ -72,7 +65,7 @@ export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Sid
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40 transition-all duration-300 md:relative md:translate-x-0 ${
+        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40 transition-all duration-300 md:translate-x-0 ${
           !isOpen ? '-translate-x-full' : ''
         }`}
       >
@@ -130,6 +123,22 @@ export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Sid
                 >
                   <UserRound size={17} />
                   <span className="text-sm font-medium">Team</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('departments')}
+                  className={`${subItemClass} ${activeTab === 'departments' ? activeSubItemClass : ''}`}
+                >
+                  <Building2 size={17} />
+                  <span className="text-sm font-medium">Departments</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('user-management')}
+                  className={`${subItemClass} ${activeTab === 'user-management' ? activeSubItemClass : ''}`}
+                >
+                  <Users size={17} />
+                  <span className="text-sm font-medium">Users</span>
                 </button>
                 <button
                   type="button"
@@ -273,31 +282,19 @@ export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Sid
           {/* User Section */}
           <div className="p-4 border-t border-slate-200 space-y-2">
             <div className="flex items-center gap-3 px-3 py-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-300 to-cyan-300 flex items-center justify-center text-slate-900 text-xs font-bold flex-shrink-0">
-                {userEmail?.charAt(0).toUpperCase()}
-              </div>
+                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-300 to-cyan-300 flex items-center justify-center text-slate-900 text-xs font-bold">
+                      {(user?.email?.charAt(0) ?? 'M').toUpperCase()}
+                    </div>
+                  )}
+                </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900 truncate">{userEmail}</p>
+                <p className="text-sm font-semibold text-slate-900 truncate">{user?.email ?? 'unknown@manto.local'}</p>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => (window.location.hash = '#/')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition text-sm"
-            >
-              <Home size={16} />
-              <span>Home</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition text-sm"
-            >
-              <LogOut size={16} />
-              <span>Logout</span>
-            </button>
           </div>
         </div>
       </aside>

@@ -1,6 +1,8 @@
-import { useMemo, useRef, useState, useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import axios from 'axios'
 import { Eye, EyeOff, Lock, Loader2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { apiClient, type ApiResponse, type GoogleAuthUrlResponse, type LoginRequestDto, type LoginResponseDto } from '@/lib/api'
 
 const backgroundVideo = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260325_094440_a3592600-bd1e-49e5-9bce-a73662061d83.mp4'
 
@@ -10,6 +12,7 @@ export default function Login() {
   const [submitted, setSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const { login } = useAuth()
 
@@ -17,20 +20,71 @@ export default function Login() {
     return email.trim().length > 0 && password.length > 0 && !isLoading && !submitted
   }, [email, password, isLoading, submitted])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
 
     setIsLoading(true)
+    setErrorMessage(null)
 
-    // Mock submit
-    setTimeout(() => {
+    const requestBody: LoginRequestDto = {
+      email: email.trim(),
+      password,
+    }
+
+    try {
+      const response = await apiClient.post<ApiResponse<LoginResponseDto>>('/auth/login', requestBody)
+      const token = response.data.data?.token
+
+      if (!response.data.succeeded || !token) {
+        throw new Error(response.data.message || 'Đăng nhập thất bại.')
+      }
+
+      login(requestBody.email, token)
       setSubmitted(true)
+    } catch (error) {
+      let message = 'Không thể đăng nhập lúc này. Vui lòng kiểm tra lại email hoặc mật khẩu.'
+
+      if (axios.isAxiosError(error)) {
+        const responseData = error.response?.data as ApiResponse<LoginResponseDto> | undefined
+        message = responseData?.message || message
+      } else if (error instanceof Error && error.message) {
+        message = error.message
+      }
+
+      setErrorMessage(message)
+    } finally {
       setIsLoading(false)
-      // Call login to update auth state
-      login(email)
-      console.log('Login attempt', { email })
-    }, 900)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    if (isLoading || submitted) return
+
+    setIsLoading(true)
+    setErrorMessage(null)
+
+    try {
+      const response = await apiClient.get<GoogleAuthUrlResponse>('/auth/google')
+      const authUrl = response.data.authUrl
+
+      if (!authUrl) {
+        throw new Error('Không thể khởi tạo đăng nhập Google.')
+      }
+
+      window.location.href = authUrl
+    } catch (error) {
+      let message = 'Không thể đăng nhập bằng Google lúc này.'
+
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || message
+      } else if (error instanceof Error && error.message) {
+        message = error.message
+      }
+
+      setErrorMessage(message)
+      setIsLoading(false)
+    }
   }
 
   // Redirect to admin after successful login
@@ -124,10 +178,31 @@ export default function Login() {
                   <input type="checkbox" className="h-4 w-4 rounded border-slate-600" disabled={isLoading} />
                   Keep me signed in
                 </label>
-                <a href="#" className="text-sm font-medium text-emerald-200/90 hover:text-emerald-100">
+                <a href="#/forgot-password" className="text-sm font-medium text-emerald-200/90 hover:text-emerald-100">
                   Forgot password?
                 </a>
               </div>
+
+              {errorMessage ? (
+                <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                  {errorMessage}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoading || submitted}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/60 px-4 py-2.5 font-semibold text-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition hover:border-slate-500 hover:bg-slate-900/80 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.1-.4-3.9z" />
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.5 8.3 6.3 14.7z" />
+                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5c-2 1.3-4.5 2.2-7.2 2.2-5.2 0-9.7-3.1-11.7-7.6l-6.5 5C8.8 39.5 15.7 44 24 44z" />
+                  <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-1 2.8-2.9 5-5.5 6.4l.1-.1 6.2 5C35.7 37.1 40 32 40 24c0-1.3-.1-2.1-.4-3.9z" />
+                </svg>
+                Continue with Google
+              </button>
 
               <button
                 type="submit"
