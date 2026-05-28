@@ -14,7 +14,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const { login } = useAuth()
+  const { login, role } = useAuth()
 
   const canSubmit = useMemo(() => {
     return email.trim().length > 0 && password.length > 0 && !isLoading && !submitted
@@ -87,15 +87,25 @@ export default function Login() {
     }
   }
 
-  // Redirect to admin after successful login
+  // Redirect to dashboard based on role after successful login
   useEffect(() => {
-    if (submitted) {
+    if (submitted && role) {
       const redirectTimer = setTimeout(() => {
-        window.location.hash = '#/admin'
+        // Redirect based on role
+        if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'ceo') {
+          window.location.hash = '#/admin'
+        } else if (role.toLowerCase() === 'manager' || role.toLowerCase() === 'hr') {
+          // TODO: Implement department dashboard
+          window.location.hash = '#/admin'
+        } else {
+          // Employee and other roles
+          // TODO: Implement personal dashboard
+          window.location.hash = '#/admin'
+        }
       }, 1500)
       return () => clearTimeout(redirectTimer)
     }
-  }, [submitted])
+  }, [submitted, role])
 
   return (
     <main
