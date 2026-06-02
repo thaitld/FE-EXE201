@@ -1,39 +1,36 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import Homepage from "../pages/Homepage";
-import Footer from "../components/Footer";
-import Login from "../pages/Login";
-import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
-import ChangePassword from "../pages/ChangePassword";
-import GoogleAuthCallback from "../pages/GoogleAuthCallback";
-import NotAuthorized from "../pages/NotAuthorized";
-import Admin from "../pages/Admin";
-import AdminDashboard from "@/pages/roles/admin/Dashboard";
-import AdminUsers from "@/pages/roles/admin/Users";
-import AdminTeams from "@/pages/roles/admin/Teams";
-import AdminDepartments from "@/pages/roles/admin/Departments";
-import RoleGate from "@/components/RoleGate";
+import Homepage from "@/pages/shared/Homepage";
+import Footer from "@/components/layout/Footer";
+import Login from "@/pages/auth/Login";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import ChangePassword from "@/pages/shared/ChangePassword";
+import GoogleAuthCallback from "@/pages/auth/GoogleAuthCallback";
+import NotAuthorized from "@/pages/shared/NotAuthorized";
+import Dashboard from "@/pages/Dashboard";
+import RoleGate from "@/features/auth/RoleGate";
+import Survey from "@/components/panels/employee/Survey";
 
 function isAdminRoute(route: string) {
   return route.startsWith("#/admin");
 }
 
-function isRoleAdminRoute(route: string) {
-  return route.startsWith("#/roles/admin");
-}
-
 function AdminRoute({ route }: { route: string }) {
   const adminComponent = (() => {
     if (route.startsWith("#/admin/user-management")) {
-      return <Admin initialTab="user-management" />;
+      return <Dashboard initialTab="user-management" />;
     }
 
     if (route.startsWith("#/admin/profile")) {
-      return <Admin initialTab="profile" />;
+      return <Dashboard initialTab="profile" />;
     }
 
-    return <Admin />;
+    if (route.startsWith("#/admin/task/")) {
+      return <Dashboard initialTab="task-detail" />;
+    }
+
+    return <Dashboard />;
   })();
 
   // All authenticated users can access dashboard (role-based visibility handled in Admin.tsx)
@@ -76,19 +73,6 @@ export default function AppRouter() {
     return <AdminRoute route={route} />;
   }
 
-  if (isRoleAdminRoute(route)) {
-    if (!isAuthenticated) {
-      window.location.hash = "#/login";
-      return null;
-    }
-
-    if (route.startsWith("#/roles/admin/users")) return <AdminUsers />;
-    if (route.startsWith("#/roles/admin/departments"))
-      return <AdminDepartments />;
-    if (route.startsWith("#/roles/admin/teams")) return <AdminTeams />;
-    return <AdminDashboard />;
-  }
-
   if (route.startsWith("#/login")) {
     return <Login />;
   }
@@ -107,6 +91,14 @@ export default function AppRouter() {
       return null;
     }
     return <ChangePassword />;
+  }
+
+  if (route.startsWith("#/survey")) {
+    if (!isAuthenticated) {
+      window.location.hash = "#/login";
+      return null;
+    }
+    return <Survey />;
   }
 
   return (

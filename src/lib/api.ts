@@ -1,4 +1,22 @@
 import axios from "axios";
+import type {
+  DailyPerformanceDto,
+  TaskInstanceSummaryDto,
+  DailyEfficiencyPointDto,
+  PersonalBurnoutInsightDto,
+  PersonalDashboardDto,
+  TaskInstanceDto,
+  TaskCommentDto,
+  TaskAttachmentDto,
+  TimeTrackingSessionDto,
+  TimeTrackingStartResponseDto,
+  TimeTrackingStopResponseDto,
+  SurveyStatusDto,
+  SurveyHistoryDto,
+  BehavioralPatternDto,
+  NotificationDto,
+  TaskFilterParams,
+} from "@/types/employee";
 
 const apiBaseUrl =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ??
@@ -272,3 +290,249 @@ export const getEmailFromJwt = (token: string): string | null => {
 
   return typeof email === "string" && email.trim().length > 0 ? email : null;
 };
+
+// ============================================================================
+// Phase 3: Employee/Staff Workflow API Endpoints
+// ============================================================================
+
+/**
+ * Personal Dashboard: GET /api/dashboard/personal
+ */
+export const getPersonalDashboard = () =>
+  apiClient.get<ApiResponse<PersonalDashboardDto>>("/dashboard/personal");
+
+/**
+ * My Tasks: GET /api/tasks/my
+ * Fetch tasks assigned to current user
+ */
+export const getMyTasks = (params?: TaskFilterParams) =>
+  apiClient.get<ApiResponse<TaskInstanceDto[]>>("/tasks/my", { params });
+
+/**
+ * Get paginated tasks with filtering
+ * GET /api/tasks?page=1&pageSize=20&status=PENDING
+ */
+export const getTasks = (params?: TaskFilterParams) =>
+  apiClient.get<
+    ApiResponse<{
+      items: TaskInstanceDto[];
+      totalCount: number;
+      pageNumber: number;
+      pageSize: number;
+      totalPages: number;
+      hasPreviousPage: boolean;
+      hasNextPage: boolean;
+    }>
+  >("/tasks", { params });
+
+/**
+ * Get single task details
+ * GET /api/tasks/{id}
+ */
+export const getTaskDetail = (taskId: number) =>
+  apiClient.get<ApiResponse<TaskInstanceDto>>(`/tasks/${taskId}`);
+
+/**
+ * Update task status (for submission)
+ * PATCH /api/tasks/{id}/status
+ */
+export const updateTaskStatus = (
+  taskId: number,
+  data: {
+    status: string;
+    submissionNote?: string;
+    deliverableUrl?: string;
+    rejectionReason?: string;
+  },
+) =>
+  apiClient.patch<ApiResponse<TaskInstanceDto>>(
+    `/tasks/${taskId}/status`,
+    data,
+  );
+
+/**
+ * Get task comments
+ * GET /api/tasks/{taskId}/comments
+ */
+export const getTaskComments = (taskId: number) =>
+  apiClient.get<ApiResponse<TaskCommentDto[]>>(`/tasks/${taskId}/comments`);
+
+/**
+ * Add comment to task
+ * POST /api/tasks/{taskId}/comments
+ */
+export const addTaskComment = (taskId: number, content: string) =>
+  apiClient.post<ApiResponse<TaskCommentDto>>(`/tasks/${taskId}/comments`, {
+    content,
+  });
+
+/**
+ * Get task attachments
+ * GET /api/tasks/{taskId}/attachments
+ */
+export const getTaskAttachments = (taskId: number) =>
+  apiClient.get<ApiResponse<TaskAttachmentDto[]>>(
+    `/tasks/${taskId}/attachments`,
+  );
+
+/**
+ * Upload submission attachment
+ * POST /api/tasks/{taskId}/attachments/submission
+ */
+export const uploadSubmissionAttachment = (taskId: number, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiClient.post<ApiResponse<TaskAttachmentDto>>(
+    `/tasks/${taskId}/attachments/submission`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+};
+
+/**
+ * Delete attachment
+ * DELETE /api/tasks/{taskId}/attachments/{id}
+ */
+export const deleteAttachment = (taskId: number, attachmentId: number) =>
+  apiClient.delete<ApiResponse<void>>(
+    `/tasks/${taskId}/attachments/${attachmentId}`,
+  );
+
+/**
+ * Time Tracking: Start timer
+ * POST /api/tasks/{taskId}/time/start
+ */
+export const startTimeTracking = (taskId: number) =>
+  apiClient.post<ApiResponse<TimeTrackingStartResponseDto>>(
+    `/tasks/${taskId}/time/start`,
+    {},
+  );
+
+/**
+ * Time Tracking: Pause timer
+ * POST /api/tasks/{taskId}/time/pause
+ */
+export const pauseTimeTracking = (taskId: number, sessionId: string) =>
+  apiClient.post<
+    ApiResponse<{
+      sessionId: string;
+      action: string;
+      timestamp: string;
+      taskStatus: string;
+    }>
+  >(`/tasks/${taskId}/time/pause`, {
+    sessionId,
+  });
+
+/**
+ * Time Tracking: Resume timer
+ * POST /api/tasks/{taskId}/time/resume
+ */
+export const resumeTimeTracking = (taskId: number, sessionId: string) =>
+  apiClient.post<
+    ApiResponse<{
+      sessionId: string;
+      action: string;
+      timestamp: string;
+      taskStatus: string;
+    }>
+  >(`/tasks/${taskId}/time/resume`, {
+    sessionId,
+  });
+
+/**
+ * Time Tracking: Stop timer
+ * POST /api/tasks/{taskId}/time/stop
+ */
+export const stopTimeTracking = (
+  taskId: number,
+  sessionId: string,
+  note?: string,
+) =>
+  apiClient.post<ApiResponse<TimeTrackingStopResponseDto>>(
+    `/tasks/${taskId}/time/stop`,
+    {
+      sessionId,
+      note,
+    },
+  );
+
+/**
+ * Get active time tracking session
+ * GET /api/tasks/time/active
+ */
+export const getActiveTimeSession = () =>
+  apiClient.get<ApiResponse<TimeTrackingSessionDto | null>>(
+    "/tasks/time/active",
+  );
+
+/**
+ * Survey: Get survey status
+ * GET /api/survey/status
+ */
+export const getSurveyStatus = () =>
+  apiClient.get<ApiResponse<SurveyStatusDto>>("/survey/status");
+
+/**
+ * Survey: Submit survey
+ * POST /api/survey
+ */
+export const submitSurvey = (data: {
+  moraleScore: number;
+  stressScore: number;
+  comment?: string;
+}) => apiClient.post<ApiResponse<void>>("/survey", data);
+
+/**
+ * Survey: Get history
+ * GET /api/survey/history
+ */
+export const getSurveyHistory = () =>
+  apiClient.get<ApiResponse<SurveyHistoryDto[]>>("/survey/history");
+
+/**
+ * Burnout: Get personal burnout signals
+ * GET /api/burnout/signals/me
+ */
+export const getPersonalBurnoutSignals = () =>
+  apiClient.get<ApiResponse<PersonalBurnoutInsightDto | null>>(
+    "/burnout/signals/me",
+  );
+
+/**
+ * Burnout: Get behavioral patterns
+ * GET /api/burnout/patterns/me
+ */
+export const getPersonalBehavioralPatterns = () =>
+  apiClient.get<ApiResponse<BehavioralPatternDto[]>>("/burnout/patterns/me");
+
+/**
+ * Notifications: Get notifications
+ * GET /api/notifications?unreadOnly=true&limit=30
+ */
+export const getNotifications = (params?: {
+  unreadOnly?: boolean;
+  limit?: number;
+}) =>
+  apiClient.get<ApiResponse<NotificationDto[]>>("/notifications", { params });
+
+/**
+ * Notifications: Mark as read
+ * PATCH /api/notifications/{id}/read
+ */
+export const markNotificationAsRead = (notificationId: number) =>
+  apiClient.patch<ApiResponse<void>>(
+    `/notifications/${notificationId}/read`,
+    {},
+  );
+
+/**
+ * Notifications: Mark all as read
+ * PATCH /api/notifications/read-all
+ */
+export const markAllNotificationsAsRead = () =>
+  apiClient.patch<ApiResponse<void>>("/notifications/read-all", {});

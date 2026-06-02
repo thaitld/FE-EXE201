@@ -94,6 +94,6 @@ export function onConnected(callback: () => void): void {
  */
 export function onDisconnected(callback: (error?: Error) => void): void {
   if (connection) {
-    connection.onclose = callback;
+    connection.onclose = callback as any;
   }
 }
