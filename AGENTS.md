@@ -24,13 +24,15 @@ Hệ thống quản lý hiệu suất nhân viên (Employee Performance Manageme
 
 ## Documentation
 
-### Must Read
-- @docs/FE-PROJECT-RULES.md - Conventions, patterns, MUST/MUST NOT
-- @docs/FE-ARCHITECTURE.md - Folder structure, components, state
+### Key Documentation
 
-### API Reference (Backend)
-- Backend luồng toàn dự án: `d:\StudySpace\EXE\MANTO_EXE\MANTO_EXE\Luồng đi toàn bộ dự án.md`
-- Frontend Integration Guide: `d:\StudySpace\EXE\MANTO_EXE\MANTO_EXE\docs\frontend-integration-guide.md`
+| File | Mục đích |
+|------|---------|
+| `docs/FE-ARCHITECTURE.md` | Folder structure, routing, data flow |
+| `docs/FE-PROJECT-RULES.md` | Coding patterns, service pattern, anti-patterns |
+| `docs/DESIGN.md` | **Design system** — màu sắc, component patterns, typography |
+| `d:\StudySpace\EXE\MANTO_EXE\MANTO_EXE\docs\frontend-integration-guide.md` | API endpoints & DTOs |
+| `d:\StudySpace\EXE\MANTO_EXE\MANTO_EXE\Luồng đi toàn bộ dự án.md` | Business rules & flows |
 
 ## Quick Reference
 
@@ -75,8 +77,9 @@ Always via `index` file (barrel export)
 1. AGENTS.md (file này)                    ← Đọc đầu tiên — overview project
 2. docs/FE-PROJECT-RULES.md               ← Patterns, anti-patterns, rules
 3. docs/FE-ARCHITECTURE.md               ← Folder structure, routing, data flow
-4. src/features/{feature}/CONTEXT.md     ← Context của feature đang làm
-5. src/lib/CONTEXT.md                    ← Nếu cần thêm API call
+4. docs/DESIGN.md                        ← Design system (BẮT BUỘC cho mọi UI task)
+5. src/features/{feature}/CONTEXT.md     ← Context của feature đang làm
+6. src/lib/CONTEXT.md                    ← Nếu cần thêm API call
 ```
 
 ### CONTEXT.md Files (per feature)
