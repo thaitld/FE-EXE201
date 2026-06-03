@@ -1,131 +1,139 @@
-import { useEffect, useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import Homepage from '../pages/Homepage'
-import Footer from '../components/Footer'
-import Login from '../pages/Login'
-import ForgotPassword from '../pages/ForgotPassword'
-import Register from '../pages/Register'
-import ResetPassword from '../pages/ResetPassword'
-import GoogleAuthCallback from '../pages/GoogleAuthCallback'
-import Admin from '../pages/Admin'
-import Manager from '@/pages/roles/Manager'
-import ProfilePage from '@/pages/Profile'
-import AdminDashboard from '@/pages/roles/Admin/Dashboard'
-import AdminUsers from '@/pages/roles/Admin/Users'
-import AdminTeams from '@/pages/roles/Admin/Teams'
-import AdminDepartments from '@/pages/roles/Admin/Departments'
-import AdminTaskTypes from '@/pages/roles/Admin/TaskTypes'
+import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import Homepage from "@/pages/shared/Homepage";
+import Footer from "@/components/layout/Footer";
+import Login from "@/pages/auth/Login";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import Register from "@/pages/auth/Register";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import ChangePassword from "@/pages/shared/ChangePassword";
+import GoogleAuthCallback from "@/pages/auth/GoogleAuthCallback";
+import NotAuthorized from "@/pages/shared/NotAuthorized";
+import Dashboard from "@/pages/Dashboard";
+import RoleGate from "@/features/auth/RoleGate";
+import Survey from "@/components/panels/employee/Survey";
+import Manager from "@/pages/roles/Manager";
+import ProfilePage from "@/pages/shared/Profile";
+import AdminTaskTypes from "@/pages/roles/admin/TaskTypes";
 
 function isAdminRoute(route: string) {
-  return route.startsWith('#/admin')
-}
-
-function isRoleAdminRoute(route: string) {
-  return route.startsWith('#/roles/admin')
+  return route.startsWith("#/admin");
 }
 
 function isRoleManagerRoute(route: string) {
-  return route.startsWith('#/roles/manager') || route.startsWith('#/manager')
+  return route.startsWith("#/roles/manager") || route.startsWith("#/manager");
 }
 
 function AdminRoute({ route }: { route: string }) {
-  if (route.startsWith('#/admin/user-management')) {
-    return <Admin initialTab="user-management" />
-  }
+  const adminComponent = (() => {
+    if (route.startsWith("#/admin/user-management")) {
+      return <Dashboard initialTab="user-management" />;
+    }
 
-  if (route.startsWith('#/admin/profile')) {
-    return <Admin initialTab="profile" />
-  }
+    if (route.startsWith("#/admin/profile")) {
+      return <Dashboard initialTab="profile" />;
+    }
 
-  return <Admin />
+    if (route.startsWith("#/admin/task/")) {
+      return <Dashboard initialTab="task-detail" />;
+    }
+
+    if (route.startsWith("#/roles/admin/task-types")) {
+      return <AdminTaskTypes />;
+    }
+
+    return <Dashboard />;
+  })();
+
+  // All authenticated users can access dashboard (role-based visibility handled in Dashboard)
+  return (
+    <RoleGate
+      allowedRoles={["Admin", "CEO", "Manager", "HR", "Employee"]}
+      fallback={<NotAuthorized />}
+    >
+      {adminComponent}
+    </RoleGate>
+  );
 }
 
 export default function AppRouter() {
-  const [route, setRoute] = useState<string>(window.location.hash || '#/')
-  const [pathname, setPathname] = useState<string>(window.location.pathname)
-  const { isAuthenticated, user } = useAuth()
+  const [route, setRoute] = useState<string>(window.location.hash || "#/");
+  const [pathname, setPathname] = useState<string>(window.location.pathname);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    const onHash = () => setRoute(window.location.hash || '#/')
-    const onPathChange = () => setPathname(window.location.pathname)
-    window.addEventListener('hashchange', onHash)
-    window.addEventListener('popstate', onPathChange)
+    const onHash = () => setRoute(window.location.hash || "#/");
+    const onPathChange = () => setPathname(window.location.pathname);
+    window.addEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onPathChange);
     return () => {
-      window.removeEventListener('hashchange', onHash)
-      window.removeEventListener('popstate', onPathChange)
-    }
-  }, [])
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onPathChange);
+    };
+  }, []);
 
-  if (pathname.startsWith('/auth/callback')) {
-    return <GoogleAuthCallback />
+  if (pathname.startsWith("/auth/callback")) {
+    return <GoogleAuthCallback />;
   }
 
   if (isAdminRoute(route)) {
     if (!isAuthenticated) {
-      window.location.hash = '#/login'
-      return null
+      window.location.hash = "#/login";
+      return null;
     }
 
-    // Only Admin users may access /admin area
-    if (user?.roleName?.toUpperCase() !== 'ADMIN') {
-      window.location.hash = '#/'
-      return null
-    }
-
-    return <AdminRoute route={route} />
-  }
-
-  if (isRoleAdminRoute(route)) {
-    if (!isAuthenticated) {
-      window.location.hash = '#/login'
-      return null
-    }
-
-    if (user?.roleName?.toUpperCase() !== 'ADMIN') {
-      window.location.hash = '#/'
-      return null
-    }
-
-    if (route.startsWith('#/roles/admin/users')) return <AdminUsers />
-    if (route.startsWith('#/roles/admin/departments')) return <AdminDepartments />
-    if (route.startsWith('#/roles/admin/task-types')) return <AdminTaskTypes />
-    if (route.startsWith('#/roles/admin/teams')) return <AdminTeams />
-    return <AdminDashboard />
+    return <AdminRoute route={route} />;
   }
 
   if (isRoleManagerRoute(route)) {
     if (!isAuthenticated) {
-      window.location.hash = '#/login'
-      return null
+      window.location.hash = "#/login";
+      return null;
     }
 
-    return <Manager />
+    return <Manager />;
   }
 
   // Generic profile route accessible to any authenticated user
-  if (route.startsWith('#/profile')) {
+  if (route.startsWith("#/profile")) {
     if (!isAuthenticated) {
-      window.location.hash = '#/login'
-      return null
+      window.location.hash = "#/login";
+      return null;
     }
 
-    return <ProfilePage />
+    return <ProfilePage />;
   }
 
-  if (route.startsWith('#/login')) {
-    return <Login />
+  if (route.startsWith("#/login")) {
+    return <Login />;
   }
 
-  if (route.startsWith('#/forgot-password')) {
-    return <ForgotPassword />
+  if (route.startsWith("#/forgot-password")) {
+    return <ForgotPassword />;
   }
 
-  if (route.startsWith('#/reset-password')) {
-    return <ResetPassword />
+  if (route.startsWith("#/reset-password")) {
+    return <ResetPassword />;
   }
 
-  if (route.startsWith('#/register')) {
-    return <Register />
+  if (route.startsWith("#/register")) {
+    return <Register />;
+  }
+
+  if (route.startsWith("#/change-password")) {
+    if (!isAuthenticated) {
+      window.location.hash = "#/login";
+      return null;
+    }
+    return <ChangePassword />;
+  }
+
+  if (route.startsWith("#/survey")) {
+    if (!isAuthenticated) {
+      window.location.hash = "#/login";
+      return null;
+    }
+    return <Survey />;
   }
 
   return (
@@ -133,5 +141,5 @@ export default function AppRouter() {
       <Homepage />
       <Footer />
     </>
-  )
+  );
 }
