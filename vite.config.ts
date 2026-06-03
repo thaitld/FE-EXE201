@@ -4,7 +4,26 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "es-toolkit-compat-resolver",
+      enforce: "pre",
+      resolveId(id) {
+        if (id.startsWith("es-toolkit/compat/")) {
+          return "\0" + id;
+        }
+        return null;
+      },
+      load(id) {
+        if (id.startsWith("\0es-toolkit/compat/")) {
+          const name = id.replace("\0es-toolkit/compat/", "");
+          return `export { ${name} as default } from 'es-toolkit/compat';`;
+        }
+        return null;
+      },
+    },
+  ],
   server: {
     port: 3000,
     strictPort: true,
@@ -20,37 +39,9 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    // esbuild plugin that runs DURING pre-bundling (unlike Vite plugins which don't).
-    // Recharts 3.x does `import get from 'es-toolkit/compat/get'` which resolves to
-    // CJS shim files that use broken internal require() chains.
-    // This plugin intercepts those deep sub-path imports and rewrites them to
-    // re-export from the proper ESM barrel file (es-toolkit/compat).
-    esbuildOptions: {
-      plugins: [
-        {
-          name: "es-toolkit-compat-esm-fix",
-          setup(build) {
-            build.onResolve(
-              { filter: /^es-toolkit\/compat\/\w+$/ },
-              (args) => ({
-                path: args.path,
-                namespace: "es-toolkit-compat-virtual",
-              }),
-            );
-            build.onLoad(
-              { filter: /.*/, namespace: "es-toolkit-compat-virtual" },
-              (args) => {
-                const name = args.path.split("/").pop();
-                return {
-                  contents: `export { ${name} as default, ${name} } from "es-toolkit/compat";`,
-                  resolveDir: path.resolve(__dirname),
-                  loader: "js",
-                };
-              },
-            );
-          },
-        },
-      ],
-    },
+    // Vite 8 uses Rolldown instead of esbuild for dependency pre-bundling.
+    // Force-include es-toolkit/compat so Recharts 3.x sub-path imports
+    // (e.g. es-toolkit/compat/get) are resolved correctly from the ESM barrel.
+    include: ["es-toolkit/compat"],
   },
 });
