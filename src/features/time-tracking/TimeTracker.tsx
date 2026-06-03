@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTimeTracking } from "./useTimeTracking";
 import { notify } from "@/lib/notify";
 
@@ -31,11 +31,14 @@ export default function TimeTracker({
     timeLabel,
   } = useTimeTracking();
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     // If there's an active session for a different task, ignore — UI should reconcile
   }, [session]);
 
   const handleStart = async () => {
+    setError(null);
     try {
       await start(taskId);
       if (onStarted) {
@@ -43,16 +46,19 @@ export default function TimeTracker({
           onStarted();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể bắt đầu đếm giờ.";
+      setError(msg);
       notify({
-        title: "Timer error",
-        message: "Failed to start timer",
+        title: "Lỗi đếm giờ",
+        message: msg,
         type: "ERROR",
       });
     }
   };
 
   const handlePause = async () => {
+    setError(null);
     try {
       await pause(taskId);
       if (onPaused) {
@@ -60,16 +66,19 @@ export default function TimeTracker({
           onPaused();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể tạm dừng đếm giờ.";
+      setError(msg);
       notify({
-        title: "Timer error",
-        message: "Failed to pause timer",
+        title: "Lỗi đếm giờ",
+        message: msg,
         type: "ERROR",
       });
     }
   };
 
   const handleResume = async () => {
+    setError(null);
     try {
       await resume(taskId);
       if (onResumed) {
@@ -77,32 +86,38 @@ export default function TimeTracker({
           onResumed();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể tiếp tục đếm giờ.";
+      setError(msg);
       notify({
-        title: "Timer error",
-        message: "Failed to resume timer",
+        title: "Lỗi đếm giờ",
+        message: msg,
         type: "ERROR",
       });
     }
   };
 
   const handleStop = async () => {
+    setError(null);
     try {
-      const note = window.prompt("Optional note for this session") || undefined;
+      const note = window.prompt("Ghi chú tùy chọn cho phiên làm việc này:") || undefined;
       const res = await stop(taskId, note);
-      if (res && res.succeeded === undefined) {
-        // if res is ApiResponse wrapper returned directly, tolerate both shapes
+      if (res && res.succeeded === false) {
+        setError(res.message || "Không thể kết thúc đếm giờ.");
+        return;
       }
-      notify({ title: "Timer", message: "Stopped and saved session" });
+      notify({ title: "Timer", message: "Đã dừng và lưu phiên làm việc" });
       if (onStopped) {
         try {
           onStopped();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể kết thúc đếm giờ.";
+      setError(msg);
       notify({
-        title: "Timer error",
-        message: "Failed to stop timer",
+        title: "Lỗi đếm giờ",
+        message: msg,
         type: "ERROR",
       });
     }
@@ -165,6 +180,12 @@ export default function TimeTracker({
           )}
         </div>
       </div>
+
+      {error && (
+        <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700">
+          Lỗi: {error}
+        </div>
+      )}
     </div>
   );
 }
