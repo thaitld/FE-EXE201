@@ -100,9 +100,9 @@ function Homepage() {
 	const softwareRow2 = [Camera, Brush, Box, Wand2, Package, Frame, Type, Layers]
 
 	const timeline = [
-		{ year: '2023-Now', role: 'Freelance Creative', company: 'Solo Studio' },
-		{ year: '2020-2023', role: 'Head of Brand Design', company: 'Rove Studio' },
-		{ year: '2017-2020', role: 'Visual Stylist', company: 'Ember Works' },
+		{ year: '', role: '', company: '' },
+		{ year: '', role: '', company: '' },
+		{ year: '', role: '', company: '' },
 	]
 
 	return (
@@ -159,7 +159,7 @@ function Homepage() {
 						href="#/login"
 						className="liquid-glass rounded-full px-5 py-2.5 text-[11px] font-medium tracking-[0.14em] text-white/88 transition-colors duration-200 hover:text-white"
 					>
-						REQUEST A DEMO
+						GET START
 					</a>
 				</header>
 
@@ -258,9 +258,7 @@ function Homepage() {
 							<div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6 bg-gradient-to-t from-black/60 to-transparent">
 								{/* Top Label */}
 								<div className="flex items-center justify-center gap-2">
-									<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-									<span className="uppercase tracking-[0.22em] text-[11px] text-white/70">Background</span>
-									<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
+									
 								</div>
 
 								{/* Bottom Timeline Grid */}
@@ -292,13 +290,13 @@ function Homepage() {
 
 							{/* Quote */}
 							<blockquote className="text-[13px] sm:text-[13.5px] leading-[1.6] text-white/85 mb-4">
-								"Max reshaped our image with a degree of finesse and vision that surpassed what we'd hoped for. The process felt graceful, and the outcomes speak for themselves."
-							</blockquote>
+								"MANTO's work is a masterclass in visual storytelling. They took our brand from bland to brilliant, crafting a visual identity that truly captures our essence. The team's creativity, professionalism, and dedication are unmatched. Working with MANTO was an absolute pleasure, and the results speak for themselves."
+											</blockquote>
 
 							{/* Attribution */}
 							<div className="text-xs text-white/70">
-								<p className="font-medium text-white/85">Elena Brooks</p>
-								<p className="text-white/60">Creative Director — Halcyon</p>
+								<p className="font-medium text-white/85">MANTO</p>
+								<p className="text-white/60">EXE201</p>
 							</div>
 						</div>
 
@@ -392,13 +390,13 @@ function Homepage() {
 								<div>
 									<p className="text-xs text-white/60 mb-1">Email</p>
 									<a href="mailto:hi@maxreed.com" className="text-sm text-white hover:text-white/80 transition-colors">
-										hi@maxreed.com
+										MANTO@gmail.com
 									</a>
 								</div>
 								<div>
 									<p className="text-xs text-white/60 mb-1">Phone</p>
 									<a href="tel:+4420781163" className="text-sm text-white hover:text-white/80 transition-colors">
-										+44 207 81 63
+										+84 207 81 63 
 									</a>
 								</div>
 							</div>

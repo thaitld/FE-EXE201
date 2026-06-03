@@ -14,7 +14,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const { login } = useAuth()
+  const { login, user } = useAuth()
 
   const canSubmit = useMemo(() => {
     return email.trim().length > 0 && password.length > 0 && !isLoading && !submitted
@@ -87,15 +87,22 @@ export default function Login() {
     }
   }
 
-  // Redirect to admin after successful login
+  // Redirect after successful login based on role
   useEffect(() => {
     if (submitted) {
+      const role = (user?.roleName ?? '').toString().trim().toUpperCase()
       const redirectTimer = setTimeout(() => {
-        window.location.hash = '#/admin'
-      }, 1500)
+        if (role === 'ADMIN') {
+          window.location.hash = '#/admin'
+        } else if (role === 'MANAGER') {
+          window.location.hash = '#/roles/manager'
+        } else {
+          window.location.hash = '#/'
+        }
+      }, 800)
       return () => clearTimeout(redirectTimer)
     }
-  }, [submitted])
+  }, [submitted, user])
 
   return (
     <main

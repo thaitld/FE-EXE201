@@ -5,7 +5,12 @@ import Sidebar from '@/components/Sidebar'
 import { Bell, ChevronDown, LogOut, Menu, Settings, Shield, TrendingUp, User } from 'lucide-react'
 
 // Import all panel components
-import { OverviewPanel } from './admin-panels/OverviewPanel'
+import PersonalDashboardView from './admin-panels/PersonalDashboard'
+import DepartmentDashboardView from './admin-panels/DepartmentDashboard'
+import CompanyDashboardView from './admin-panels/CompanyDashboard'
+import TaskListPage from './admin-panels/TaskListPage'
+import MyTasksPage from './admin-panels/MyTasksPage'
+import TeamTasksPage from './admin-panels/TeamTasksPage'
 import { TeamPanel } from './admin-panels/TeamPanel'
 import { PerformancePanel } from './admin-panels/PerformancePanel'
 import { WorkloadPanel } from './admin-panels/WorkloadPanel'
@@ -19,10 +24,17 @@ import { UserManagementPanel } from './admin-panels/UserManagementPanel'
 import { WorkforceTrendsPanel } from './admin-panels/WorkforceTrendsPanel'
 import { SettingsPanel } from './admin-panels/SettingsPanel'
 import DepartmentsPanel from './admin-panels/DepartmentsPanel'
+import TaskTypesPanel from './admin-panels/TaskTypesPanel'
 import ProfilePage from './Profile'
 
 const TAB_META: Record<string, { title: string; subtitle: string }> = {
-  overview: { title: 'Dashboard Overview', subtitle: 'Executive snapshot of platform performance.' },
+
+  'dashboard-personal': { title: 'Personal Dashboard', subtitle: 'Your personal performance and tasks.' },
+  'dashboard-department': { title: 'Department Dashboard', subtitle: 'Department KPIs and team summaries.' },
+  'dashboard-company': { title: 'Company Dashboard', subtitle: 'Company-wide KPIs and alerts.' },
+  tasks: { title: 'Tasks', subtitle: 'Manage and track all tasks.' },
+  'my-tasks': { title: 'My Tasks', subtitle: 'Your assigned tasks.' },
+  'team-tasks': { title: 'Team Tasks', subtitle: 'Monitor your team\'s task progress.' },
   team: { title: 'Team', subtitle: 'Team size, distribution and engagement status.' },
   performance: { title: 'Performance', subtitle: 'Productivity and goal completion metrics.' },
   workload: { title: 'Workload', subtitle: 'Allocation balance across teams and roles.' },
@@ -33,6 +45,7 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
   'ai-recommendations': { title: 'AI Recommendations', subtitle: 'Actionable suggestions to improve outcomes.' },
   'department-analytics': { title: 'Department Analytics', subtitle: 'Department-level KPI breakdown and ranking.' },
   departments: { title: 'Departments', subtitle: 'Manage company departments.' },
+  'task-types': { title: 'Task Types', subtitle: 'Manage task type templates and standard time versions.' },
   'user-management': { title: 'User Management', subtitle: 'Create, update, search, and review users.' },
   'workforce-trends': { title: 'Workforce Trends', subtitle: 'Headcount, churn, and productivity trends over time.' },
   settings: { title: 'Settings', subtitle: 'Manage dashboard preferences and system options.' },
@@ -42,7 +55,19 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
 const getPanelComponent = (activeTab: string) => {
   switch (activeTab) {
     case 'overview':
-      return <OverviewPanel />
+      return <PersonalDashboardView />
+    case 'dashboard-personal':
+      return <PersonalDashboardView />
+    case 'dashboard-department':
+      return <DepartmentDashboardView />
+    case 'dashboard-company':
+      return <CompanyDashboardView />
+    case 'tasks':
+      return <TaskListPage />
+    case 'my-tasks':
+      return <MyTasksPage />
+    case 'team-tasks':
+      return <TeamTasksPage />
     case 'profile':
       return <ProfilePage />
     case 'team':
@@ -65,6 +90,8 @@ const getPanelComponent = (activeTab: string) => {
       return <DepartmentAnalyticsPanel />
     case 'departments':
       return <DepartmentsPanel />
+    case 'task-types':
+      return <TaskTypesPanel />
     case 'user-management':
       return <UserManagementPanel />
     case 'workforce-trends':
@@ -72,13 +99,13 @@ const getPanelComponent = (activeTab: string) => {
     case 'settings':
       return <SettingsPanel />
     default:
-      return <OverviewPanel />
+      return <PersonalDashboardView />
   }
 }
 
 export default function Admin({ initialTab }: { initialTab?: string } = {}) {
   const { logout, user, userEmail } = useAuth()
-  const [activeTab, setActiveTab] = useState(initialTab ?? 'overview')
+  const [activeTab, setActiveTab] = useState(initialTab ?? 'dashboard-personal')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement | null>(null)
@@ -88,7 +115,7 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
     window.location.hash = '#/'
   }
 
-  const currentMeta = TAB_META[activeTab] ?? TAB_META.overview
+  const currentMeta = TAB_META[activeTab] ?? { title: 'Dashboard', subtitle: 'Company / department / personal dashboards.' }
 
   const profileName = useMemo(() => {
     if (user?.firstName || user?.lastName) return `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()
@@ -146,18 +173,22 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
       {/* Main Content */}
       <main className="flex-1 transition-all duration-300 md:ml-64">
         {/* Header */}
-        <header className="border-b border-slate-200 bg-white sticky top-0 z-30">
-          <div className="px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+          <div className="flex items-center justify-between px-6 py-3.5">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition md:hidden"
+                className="rounded-lg p-2 transition hover:bg-slate-100 md:hidden"
               >
                 <Menu size={20} />
               </button>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">{currentMeta.title}</h2>
-                <p className="text-sm text-slate-500">{currentMeta.subtitle}</p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  <span>Admin</span>
+                  <span className="text-slate-300">/</span>
+                  <span className="truncate text-slate-700">{currentMeta.title}</span>
+                </div>
+                <p className="mt-1 max-w-[42rem] truncate text-sm text-slate-500">{currentMeta.subtitle}</p>
               </div>
             </div>
 
@@ -183,8 +214,8 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
                   onClick={() => setProfileOpen((value) => !value)}
                 >
                   <div className="hidden text-right sm:block">
-                    <p className="text-base font-semibold text-blue-900 leading-tight">{profileName}</p>
-                    <p className="text-sm text-slate-500 leading-tight">{profileRole}</p>
+                    <p className="text-sm font-semibold leading-tight text-blue-900">{profileName}</p>
+                    <p className="text-xs uppercase tracking-wide text-slate-500 leading-tight">{profileRole}</p>
                   </div>
                   <div className="inline-flex h-10 w-10 items-center justify-center rounded-full overflow-hidden bg-blue-600 text-sm font-bold text-white">
                     {user?.avatarUrl ? (
@@ -279,15 +310,6 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
 
         {/* Content Area */}
         <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-slate-600">Rendering {currentMeta.title.toLowerCase()} panel with extracted components.</p>
-            </div>
-            {/* <Button className="bg-slate-900 hover:bg-slate-800 text-white">
-              Export
-            </Button> */}
-          </div>
-
           {getPanelComponent(activeTab)}
         </div>
       </main>

@@ -8,10 +8,13 @@ import Register from '../pages/Register'
 import ResetPassword from '../pages/ResetPassword'
 import GoogleAuthCallback from '../pages/GoogleAuthCallback'
 import Admin from '../pages/Admin'
-import AdminDashboard from '@/pages/roles/admin/Dashboard'
-import AdminUsers from '@/pages/roles/admin/Users'
-import AdminTeams from '@/pages/roles/admin/Teams'
-import AdminDepartments from '@/pages/roles/admin/Departments'
+import Manager from '@/pages/roles/Manager'
+import ProfilePage from '@/pages/Profile'
+import AdminDashboard from '@/pages/roles/Admin/Dashboard'
+import AdminUsers from '@/pages/roles/Admin/Users'
+import AdminTeams from '@/pages/roles/Admin/Teams'
+import AdminDepartments from '@/pages/roles/Admin/Departments'
+import AdminTaskTypes from '@/pages/roles/Admin/TaskTypes'
 
 function isAdminRoute(route: string) {
   return route.startsWith('#/admin')
@@ -19,6 +22,10 @@ function isAdminRoute(route: string) {
 
 function isRoleAdminRoute(route: string) {
   return route.startsWith('#/roles/admin')
+}
+
+function isRoleManagerRoute(route: string) {
+  return route.startsWith('#/roles/manager') || route.startsWith('#/manager')
 }
 
 function AdminRoute({ route }: { route: string }) {
@@ -36,7 +43,7 @@ function AdminRoute({ route }: { route: string }) {
 export default function AppRouter() {
   const [route, setRoute] = useState<string>(window.location.hash || '#/')
   const [pathname, setPathname] = useState<string>(window.location.pathname)
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
   useEffect(() => {
     const onHash = () => setRoute(window.location.hash || '#/')
@@ -59,6 +66,12 @@ export default function AppRouter() {
       return null
     }
 
+    // Only Admin users may access /admin area
+    if (user?.roleName?.toUpperCase() !== 'ADMIN') {
+      window.location.hash = '#/'
+      return null
+    }
+
     return <AdminRoute route={route} />
   }
 
@@ -68,10 +81,35 @@ export default function AppRouter() {
       return null
     }
 
+    if (user?.roleName?.toUpperCase() !== 'ADMIN') {
+      window.location.hash = '#/'
+      return null
+    }
+
     if (route.startsWith('#/roles/admin/users')) return <AdminUsers />
     if (route.startsWith('#/roles/admin/departments')) return <AdminDepartments />
+    if (route.startsWith('#/roles/admin/task-types')) return <AdminTaskTypes />
     if (route.startsWith('#/roles/admin/teams')) return <AdminTeams />
     return <AdminDashboard />
+  }
+
+  if (isRoleManagerRoute(route)) {
+    if (!isAuthenticated) {
+      window.location.hash = '#/login'
+      return null
+    }
+
+    return <Manager />
+  }
+
+  // Generic profile route accessible to any authenticated user
+  if (route.startsWith('#/profile')) {
+    if (!isAuthenticated) {
+      window.location.hash = '#/login'
+      return null
+    }
+
+    return <ProfilePage />
   }
 
   if (route.startsWith('#/login')) {

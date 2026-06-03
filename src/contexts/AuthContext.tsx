@@ -31,10 +31,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const resp = await apiClient.get<ApiResponse<UserDto>>('/users/me')
+      const resp = await apiClient.get<ApiResponse<any>>('/users/me')
       if (resp.data?.succeeded && resp.data.data) {
-        setUser(resp.data.data)
-        localStorage.setItem(userProfileKey, JSON.stringify(resp.data.data))
+        // Map backend response to UserDto format
+        // Backend returns 'Role' but UserDto expects 'roleName'
+        const rawRole = resp.data.data.role ?? resp.data.data.roleName ?? 'Employee'
+        const normalizedRole = String(rawRole ?? 'Employee').trim()
+
+        const userData: UserDto = {
+          id: resp.data.data.id,
+          email: resp.data.data.email,
+          firstName: resp.data.data.firstName,
+          lastName: resp.data.data.lastName,
+          isActive: resp.data.data.isActive,
+          roleName: normalizedRole, // Map and normalize 'Role' from backend
+          teamName: resp.data.data.teamName || null,
+          departmentName: resp.data.data.departmentName || null,
+          roleInTeam: resp.data.data.roleInTeam || null,
+          createdAt: resp.data.data.createdAt,
+          avatarUrl: resp.data.data.avatarUrl,
+        }
+        setUser(userData)
+        localStorage.setItem(userProfileKey, JSON.stringify(userData))
       } else {
         setUser(null)
         localStorage.removeItem(userProfileKey)

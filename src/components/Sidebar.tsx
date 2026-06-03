@@ -16,6 +16,7 @@ import {
   BarChart3,
   Building2,
   Zap,
+  ListTodo,
   ChevronDown,
   Settings,
   X,
@@ -30,12 +31,16 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: SidebarProps) {
   const { user } = useAuth()
-  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
-    people: true,
-    wellbeing: true,
-    ai: true,
-    analytics: true,
-  })
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>(
+    {
+      dashboard: true,
+      tasks: true,
+      people: true,
+      wellbeing: true,
+      ai: true,
+      analytics: true,
+    }
+  )
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -73,11 +78,12 @@ export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Sid
           {/* Logo Section */}
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center text-white font-bold text-sm">
-                  M
-                </div>
-                <h1 className="text-lg font-bold text-slate-900">MANTO</h1>
+              <div className="flex items-center gap-2">
+                <img 
+                  src="/manto.png" 
+                  className="h-23 w-auto"
+                  loading="lazy"
+                />
               </div>
               <button
                 onClick={onClose}
@@ -92,14 +98,95 @@ export default function Sidebar({ isOpen, onClose, activeTab, onTabChange }: Sid
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             <button
               type="button"
-              onClick={() => handleTabClick('overview')}
-              className={`${topLevelItemClass} ${
-                activeTab === 'overview' ? activeTopLevelClass : ''
-              }`}
+              onClick={() => toggleSection('dashboard')}
+              className={`${topLevelItemClass} ${expandedSections.dashboard ? activeTopLevelClass : ''}`}
             >
               <LayoutDashboard size={18} />
               <span className="text-sm font-semibold">Dashboard</span>
+              <ChevronDown
+                size={16}
+                className={`ml-auto transition-transform ${expandedSections.dashboard ? 'rotate-180' : ''}`}
+              />
             </button>
+
+            {expandedSections.dashboard && (
+              <div className="space-y-1 pl-4">
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('dashboard-personal')}
+                  className={`${subItemClass} ${activeTab === 'dashboard-personal' ? activeSubItemClass : ''}`}
+                >
+                  <UserRound size={17} />
+                  <span className="text-sm font-medium">Personal</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('dashboard-department')}
+                  className={`${subItemClass} ${activeTab === 'dashboard-department' ? activeSubItemClass : ''}`}
+                >
+                  <Building2 size={17} />
+                  <span className="text-sm font-medium">Department</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('dashboard-company')}
+                  className={`${subItemClass} ${activeTab === 'dashboard-company' ? activeSubItemClass : ''}`}
+                >
+                  <BarChart3 size={17} />
+                  <span className="text-sm font-medium">Company</span>
+                </button>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => toggleSection('tasks')}
+              className={`${topLevelItemClass} ${expandedSections.tasks ? activeTopLevelClass : ''}`}
+            >
+              <ListTodo size={18} />
+              <span className="text-sm font-semibold">Tasks</span>
+              <ChevronDown
+                size={16}
+                className={`ml-auto transition-transform ${expandedSections.tasks ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {expandedSections.tasks && (
+              <div className="space-y-1 pl-4">
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('tasks')}
+                  className={`${subItemClass} ${activeTab === 'tasks' ? activeSubItemClass : ''}`}
+                >
+                  <ListTodo size={17} />
+                  <span className="text-sm font-medium">All Tasks</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('my-tasks')}
+                  className={`${subItemClass} ${activeTab === 'my-tasks' ? activeSubItemClass : ''}`}
+                >
+                  <UserRound size={17} />
+                  <span className="text-sm font-medium">My Tasks</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('team-tasks')}
+                  className={`${subItemClass} ${activeTab === 'team-tasks' ? activeSubItemClass : ''}`}
+                >
+                  <Users size={17} />
+                  <span className="text-sm font-medium">Team Tasks</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('task-types')}
+                  className={`${subItemClass} ${activeTab === 'task-types' ? activeSubItemClass : ''}`}
+                >
+                  <ListTodo size={17} />
+                  <span className="text-sm font-medium">Task Types</span>
+                </button>
+              </div>
+            )}
 
             <button
               type="button"
