@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getTeamPerformance, listTeams, listOvertimeReports } from '../api'
+import { getTeamPerformance, listTeams, listOvertimeReports, exportTeamPerformance } from '../api'
 import type { TeamDetailDto, TeamPerformanceDto, OvertimeReportDto } from '../types'
-import { Users, TrendingUp, Clock, AlertTriangle, ChevronDown } from 'lucide-react'
+import { Users, TrendingUp, Clock, AlertTriangle, ChevronDown, Download } from 'lucide-react'
 
 export default function TeamPerformancePage() {
   const [teams, setTeams] = useState<TeamDetailDto[]>([])
@@ -11,6 +11,20 @@ export default function TeamPerformancePage() {
   const [overtime, setOvertime] = useState<OvertimeReportDto[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async () => {
+    if (!teamId) return
+    setExporting(true)
+    try {
+      const yearMonth = date.slice(0, 7)
+      await exportTeamPerformance(Number(teamId), `${yearMonth}-01`, `${yearMonth}-31`)
+    } catch (err: any) {
+      setError(err?.message ?? 'Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   useEffect(() => {
     listTeams({ isActive: true })
@@ -30,92 +44,286 @@ export default function TeamPerformancePage() {
       .finally(() => setLoading(false))
   }, [teamId, date])
 
-  const totalOvertimeMin = Array.isArray(overtime) ? overtime.reduce((sum, item) => sum + (item?.overtimeMinutes ?? 0), 0) : 0
-  const memberEffs = Array.isArray(performance?.members) ? performance!.members.map(m => m.efficiencyRatio ?? 0) : [1]
+  const totalOvertimeMin = Array.isArray(overtime)
+    ? overtime.reduce((sum, item) => sum + (item?.overtimeMinutes ?? 0), 0)
+    : 0
+  const memberEffs = Array.isArray(performance?.members)
+    ? performance!.members.map(m => m.efficiencyRatio ?? 0)
+    : [1]
   const maxEff = Math.max(...memberEffs, 0.01)
+  const otCount = Array.isArray(overtime) ? overtime.filter(o => o.hasOvertime).length : 0
 
   return (
-    <div className="space-y-5">
-      {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm">
+    <div className="min-h-screen bg-gray-50/60 px-6 py-6">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Geist', sans-serif; }
+
+        .card {
+          background: #fff;
+          border: 1px solid #f0f0f0;
+          border-radius: 16px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .ctrl-select {
+          appearance: none;
+          background: #f8f9fb;
+          border: 1.5px solid #e8eaed;
+          border-radius: 10px;
+          padding: 7px 32px 7px 12px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #374151;
+          outline: none;
+          cursor: pointer;
+          transition: border-color 0.15s;
+          min-width: 200px;
+        }
+        .ctrl-select:focus { border-color: #3b82f6; background: #fff; }
+
+        .ctrl-date {
+          appearance: none;
+          background: #f8f9fb;
+          border: 1.5px solid #e8eaed;
+          border-radius: 10px;
+          padding: 7px 12px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #374151;
+          outline: none;
+          transition: border-color 0.15s;
+        }
+        .ctrl-date:focus { border-color: #3b82f6; background: #fff; }
+
+        .btn-export {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: #fff;
+          color: #374151;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 10px;
+          padding: 7px 14px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+        }
+        .btn-export:hover:not(:disabled) { border-color: #d1d5db; background: #f9fafb; }
+        .btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .kpi-card {
+          background: #fff;
+          border: 1px solid #f0f0f0;
+          border-radius: 14px;
+          padding: 20px;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+          transition: box-shadow 0.15s, transform 0.15s;
+        }
+        .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); transform: translateY(-1px); }
+
+        .member-row {
+          padding: 14px 16px;
+          border-radius: 12px;
+          border: 1px solid #f0f0f0;
+          background: #fafafa;
+          transition: background 0.1s, border-color 0.1s;
+        }
+        .member-row:hover { background: #f5f7ff; border-color: #dbeafe; }
+
+        .ot-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 14px;
+          border-radius: 12px;
+          border: 1px solid #f0f0f0;
+          background: #fafafa;
+          transition: background 0.1s;
+        }
+        .ot-row.has-ot {
+          border-color: #fde68a;
+          background: #fffbeb;
+        }
+
+        .ot-badge {
+          font-size: 10px;
+          font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 6px;
+          letter-spacing: 0.05em;
+          background: #fef3c7;
+          color: #d97706;
+          border: 1px solid #fde68a;
+        }
+
+        .progress-track {
+          flex: 1;
+          height: 5px;
+          background: #f0f0f0;
+          border-radius: 99px;
+          overflow: hidden;
+        }
+        .progress-fill {
+          height: 100%;
+          border-radius: 99px;
+          background: linear-gradient(90deg, #60a5fa, #2563eb);
+          transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .pulse-dot {
+          width: 6px; height: 6px;
+          background: #22c55e;
+          border-radius: 50%;
+          animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+          0%,100% { opacity:1; transform:scale(1); }
+          50% { opacity:0.5; transform:scale(1.4); }
+        }
+      `}</style>
+
+      {/* Page header */}
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Manager · Teams</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Hiệu suất Team</h1>
+          <p className="text-sm text-gray-400 mt-0.5">Phân tích hiệu suất thành viên và báo cáo OT</p>
+        </div>
+        {loading && (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="pulse-dot" /> Đang tải...
+          </div>
+        )}
+      </div>
+
+      {/* Controls bar */}
+      <div className="card flex flex-wrap items-center gap-3 px-5 py-3.5 mb-5">
         <div className="relative">
           <select
             value={teamId}
             onChange={e => setTeamId(e.target.value ? Number(e.target.value) : '')}
-            className="h-9 appearance-none rounded-xl border border-slate-300 bg-white pl-3 pr-8 text-sm text-slate-900 outline-none focus:border-cyan-400/60"
+            className="ctrl-select"
           >
             <option value="">Chọn team</option>
             {teams.map(team => (
               <option key={team.id} value={team.id}>{team.code} — {team.name}</option>
             ))}
           </select>
-          <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <ChevronDown size={11} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
 
         <input
           type="date"
           value={date}
           onChange={e => setDate(e.target.value)}
-          className="h-9 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-cyan-400/60"
+          className="ctrl-date"
         />
 
-        {loading && <span className="ml-auto text-xs text-slate-500 animate-pulse">Đang tải...</span>}
+        <button
+          className="btn-export ml-auto"
+          onClick={handleExport}
+          disabled={exporting || !teamId}
+        >
+          <Download size={13} />
+          {exporting ? 'Đang xuất...' : 'Xuất Excel'}
+        </button>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-          <AlertTriangle size={15} className="shrink-0" />{error}
+        <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500 mb-5">
+          <AlertTriangle size={13} className="shrink-0" /> {error}
         </div>
       )}
 
       {performance && (
         <>
           {/* KPI strip */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-4 mb-5">
             {[
-              { label: 'Hiệu suất TB', value: performance.avgEfficiencyRatio.toFixed(2), sub: performance.avgEfficiencyLabel, icon: TrendingUp, color: '#22d3ee' },
-              { label: 'Thành viên', value: `${performance.activeMembers}/${performance.totalMembers}`, sub: 'đang hoạt động', icon: Users, color: '#818cf8' },
-              { label: 'Tổng OT', value: `${totalOvertimeMin}p`, sub: `${Array.isArray(overtime) ? overtime.filter(o => o.hasOvertime).length : 0} người OT`, icon: Clock, color: '#fbbf24' },
+              {
+                label: 'Hiệu suất TB',
+                value: `${(performance.avgEfficiencyRatio * 100).toFixed(1)}%`,
+                sub: performance.avgEfficiencyLabel,
+                icon: TrendingUp,
+                color: '#2563eb', bg: '#eff6ff',
+              },
+              {
+                label: 'Thành viên',
+                value: `${performance.activeMembers}/${performance.totalMembers}`,
+                sub: 'đang hoạt động',
+                icon: Users,
+                color: '#7c3aed', bg: '#f5f3ff',
+              },
+              {
+                label: 'Tổng OT',
+                value: `${totalOvertimeMin}p`,
+                sub: `${otCount} người có OT`,
+                icon: Clock,
+                color: '#d97706', bg: '#fffbeb',
+              },
             ].map(card => (
-              <div key={card.label} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="pointer-events-none absolute -right-3 -top-3 h-12 w-12 rounded-full opacity-12 blur-xl"
-                  style={{ background: card.color }} />
-                <div className="flex items-start justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{card.label}</p>
-                  <card.icon size={14} style={{ color: card.color }} />
+              <div key={card.label} className="kpi-card">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">{card.label}</p>
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: card.bg }}>
+                    <card.icon size={14} style={{ color: card.color }} />
+                  </div>
                 </div>
-                <p className="mt-3 text-2xl font-bold text-slate-900">{card.value}</p>
-                <p className="mt-0.5 text-xs text-slate-500">{card.sub}</p>
+                <p className="text-3xl font-bold tracking-tight text-gray-900">{card.value}</p>
+                <p className="mt-1 text-xs font-medium text-gray-400">{card.sub}</p>
               </div>
             ))}
           </div>
 
           <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
             {/* Member breakdown */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="card p-5">
               <div className="flex items-center justify-between mb-5">
-                <h3 className="text-sm font-semibold text-slate-900">{performance.teamName}</h3>
-                <span className="text-xs text-slate-500">{performance.reportDate}</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">{performance.teamName}</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">Hiệu suất từng thành viên</p>
+                </div>
+                <span className="text-xs font-semibold text-blue-500 bg-blue-50 px-2.5 py-1 rounded-lg">
+                  {performance.reportDate}
+                </span>
               </div>
-              <div className="space-y-3">
+
+              <div className="space-y-2.5">
                 {(performance.members ?? []).map(member => {
                   const pct = Math.min((member.efficiencyRatio / maxEff) * 100, 100)
+                  const effPct = (member.efficiencyRatio * 100).toFixed(0)
+                  const isHigh = member.efficiencyRatio >= 0.9
+                  const isLow = member.efficiencyRatio < 0.6
                   return (
-                    <div key={member.userId} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div key={member.userId} className="member-row">
                       <div className="flex items-center justify-between gap-3 mb-2.5">
-                        <p className="text-sm font-semibold text-slate-900">{member.userName}</p>
-                        <span className="text-xs text-slate-500">{member.totalTasks} tasks</span>
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                            style={{ background: isHigh ? '#2563eb' : isLow ? '#ef4444' : '#6b7280' }}
+                          >
+                            {member.userName?.charAt(0)?.toUpperCase()}
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900">{member.userName}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-400">{member.totalTasks} tasks</span>
+                          <span
+                            className="text-xs font-bold"
+                            style={{ color: isHigh ? '#2563eb' : isLow ? '#ef4444' : '#374151' }}
+                          >
+                            {effPct}%
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-300 transition-all"
-                            style={{ width: `${pct}%` }}
-                          />
+                        <div className="progress-track">
+                          <div className="progress-fill" style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="text-xs font-semibold text-cyan-400">{(member.efficiencyRatio * 100).toFixed(0)}%</span>
                       </div>
-                      <p className="mt-1.5 text-xs text-slate-500">{member.efficiencyLabel}</p>
+                      <p className="mt-1.5 text-[11px] text-gray-400">{member.efficiencyLabel}</p>
                     </div>
                   )
                 })}
@@ -123,35 +331,54 @@ export default function TeamPerformancePage() {
             </div>
 
             {/* Overtime */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">Báo cáo OT</h3>
+            <div className="card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900">Báo cáo OT</h3>
+                {otCount > 0 && (
+                  <span className="h-5 w-5 rounded-full bg-amber-100 text-amber-600 text-[10px] font-bold flex items-center justify-center">
+                    {otCount}
+                  </span>
+                )}
+              </div>
+
               {overtime.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 text-slate-500">
-                  <Clock size={24} className="mb-2 opacity-40" />
-                  <p className="text-xs">Không có dữ liệu OT.</p>
+                <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                    <Clock size={16} className="opacity-40" />
+                  </div>
+                  <p className="text-xs font-medium">Không có dữ liệu OT</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {overtime.map(item => (
                     <div
                       key={`${item.userId}-${item.reportDate}`}
-                      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
-                        item.hasOvertime
-                          ? 'border-amber-200 bg-amber-50'
-                          : 'border-slate-200 bg-slate-50'
-                      }`}
+                      className={`ot-row ${item.hasOvertime ? 'has-ot' : ''}`}
                     >
-                      <p className="text-sm text-slate-900">{item.userName}</p>
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                          style={{ background: item.hasOvertime ? '#d97706' : '#9ca3af' }}
+                        >
+                          {item.userName?.charAt(0)?.toUpperCase()}
+                        </div>
+                        <p className="text-sm font-medium text-gray-800">{item.userName}</p>
+                      </div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-semibold ${item.hasOvertime ? 'text-amber-600' : 'text-slate-500'}`}>
+                        <span className={`text-sm font-bold ${item.hasOvertime ? 'text-amber-600' : 'text-gray-400'}`}>
                           {item.overtimeMinutes}p
                         </span>
-                        {item.hasOvertime && (
-                          <span className="rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-700">OT</span>
-                        )}
+                        {item.hasOvertime && <span className="ot-badge">OT</span>}
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {overtime.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <p className="text-xs text-gray-400">Tổng cộng</p>
+                  <p className="text-sm font-bold text-gray-700">{totalOvertimeMin} phút</p>
                 </div>
               )}
             </div>

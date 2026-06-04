@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Users, AlertCircle, FileText } from 'lucide-react'
 import { apiClient, type ApiResponse, type TaskInstanceDto, type TeamDetailDto } from '@/lib/api'
-import TaskDetailModal from '../../components/TaskDetailModal'
+import TaskDetailModal from '@/components/TaskDetailModal'
 
 export default function TeamTasksPage() {
   const [teams, setTeams] = useState<TeamDetailDto[]>([])

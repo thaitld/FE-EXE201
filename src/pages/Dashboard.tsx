@@ -29,6 +29,16 @@ import Survey from "@/components/panels/employee/Survey";
 import TaskDetail from "@/components/panels/employee/TaskDetail";
 import { usePermission } from "@/features/auth/usePermission";
 
+// Manager panel imports
+import DepartmentDashboardPanel from "@/features/manager/pages/DepartmentDashboardPage";
+import TaskManagementPanel from "@/features/manager/pages/TaskManagementPage";
+import BulkCreateTaskPanel from "@/features/manager/pages/BulkCreateTaskPage";
+import BurnoutMonitorPanel from "@/features/manager/pages/BurnoutMonitorPage";
+import TeamPerformancePanel from "@/features/manager/pages/TeamPerformancePage";
+import ManagerReportPanel from "@/features/manager/pages/ManagerReportPage";
+import OrgManagementPanel from "@/features/manager/pages/OrgManagementPage";
+import TaskTypesPanel from "@/components/panels/admin/TaskTypesPanel";
+
 const TAB_META: Record<string, { title: string; subtitle: string }> = {
   overview: {
     title: "Dashboard Overview",
@@ -98,6 +108,39 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Settings",
     subtitle: "Manage dashboard preferences and system options.",
   },
+  // Manager tabs
+  "mgr-dashboard": {
+    title: "Department Dashboard",
+    subtitle: "KPI, burnout alerts, and monthly trend.",
+  },
+  "mgr-tasks": {
+    title: "Task Management",
+    subtitle: "Create, approve, reject, reassign, and clone tasks.",
+  },
+  "mgr-bulk-create": {
+    title: "Bulk Create Tasks",
+    subtitle: "Import multiple tasks in one shot.",
+  },
+  "mgr-burnout": {
+    title: "Burnout Monitor",
+    subtitle: "Track high-risk signals and resolve them.",
+  },
+  "mgr-performance": {
+    title: "Team Performance",
+    subtitle: "Efficiency and overtime by team member.",
+  },
+  "mgr-report": {
+    title: "Manager Report",
+    subtitle: "Weekly AI-generated optimization report.",
+  },
+  "mgr-organization": {
+    title: "Organization",
+    subtitle: "Departments, teams, and work schedules.",
+  },
+  "task-types": {
+    title: "Task Types",
+    subtitle: "Manage task type definitions.",
+  },
 };
 
 // Panel component map - maps activeTab to the corresponding panel component
@@ -105,6 +148,12 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
   switch (activeTab) {
     case "overview":
       return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
+    case "dashboard-personal":
+      return <OverviewPanel key="personal" initialMode="personal" />;
+    case "dashboard-department":
+      return <OverviewPanel key="department" initialMode="department" />;
+    case "dashboard-company":
+      return <OverviewPanel key="company" initialMode="company" />;
     case "my-tasks":
       return <MyTasks />;
     case "survey":
@@ -139,6 +188,23 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
       return <WorkforceTrendsPanel />;
     case "settings":
       return <SettingsPanel />;
+    // Manager cases
+    case "mgr-dashboard":
+      return <DepartmentDashboardPanel />;
+    case "mgr-tasks":
+      return <TaskManagementPanel />;
+    case "mgr-bulk-create":
+      return <BulkCreateTaskPanel />;
+    case "mgr-burnout":
+      return <BurnoutMonitorPanel />;
+    case "mgr-performance":
+      return <TeamPerformancePanel />;
+    case "mgr-report":
+      return <ManagerReportPanel />;
+    case "mgr-organization":
+      return <OrgManagementPanel />;
+    case "task-types":
+      return <TaskTypesPanel />;
     default:
       return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
   }

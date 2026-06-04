@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { apiClient, type ApiResponse } from "@/lib/api";
+import { useAuth } from "@/features/auth/AuthContext";
 
 export default function ProfileEditModal({
   open,
@@ -8,6 +9,7 @@ export default function ProfileEditModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const { user, refreshUser } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -16,12 +18,12 @@ export default function ProfileEditModal({
 
   React.useEffect(() => {
     if (open) {
-      setFirstName("");
-      setLastName("");
+      setFirstName(user?.firstName || "");
+      setLastName(user?.lastName || "");
       setError(null);
       setSuccess(null);
     }
-  }, [open]);
+  }, [open, user]);
 
   const handleSubmit = async () => {
     setError(null);
@@ -36,9 +38,10 @@ export default function ProfileEditModal({
         ...(firstName && { firstName }),
         ...(lastName && { lastName }),
       };
-      const resp = await apiClient.put<ApiResponse<null>>("/users/me", payload);
+      const resp = await apiClient.patch<ApiResponse<null>>("/users/me", payload);
       if (resp.data.succeeded) {
         setSuccess("Profile updated successfully");
+        await refreshUser();
         setTimeout(() => {
           onClose();
         }, 1000);
@@ -55,53 +58,76 @@ export default function ProfileEditModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6">
-        <h3 className="text-lg font-semibold">Edit profile</h3>
-        <p className="text-sm text-slate-500 mt-1">
-          Update your first and last name.
-        </p>
-        <div className="mt-4 space-y-3">
-          <div>
-            <label className="block text-sm text-slate-600">First name</label>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300" 
+        onClick={onClose} 
+      />
+      
+      {/* Modal Container */}
+      <div className="relative z-10 w-full max-w-md transform overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-6 md:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] transition-all duration-300">
+        
+        {/* Header */}
+        <div className="space-y-1.5 pb-4 border-b border-slate-850">
+          <h3 className="text-xl font-bold text-white tracking-tight">Edit Profile</h3>
+          <p className="text-sm text-slate-400">
+            Update your first and last name.
+          </p>
+        </div>
+
+        {/* Inputs */}
+        <div className="mt-6 space-y-4">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">First Name</label>
             <input
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="John"
-              className="mt-1 w-full rounded-md border px-3 py-2"
+              placeholder="First name"
+              className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
-          <div>
-            <label className="block text-sm text-slate-600">Last name</label>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Last Name</label>
             <input
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Doe"
-              className="mt-1 w-full rounded-md border px-3 py-2"
+              placeholder="Last name"
+              className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
-          {error ? <div className="text-sm text-rose-600">{error}</div> : null}
+
+          {/* Messages */}
+          {error ? (
+            <div className="rounded-xl border border-rose-900/30 bg-rose-950/20 px-4 py-3 text-sm font-medium text-rose-400">
+              {error}
+            </div>
+          ) : null}
           {success ? (
-            <div className="text-sm text-green-600">{success}</div>
+            <div className="rounded-xl border border-green-900/30 bg-green-950/20 px-4 py-3 text-sm font-medium text-green-400">
+              {success}
+            </div>
           ) : null}
         </div>
-        <div className="mt-6 flex gap-2 justify-end">
+
+        {/* Actions */}
+        <div className="mt-8 flex gap-3 justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-md"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-850 bg-slate-950 px-5 text-sm font-semibold text-slate-400 hover:border-slate-700 hover:text-white transition duration-200"
             disabled={isSaving}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-500 shadow-lg shadow-blue-500/10 transition duration-200 disabled:opacity-50 disabled:pointer-events-none"
             disabled={isSaving}
           >
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ListTodo, AlertCircle, CheckCircle2, Clock, RefreshCw } from 'lucide-react'
 import { apiClient, type ApiResponse, type TaskInstanceDto } from '@/lib/api'
-import TaskDetailModal from '../../components/TaskDetailModal'
+import TaskDetailModal from '@/components/TaskDetailModal'
 
 export default function MyTasksPage() {
   const [tasks, setTasks] = useState<TaskInstanceDto[]>([])

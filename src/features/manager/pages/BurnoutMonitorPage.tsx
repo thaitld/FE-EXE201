@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listBurnoutSignals, resolveBurnoutSignal } from '../api'
+import { listBurnoutSignals, resolveBurnoutSignal, exportBurnout } from '../api'
 import type { BurnoutSignalDto } from '../types'
 import { Activity, Filter, CheckCircle2, AlertTriangle, ChevronDown } from 'lucide-react'
 
@@ -15,6 +15,21 @@ export default function BurnoutMonitorPage() {
   const [resolvedOnly, setResolvedOnly] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      await exportBurnout({
+        riskLevel,
+        isResolved: resolvedOnly,
+      })
+    } catch (err: any) {
+      setError(err?.message ?? 'Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const load = async () => {
     setError(null)
@@ -94,6 +109,15 @@ export default function BurnoutMonitorPage() {
             className="form-cta"
           >
             {loading ? 'Đang tải...' : 'Áp dụng'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={exporting}
+            className="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100 active:scale-95 disabled:opacity-40"
+          >
+            {exporting ? 'Đang xuất...' : 'Xuất Excel'}
           </button>
         </div>
       </div>

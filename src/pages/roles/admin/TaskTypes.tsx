@@ -1,4 +1,4 @@
-import TaskTypesPanel from '@/pages/admin-panels/TaskTypesPanel'
+import TaskTypesPanel from '@/components/panels/admin/TaskTypesPanel'
 
 export default function AdminTaskTypes() {
   return (

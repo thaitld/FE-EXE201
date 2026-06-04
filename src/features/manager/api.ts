@@ -27,6 +27,7 @@ import type {
   UpdateWorkScheduleDto,
   WorkScheduleDto,
   BurnoutSignalDto,
+  AssigneeSuggestionDto,
 } from './types'
 
 const unwrap = <T>(response: ApiResponse<T>) => {
@@ -227,10 +228,10 @@ export async function getDepartmentPerformanceRange(deptId: number, from?: strin
 }
 
 export async function listOvertimeReports(teamId: number, from?: string, to?: string) {
-  const response = await apiClient.get<ApiResponse<OvertimeReportDto[]>>(`/teams/${teamId}/overtime`, {
+  const response = await apiClient.get<ApiResponse<{ details: OvertimeReportDto[] }>>(`/teams/${teamId}/overtime`, {
     params: { from, to },
   })
-  return unwrap(response.data) ?? []
+  return unwrap(response.data)?.details ?? []
 }
 
 export async function listBurnoutSignals(params?: { riskLevel?: string; isResolved?: boolean; page?: number; pageSize?: number }) {
@@ -299,4 +300,39 @@ export async function getManagerReport(deptId: number, weekStart: string) {
     },
     members: report.members ?? report.Members ?? [],
   }
+}
+
+export async function downloadFile(url: string, params: any, defaultFilename: string) {
+  const response = await apiClient.get(url, {
+    params,
+    responseType: 'blob',
+  })
+  const blob = new Blob([response.data], { type: (response.headers['content-type'] ?? 'application/octet-stream') as string })
+  const downloadUrl = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = downloadUrl
+  link.setAttribute('download', defaultFilename)
+  document.body.appendChild(link)
+  link.click()
+  link.parentNode?.removeChild(link)
+  window.URL.revokeObjectURL(downloadUrl)
+}
+
+export async function exportTasks(params: any) {
+  await downloadFile('/export/tasks', params, 'tasks.xlsx')
+}
+
+export async function exportTeamPerformance(teamId: number, from?: string, to?: string) {
+  await downloadFile(`/export/team-performance/${teamId}`, { from, to }, `team_${teamId}_performance.xlsx`)
+}
+
+export async function exportBurnout(params: any) {
+  await downloadFile('/export/burnout', params, 'burnout_signals.xlsx')
+}
+
+export async function getAssigneeSuggestions(taskTypeId: number, teamId: number) {
+  const response = await apiClient.get<ApiResponse<AssigneeSuggestionDto[]>>('/tasks/suggest-assignee', {
+    params: { taskTypeId, teamId },
+  })
+  return unwrap(response.data) ?? []
 }

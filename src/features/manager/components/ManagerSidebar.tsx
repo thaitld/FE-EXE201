@@ -21,7 +21,7 @@ interface ManagerSidebarProps {
   onOpenCreate?: () => void
 }
 
-export default function ManagerSidebar({ isOpen = true, onClose = () => {}, activeTab, onTabChange, onOpenCreate }: ManagerSidebarProps) {
+export default function ManagerSidebar({ isOpen = true, onClose = () => { }, activeTab, onTabChange, onOpenCreate }: ManagerSidebarProps) {
   const { user } = useAuth()
   const [expanded, setExpanded] = useState<{ [k: string]: boolean }>({ dashboard: true, tasks: true, org: true })
 
@@ -42,8 +42,8 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => {}, acti
         <div className="h-full flex flex-col overflow-y-auto">
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <img src="/manto.png" className="h-8 w-auto" loading="lazy" />
+              <div className="flex items-center">
+                <img src="/manto.png" className="h-30 w-auto object-contain transition-transform duration-300 hover:scale-105" alt="MANTO" loading="lazy" />
               </div>
               <button onClick={onClose} className="md:hidden p-1 hover:bg-slate-100 rounded-lg">
                 <X size={20} />
@@ -82,10 +82,6 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => {}, acti
                 <button type="button" onClick={() => onTabChange('bulk-create')} className={`${subItemClass} ${activeTab === 'bulk-create' ? activeSubItemClass : ''}`}>
                   <Archive size={16} />
                   <span className="text-sm font-medium">Bulk Create</span>
-                </button>
-                <button type="button" onClick={() => { onOpenCreate ? onOpenCreate() : onTabChange('tasks') }} className={`${subItemClass} ${activeTab === 'tasks' ? activeSubItemClass : ''}`}>
-                  <Grid size={16} />
-                  <span className="text-sm font-medium">+ New Task</span>
                 </button>
               </div>
             )}

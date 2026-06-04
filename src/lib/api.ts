@@ -1,12 +1,5 @@
 import axios from "axios";
 import type {
-  DailyPerformanceDto,
-  TaskInstanceSummaryDto,
-  DailyEfficiencyPointDto,
-  PersonalBurnoutInsightDto,
-  PersonalDashboardDto,
-  TaskInstanceDto,
-  TaskCommentDto,
   TaskAttachmentDto,
   TimeTrackingSessionDto,
   TimeTrackingStartResponseDto,
@@ -18,9 +11,7 @@ import type {
   TaskFilterParams,
 } from "@/types/employee";
 
-const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ??
-  "http://localhost:5211/api";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,
@@ -58,8 +49,7 @@ export function getRoleFromJwt(token: string): string | null {
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token");
 
-  if (token) {
-    config.headers = config.headers ?? {};
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -248,6 +238,7 @@ export interface UserDto {
   lastName: string;
   isActive: boolean;
   roleName: string;
+  role?: string;
   teamName: string | null;
   departmentName: string | null;
   roleInTeam: string | null;

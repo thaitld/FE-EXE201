@@ -224,3 +224,19 @@ export interface ManagerActionResultDto {
 }
 
 export type ManagerApiResponse<T> = ApiResponse<T>
+
+export interface AssigneeSuggestionDto {
+  userId: string
+  userName: string
+  rank: number
+  fitScore: number
+  fitLabel: string
+  reasoning: string
+  metrics: {
+    activeTaskCount: number
+    avgEfficiencyRatio: number | null
+    overtimeDaysThisWeek: number
+    burnoutRiskLevel: string
+    taskTypeExperienceCount: number
+  }
+}

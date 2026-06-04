@@ -11,11 +11,9 @@ import GoogleAuthCallback from "@/pages/auth/GoogleAuthCallback";
 import NotAuthorized from "@/pages/shared/NotAuthorized";
 import Dashboard from "@/pages/Dashboard";
 import RoleGate from "@/features/auth/RoleGate";
+import ProfilePage from "@/pages/shared/Profile";
 import Survey from "@/components/panels/employee/Survey";
 import Manager from "@/pages/roles/Manager";
-import ProfilePage from "@/pages/shared/Profile";
-import AdminTaskTypes from "@/pages/roles/admin/TaskTypes";
-
 function isAdminRoute(route: string) {
   return route.startsWith("#/admin");
 }
@@ -39,7 +37,7 @@ function AdminRoute({ route }: { route: string }) {
     }
 
     if (route.startsWith("#/roles/admin/task-types")) {
-      return <AdminTaskTypes />;
+      return <Dashboard initialTab="task-types" />;
     }
 
     return <Dashboard />;
@@ -59,9 +57,10 @@ function AdminRoute({ route }: { route: string }) {
 export default function AppRouter() {
   const [route, setRoute] = useState<string>(window.location.hash || "#/");
   const [pathname, setPathname] = useState<string>(window.location.pathname);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, role, user } = useAuth();
 
   useEffect(() => {
+    console.log("[AppRouter Debug] Route:", route, "isAuthenticated:", isAuthenticated, "role:", role, "user:", user);
     const onHash = () => setRoute(window.location.hash || "#/");
     const onPathChange = () => setPathname(window.location.pathname);
     window.addEventListener("hashchange", onHash);
@@ -84,7 +83,6 @@ export default function AppRouter() {
 
     return <AdminRoute route={route} />;
   }
-
   if (isRoleManagerRoute(route)) {
     if (!isAuthenticated) {
       window.location.hash = "#/login";

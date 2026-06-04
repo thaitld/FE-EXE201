@@ -9,7 +9,7 @@ import BurnoutMonitorPage from './BurnoutMonitorPage'
 import TeamPerformancePage from './TeamPerformancePage'
 import ManagerReportPage from './ManagerReportPage'
 import OrgManagementPage from './OrgManagementPage'
-import ProfilePage from '@/pages/Profile'
+import ProfilePage from '@/pages/shared/Profile'
 
 const tabs: ManagerTabItem[] = [
   { id: 'dashboard', label: 'Department Dashboard', description: 'KPI, burnout alerts, and monthly trend.' },
@@ -48,15 +48,17 @@ function getSubtitle(tab: string) {
 }
 
 export default function ManagerWorkspace() {
-  const { user, isAuthenticated, refreshUser } = useAuth()
+  const { user, isAuthenticated, refreshUser, role: authRole } = useAuth()
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(window.location.hash || '#/roles/manager'))
 
   const allowed = useMemo(() => {
-    const role = user?.roleName?.toUpperCase()
-    return role === 'MANAGER' || role === 'ADMIN'
-  }, [user])
+    const r = (authRole || user?.roleName || user?.role)?.toUpperCase()
+    console.log("[ManagerWorkspace Debug] authRole:", authRole, "user.role:", user?.role, "user.roleName:", user?.roleName, "resolved:", r, "allowed:", r === 'MANAGER' || r === 'ADMIN');
+    return r === 'MANAGER' || r === 'ADMIN'
+  }, [user, authRole])
 
   useEffect(() => {
+    console.log("[ManagerWorkspace useEffect] isAuthenticated:", isAuthenticated, "user:", user, "allowed:", allowed);
     if (!isAuthenticated) {
       window.location.hash = '#/login'
       return
