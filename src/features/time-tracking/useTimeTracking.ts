@@ -11,7 +11,7 @@ import type {
   TimeTrackingStopResponseDto,
 } from "@/types/employee";
 
-export function useTimeTracking() {
+export function useTimeTracking(taskId?: number) {
   const [session, setSession] = useState<TimeTrackingSessionDto | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -110,13 +110,24 @@ export function useTimeTracking() {
       const res = await getActiveTimeSession();
       if (res.data.succeeded) {
         const s = res.data.data;
-        if (s) {
+        if (s && (taskId === undefined || s.taskInstanceId === taskId)) {
           setSession(s);
           setElapsedSeconds(s.elapsedSeconds || 0);
           setIsRunning(
-            s.currentAction === "STARTED" || s.currentAction === "RESUMED",
+            s.currentAction === "STARTED" ||
+              s.currentAction === "START" ||
+              s.currentAction === "RESUMED" ||
+              s.currentAction === "RESUME",
           );
-          setIsPaused(s.currentAction === "PAUSED");
+          setIsPaused(
+            s.currentAction === "PAUSED" ||
+              s.currentAction === "PAUSE",
+          );
+        } else {
+          setSession(null);
+          setElapsedSeconds(0);
+          setIsRunning(false);
+          setIsPaused(false);
         }
       }
     } catch (err) {
@@ -143,7 +154,7 @@ export function useTimeTracking() {
 
   useEffect(() => {
     void restore();
-  }, []);
+  }, [taskId]);
 
   const format = (seconds: number) => {
     const mm = Math.floor(seconds / 60)
