@@ -108,17 +108,9 @@ export default function Login() {
     if (submitted && role) {
       const redirectTimer = setTimeout(() => {
         // Redirect based on role
-        if (role.toLowerCase() === "admin" || role.toLowerCase() === "ceo") {
-          window.location.hash = "#/admin";
-        } else if (
-          role.toLowerCase() === "manager" ||
-          role.toLowerCase() === "hr"
-        ) {
-          // TODO: Implement department dashboard
-          window.location.hash = "#/admin";
+        if (role.toLowerCase() === "manager") {
+          window.location.hash = "#/roles/manager";
         } else {
-          // Employee and other roles
-          // TODO: Implement personal dashboard
           window.location.hash = "#/admin";
         }
       }, 1500);

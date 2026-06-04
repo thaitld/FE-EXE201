@@ -25,7 +25,7 @@ export default function UserMenu({
   userEmail,
   profileName,
   activeTab = "overview",
-  onTabChange = () => {},
+  onTabChange = () => { },
   unreadCount = 0,
 }: UserMenuProps) {
   const { logout, role } = useAuth();
@@ -40,7 +40,7 @@ export default function UserMenu({
   }, [profileName]);
 
   const profileRole = useMemo(() => {
-    return role ?? user?.roleName ?? "User";
+    return role ?? user?.roleName ?? user?.role ?? "User";
   }, [role, user]);
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function UserMenu({
               type="button"
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
               onClick={() => {
-                window.location.hash = "#/admin/profile";
+                window.location.hash = "#/profile";
                 handleProfileAction("profile");
               }}
             >

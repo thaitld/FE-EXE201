@@ -1,52 +1,201 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, ArrowUpRight, Brain, Building2, CalendarDays, Loader2, TrendingUp, Users } from 'lucide-react'
-import { apiClient, type ApiResponse, type CompanyDashboardDto } from '@/lib/api'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import axios from 'axios'
+import { CalendarDays, ChevronDown, RefreshCw, Building2 } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import {
+  apiClient,
+  type ApiResponse,
+  type CompanyDashboardDto,
+  type DepartmentDashboardDto,
+  type DepartmentDto,
+  type PersonalDashboardDto,
+} from '@/lib/api'
+import PersonalDashboardView from './PersonalDashboard'
+import DepartmentDashboardView from './DepartmentDashboard'
+import CompanyDashboardView from './CompanyDashboard'
+import { HeroChip } from './DashboardHelpers'
 
-const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`
-
-const severityClassMap: Record<string, string> = {
-  HIGH: 'border-rose-200 bg-rose-50 text-rose-700',
-  MEDIUM: 'border-amber-200 bg-amber-50 text-amber-700',
-  LOW: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+type DashboardMode = 'personal' | 'department' | 'company'
+type DashboardData =
+  | { mode: 'personal'; data: PersonalDashboardDto }
+  | { mode: 'department'; data: DepartmentDashboardDto }
+  | { mode: 'company'; data: CompanyDashboardDto }
+const MODE_META: Record<DashboardMode, { label: string; description: string }> = {
+  personal: { label: 'Personal', description: 'Today focus, upcoming deadlines and weekly trend.' },
+  department: { label: 'Department', description: 'Department KPI, team view and burnout alerts.' },
+  company: { label: 'Company', description: 'Company-wide KPI, departments and system signals.' },
 }
 
-export const OverviewPanel = () => {
-  const [dashboard, setDashboard] = useState<CompanyDashboardDto | null>(null)
+const MONTH_OPTIONS = [
+  { value: 1, label: 'Jan' },
+  { value: 2, label: 'Feb' },
+  { value: 3, label: 'Mar' },
+  { value: 4, label: 'Apr' },
+  { value: 5, label: 'May' },
+  { value: 6, label: 'Jun' },
+  { value: 7, label: 'Jul' },
+  { value: 8, label: 'Aug' },
+  { value: 9, label: 'Sep' },
+  { value: 10, label: 'Oct' },
+  { value: 11, label: 'Nov' },
+  { value: 12, label: 'Dec' },
+]
+
+const getDefaultMode = (roleName?: string): DashboardMode => {
+  switch (roleName) {
+    case 'CEO':
+      return 'company'
+    case 'Manager':
+    case 'HR':
+      return 'department'
+    case 'Admin':
+      return 'company'
+    default:
+      return 'personal'
+  }
+}
+
+// date formatting helpers are provided in individual dashboard components
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error && error.message ? error.message : fallback
+  }
+
+  const data = error.response?.data
+  if (typeof data === 'string' && data.trim()) return data
+  if (!data || typeof data !== 'object') return fallback
+
+  const typed = data as { message?: unknown; title?: unknown; detail?: unknown; errors?: unknown }
+
+  if (typeof typed.message === 'string' && typed.message.trim()) return typed.message
+  if (typeof typed.title === 'string' && typed.title.trim()) return typed.title
+  if (typeof typed.detail === 'string' && typed.detail.trim()) return typed.detail
+
+  if (typed.errors && typeof typed.errors === 'object') {
+    const messages = Object.values(typed.errors as Record<string, unknown>)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+
+    if (messages.length > 0) return messages.join('; ')
+  }
+
+  return fallback
+}
+
+export const OverviewPanel = ({ initialMode }: { initialMode?: DashboardMode } = {}) => {
+  const { user } = useAuth()
+  const availableModes = useMemo(() => {
+    const role = user?.roleName
+    if (role === 'Admin') return ['personal', 'department', 'company'] as DashboardMode[]
+    if (role === 'CEO') return ['personal', 'company'] as DashboardMode[]
+    if (role === 'Manager' || role === 'HR') return ['personal', 'department'] as DashboardMode[]
+    return ['personal'] as DashboardMode[]
+  }, [user?.roleName])
+
+  const [mode, setMode] = useState<DashboardMode>(() => initialMode ?? getDefaultMode(user?.roleName))
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  const [departments, setDepartments] = useState<DepartmentDto[]>([])
+  const [loadingDepartments, setLoadingDepartments] = useState(false)
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null)
+
+  const now = useMemo(() => new Date(), [refreshKey])
+  const [year, setYear] = useState(now.getFullYear())
+  const [month, setMonth] = useState(now.getMonth() + 1)
 
   useEffect(() => {
-    let isMounted = true
-    const now = new Date()
+    const preferred = getDefaultMode(user?.roleName)
+    if (!availableModes.includes(mode)) {
+      setMode(preferred)
+    }
+  }, [availableModes, mode, user?.roleName])
+
+  const loadDepartments = useCallback(async () => {
+    if (departments.length > 0 || loadingDepartments) return
+
+    setLoadingDepartments(true)
+    try {
+      const response = await apiClient.get<ApiResponse<DepartmentDto[]>>('/departments')
+      const items = response.data.data ?? []
+      setDepartments(items)
+
+      if (selectedDepartmentId == null && items.length > 0) {
+        const matched = user?.departmentName
+          ? items.find((department) => department.name.trim().toLowerCase() === user.departmentName?.trim().toLowerCase())
+          : undefined
+        setSelectedDepartmentId(matched?.id ?? items[0].id)
+      }
+    } catch {
+      setDepartments([])
+    } finally {
+      setLoadingDepartments(false)
+    }
+  }, [departments.length, loadingDepartments, selectedDepartmentId, user?.departmentName])
+
+  useEffect(() => {
+    if (mode === 'department') {
+      void loadDepartments()
+    }
+  }, [loadDepartments, mode])
+
+  const currentDepartment = useMemo(
+    () => departments.find((department) => department.id === selectedDepartmentId) ?? null,
+    [departments, selectedDepartmentId],
+  )
+
+  useEffect(() => {
+    let cancelled = false
 
     const loadDashboard = async () => {
+      const departmentId = mode === 'department' ? selectedDepartmentId : null
+
+      if (mode === 'department' && departmentId == null) {
+        if (loadingDepartments) return
+        setDashboard(null)
+        setIsLoading(false)
+        setErrorMessage('Vui lòng chọn phòng ban để xem dashboard.')
+        return
+      }
+
       setIsLoading(true)
       setErrorMessage(null)
 
       try {
-        const response = await apiClient.get<ApiResponse<CompanyDashboardDto>>('/dashboard/company', {
-          params: {
-            year: now.getFullYear(),
-            month: now.getMonth() + 1,
-          },
-        })
+        let response:
+          | ApiResponse<PersonalDashboardDto>
+          | ApiResponse<DepartmentDashboardDto>
+          | ApiResponse<CompanyDashboardDto>
 
-        if (!response.data.succeeded || !response.data.data) {
-          throw new Error(response.data.message || 'Không thể tải dashboard công ty.')
+        if (mode === 'personal') {
+          response = (await apiClient.get<ApiResponse<PersonalDashboardDto>>('/dashboard/personal')).data
+        } else if (mode === 'department') {
+          response = (
+            await apiClient.get<ApiResponse<DepartmentDashboardDto>>(`/dashboard/department/${departmentId}`, {
+              params: { year, month },
+            })
+          ).data
+        } else {
+          response = (await apiClient.get<ApiResponse<CompanyDashboardDto>>('/dashboard/company', { params: { year, month } })).data
         }
 
-        if (isMounted) {
-          setDashboard(response.data.data)
+        if (!response.succeeded || !response.data) {
+          throw new Error(response.message || 'Không thể tải dashboard.')
+        }
+
+        if (!cancelled) {
+          setDashboard({ mode, data: response.data } as DashboardData)
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Không thể tải dashboard công ty.'
-        if (isMounted) {
-          setErrorMessage(message)
+        if (!cancelled) {
+          setErrorMessage(getErrorMessage(error, 'Không thể tải dashboard.'))
+          setDashboard(null)
         }
       } finally {
-        if (isMounted) {
+        if (!cancelled) {
           setIsLoading(false)
         }
       }
@@ -55,220 +204,205 @@ export const OverviewPanel = () => {
     void loadDashboard()
 
     return () => {
-      isMounted = false
+      cancelled = true
     }
+  }, [loadingDepartments, mode, month, selectedDepartmentId, year, refreshKey])
+
+  const dashboardTitle = dashboard?.mode ?? mode
+  const modeMeta = MODE_META[dashboardTitle]
+
+  const yearRange = useMemo(() => {
+    const current = new Date().getFullYear()
+    return [current - 1, current, current + 1]
   }, [])
 
-  const trendBars = useMemo(() => {
-    if (!dashboard) return []
-
-    return dashboard.quarterlyTrend.map((point) => ({
-      label: monthLabels[point.month - 1] ?? `${point.month}`,
-      value: point.avgEfficiency,
-      morale: point.avgMorale,
-      stress: point.avgStress,
-    }))
-  }, [dashboard])
-
-  if (isLoading) {
+  const renderModeButton = (tab: DashboardMode) => {
+    const isActive = (dashboard?.mode ?? mode) === tab
     return (
-      <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-slate-200 bg-white">
-        <div className="flex items-center gap-3 text-slate-600">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Loading company dashboard...
+      <button
+        key={tab}
+        type="button"
+        onClick={() => setMode(tab)}
+        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${isActive ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-200 hover:bg-white/10'}`}
+      >
+        {MODE_META[tab].label}
+      </button>
+    )
+  }
+
+  if (isLoading && !dashboard) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-3">
+              <div className="h-4 w-36 rounded-full bg-slate-100" />
+              <div className="h-8 w-72 rounded-full bg-slate-100" />
+              <div className="h-4 w-[32rem] max-w-full rounded-full bg-slate-100" />
+            </div>
+            <div className="h-11 w-44 rounded-full bg-slate-100" />
+          </div>
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="h-28 rounded-2xl bg-slate-50" />
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="h-80 rounded-2xl border border-slate-200 bg-white" />
+          <div className="h-80 rounded-2xl border border-slate-200 bg-white" />
+          <div className="h-80 rounded-2xl border border-slate-200 bg-white" />
         </div>
       </div>
     )
   }
 
-  if (errorMessage || !dashboard) {
+  if (errorMessage && !dashboard) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700">
+      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700 shadow-sm">
         <p className="font-semibold">Không tải được dashboard</p>
-        <p className="mt-1 text-sm">{errorMessage || 'Dữ liệu dashboard không hợp lệ.'}</p>
+        <p className="mt-1 text-sm">{errorMessage}</p>
+        <button
+          type="button"
+          onClick={() => setRefreshKey((value) => value + 1)}
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
+        >
+          <RefreshCw size={14} />
+          Thử lại
+        </button>
       </div>
     )
   }
 
-  const stats = [
-    {
-      label: 'Avg Efficiency',
-      value: dashboard.avgEfficiencyLabel,
-      subtext: formatPercent(dashboard.avgEfficiencyRatio),
-      icon: TrendingUp,
-      iconClass: 'text-emerald-600',
-    },
-    {
-      label: 'Avg Morale',
-      value: dashboard.avgMoraleScore.toFixed(2),
-      subtext: 'Wellbeing sentiment',
-      icon: Brain,
-      iconClass: 'text-blue-600',
-    },
-    {
-      label: 'Avg Stress',
-      value: dashboard.avgStressScore.toFixed(2),
-      subtext: 'Current pressure level',
-      icon: AlertTriangle,
-      iconClass: 'text-amber-600',
-    },
-    {
-      label: 'Active Employees',
-      value: dashboard.totalActiveEmployees.toString(),
-      subtext: `${dashboard.departments.length} departments`,
-      icon: Users,
-      iconClass: 'text-slate-700',
-    },
-  ]
+  if (!dashboard) {
+    return null
+  }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon
-          return (
-            <div key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                <Icon className={stat.iconClass} size={18} />
-              </div>
-              <p className="mt-4 text-3xl font-bold text-slate-900">{stat.value}</p>
-              <p className="mt-1 text-xs text-slate-500">{stat.subtext}</p>
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+        <div className="relative overflow-hidden px-6 py-6 sm:px-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.18),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.14),transparent_40%)]" />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200/80"> Dashboard</p>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{modeMeta.label} Dashboard</h2>
+              <p className="max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">{modeMeta.description}</p>
+              {mode === 'department' && currentDepartment ? (
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-100">
+                  <Building2 size={14} />
+                  {currentDepartment.name}
+                </div>
+              ) : null}
             </div>
-          )
-        })}
-      </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Quarterly Trend</h3>
-              <p className="text-sm text-slate-500">{dashboard.year}-{String(dashboard.month).padStart(2, '0')} snapshot</p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-              <CalendarDays size={14} />
-              Last 3 months
+            <div className="flex flex-wrap gap-2 rounded-full border border-white/10 bg-white/10 p-2 backdrop-blur-sm">
+              {availableModes.map(renderModeButton)}
             </div>
           </div>
 
-          <div className="mt-6 flex h-72 items-end gap-3">
-            {trendBars.map((bar) => (
-              <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
-                <div className="flex w-full items-end justify-center gap-1">
-                  <div className="w-1/2 rounded-t-xl bg-slate-900" style={{ height: `${Math.max((bar.value / 1.5) * 100, 8)}%` }} title={`Efficiency ${bar.value.toFixed(2)}`} />
-                  <div className="w-1/2 rounded-t-xl bg-emerald-400/80" style={{ height: `${Math.max((bar.morale / 5) * 100, 8)}%` }} title={`Morale ${bar.morale.toFixed(2)}`} />
-                  <div className="w-1/2 rounded-t-xl bg-amber-400/80" style={{ height: `${Math.max((bar.stress / 5) * 100, 8)}%` }} title={`Stress ${bar.stress.toFixed(2)}`} />
-                </div>
-                <span className="text-xs font-medium text-slate-500">{bar.label}</span>
-              </div>
-            ))}
+          <div className="relative mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <HeroChip label="Active view" value={MODE_META[dashboard.mode].label} />
+            <HeroChip label="Period" value={dashboard.mode === 'personal' ? 'Live' : `${MONTH_OPTIONS[month - 1]?.label ?? month}/${year}`} />
+            <HeroChip label="Context" value={dashboard.mode === 'personal' ? 'My workday' : dashboard.mode === 'department' ? 'Department overview' : 'Company overview'} />
           </div>
         </div>
+      </section>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Burnout Overview</h3>
-              <p className="text-sm text-slate-500">Current unresolved risk signals</p>
-            </div>
-            <Brain className="text-slate-400" size={18} />
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Controls</p>
+            <h3 className="text-lg font-semibold text-slate-900">Period and scope</h3>
+            <p className="mt-1 text-sm text-slate-500">Chọn chế độ dashboard, phòng ban và kỳ báo cáo phù hợp.</p>
           </div>
 
-          <div className="mt-6 space-y-4">
-            {[
-              { label: 'High Risk', value: dashboard.burnoutOverview.highRisk, className: 'text-rose-600' },
-              { label: 'Medium Risk', value: dashboard.burnoutOverview.mediumRisk, className: 'text-amber-600' },
-              { label: 'Low Risk', value: dashboard.burnoutOverview.lowRisk, className: 'text-emerald-600' },
-              { label: 'Resolved', value: dashboard.burnoutOverview.resolved, className: 'text-slate-700' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-                <span className="text-sm font-medium text-slate-600">{item.label}</span>
-                <span className={`text-lg font-bold ${item.className}`}>{item.value}</span>
-              </div>
-            ))}
+          <div className="flex flex-wrap items-end gap-3">
+            {mode === 'department' ? (
+              <label className="space-y-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</span>
+                <select
+                  value={selectedDepartmentId ?? ''}
+                  onChange={(event) => setSelectedDepartmentId(event.target.value ? Number(event.target.value) : null)}
+                  className="min-w-56 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                >
+                  <option value="">{loadingDepartments ? 'Loading departments...' : 'Select department'}</option>
+                  {departments.map((department) => (
+                    <option key={department.id} value={department.id}>
+                      {department.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+
+            {mode !== 'personal' ? (
+              <>
+                <label className="space-y-1.5">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Month</span>
+                  <select
+                    value={month}
+                    onChange={(event) => setMonth(Number(event.target.value))}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  >
+                    {MONTH_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="space-y-1.5">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Year</span>
+                  <select
+                    value={year}
+                    onChange={(event) => setYear(Number(event.target.value))}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  >
+                    {yearRange.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => setRefreshKey((value) => value + 1)}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <RefreshCw size={14} />
+              Refresh
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Department Comparison</h3>
-              <p className="text-sm text-slate-500">Efficiency, morale and burnout pressure by department</p>
-            </div>
-            <Building2 className="text-slate-400" size={18} />
-          </div>
-
-          <div className="mt-5 space-y-3">
-            {dashboard.departments.map((department) => (
-              <div key={department.departmentId} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">{department.departmentName}</p>
-                    <p className="text-sm text-slate-500">{department.headCount} employees</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900">{department.avgEfficiencyLabel}</p>
-                    <p className="text-xs text-slate-500">Efficiency {department.avgEfficiencyRatio.toFixed(2)}</p>
-                  </div>
-                </div>
-
-                <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
-                  <div className="rounded-lg bg-white px-3 py-2">
-                    <p className="text-xs text-slate-500">Morale</p>
-                    <p className="font-semibold text-slate-900">{department.avgMoraleScore.toFixed(2)}</p>
-                  </div>
-                  <div className="rounded-lg bg-white px-3 py-2">
-                    <p className="text-xs text-slate-500">High Risk</p>
-                    <p className="font-semibold text-rose-600">{department.highRiskBurnoutCount}</p>
-                  </div>
-                  <div className="rounded-lg bg-white px-3 py-2">
-                    <p className="text-xs text-slate-500">Dept ID</p>
-                    <p className="font-semibold text-slate-900">{department.departmentId}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      {errorMessage ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {errorMessage}
         </div>
+      ) : null}
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">System Alerts</h3>
-              <p className="text-sm text-slate-500">Unread system notifications</p>
-            </div>
-            <ArrowUpRight className="text-slate-400" size={18} />
-          </div>
+      {dashboard.mode === 'personal' ? <PersonalDashboardView dashboard={dashboard.data} /> : null}
+      {dashboard.mode === 'department' ? <DepartmentDashboardView dashboard={dashboard.data} /> : null}
+      {dashboard.mode === 'company' ? <CompanyDashboardView dashboard={dashboard.data} /> : null}
 
-          <div className="mt-5 space-y-3">
-            {dashboard.systemAlerts.length > 0 ? (
-              dashboard.systemAlerts.map((alert) => (
-                <div key={alert.id} className={`rounded-xl border px-4 py-3 ${severityClassMap[alert.severity] ?? 'border-slate-200 bg-slate-50 text-slate-700'}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold">{alert.alertType}</p>
-                    <span className="text-[11px] font-bold uppercase tracking-wide">{alert.severity}</span>
-                  </div>
-                  <p className="mt-1 text-sm">{alert.message}</p>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-                No unread system alerts.
-              </div>
-            )}
-          </div>
-
-          {dashboard.monthlyInsight ? (
-            <div className="mt-6 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-4 text-sm text-indigo-800">
-              <p className="mb-1 font-semibold">Monthly Insight</p>
-              <p>{dashboard.monthlyInsight}</p>
-            </div>
-          ) : null}
+      <div className="flex items-center justify-between text-xs text-slate-500">
+        <div className="inline-flex items-center gap-2">
+          <CalendarDays size={14} />
+          Updated at {new Date().toLocaleString('vi-VN')}
+        </div>
+        <div className="inline-flex items-center gap-2">
+          <ChevronDown size={14} className="-rotate-90" />
+          {MODE_META[dashboard.mode].label} mode
         </div>
       </div>
     </div>
   )
 }
+

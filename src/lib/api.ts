@@ -1,12 +1,5 @@
 import axios from "axios";
 import type {
-  DailyPerformanceDto,
-  TaskInstanceSummaryDto,
-  DailyEfficiencyPointDto,
-  PersonalBurnoutInsightDto,
-  PersonalDashboardDto,
-  TaskInstanceDto,
-  TaskCommentDto,
   TaskAttachmentDto,
   TimeTrackingSessionDto,
   TimeTrackingStartResponseDto,
@@ -18,9 +11,7 @@ import type {
   TaskFilterParams,
 } from "@/types/employee";
 
-const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ??
-  "http://localhost:5211/api";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,
@@ -58,8 +49,7 @@ export function getRoleFromJwt(token: string): string | null {
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token");
 
-  if (token) {
-    config.headers = config.headers ?? {};
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -93,6 +83,17 @@ export interface ResetPasswordRequestDto {
 
 export interface GoogleAuthUrlResponse {
   authUrl: string;
+}
+
+export interface DailyPerformanceDto {
+  userId: string
+  userName: string
+  reportDate: string
+  totalStandardMinutes: number
+  totalActualMinutes: number
+  totalTasks: number
+  efficiencyRatio: number
+  efficiencyLabel: string
 }
 
 export interface DepartmentKpiSummaryDto {
@@ -135,6 +136,86 @@ export interface AlertSummaryDto {
   createdAt: string | null;
 }
 
+export interface DailyEfficiencyPointDto {
+  date: string
+  efficiencyRatio: number | null
+  efficiencyLabel: string
+}
+
+export interface TaskInstanceSummaryDto {
+  id: number
+  taskCode: string
+  title: string
+  status: string
+  priority: string
+  taskTypeName: string
+  assignedUserName: string
+  expectedCompletion: string
+  isOverdue: boolean
+}
+
+export interface PersonalBurnoutInsightDto {
+  riskLevel: string
+  riskScore: number
+  triggerFactors: string[]
+  detectedDate: string
+}
+
+export interface PersonalDashboardDto {
+  todayPerformance: DailyPerformanceDto | null
+  pendingTasks: number
+  inProgressTasks: number
+  completedThisWeek: number
+  upcomingDeadlines: TaskInstanceSummaryDto[]
+  weeklyTrend: DailyEfficiencyPointDto[]
+  burnoutInsight: PersonalBurnoutInsightDto | null
+}
+
+export interface TeamPerformanceSummaryDto {
+  teamId: number
+  teamName: string
+  avgEfficiencyRatio: number
+  avgEfficiencyLabel: string
+  avgMoraleScore?: number
+  avgStressScore?: number
+  totalActiveTasks?: number
+  overdueTasks?: number
+  activeMembers?: number
+  highRiskBurnoutCount?: number
+}
+
+export interface BurnoutAlertItemDto {
+  id: number
+  userName: string
+  departmentName?: string | null
+  teamName?: string | null
+  riskLevel: string
+  riskScore: number
+  message: string
+  detectedDate: string
+  isResolved?: boolean
+}
+
+export interface DepartmentDashboardDto {
+  departmentId: number
+  departmentName: string
+  year: number
+  month: number
+  avgEfficiencyRatio: number
+  avgEfficiencyLabel: string
+  avgMoraleScore: number
+  avgStressScore: number
+  totalActiveTasks: number
+  overdueTasks: number
+  completedThisMonth: number
+  teams: TeamPerformanceSummaryDto[]
+  highRiskBurnoutCount: number
+  mediumRiskBurnoutCount: number
+  recentHighRiskAlerts: BurnoutAlertItemDto[]
+  monthlyTrend: DailyEfficiencyPointDto[]
+  unreadAlerts: AlertSummaryDto[]
+}
+
 export interface CompanyDashboardDto {
   year: number;
   month: number;
@@ -157,6 +238,7 @@ export interface UserDto {
   lastName: string;
   isActive: boolean;
   roleName: string;
+  role?: string;
   teamName: string | null;
   departmentName: string | null;
   roleInTeam: string | null;
@@ -221,6 +303,116 @@ export interface CreateDepartmentDto {
   managerUserId?: string;
 }
 
+// ==================== Task DTOs ====================
+
+export interface TaskInstanceDto {
+  id: number
+  taskCode: string
+  title: string
+  status: string // "PENDING" | "IN_PROGRESS" | "PAUSED" | "COMPLETED" | "CANCELLED" | "WAITING_FOR_APPROVAL" | "REJECTED"
+  priority: string // "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  taskTypeId: number
+  taskTypeName: string
+  taskTypeCode: string
+  standardTimeMinutes: number
+  assignedUserId: string
+  assignedUserName: string
+  assignedUserDepartment: string | null
+  plannedQuantity: number
+  expectedCompletion: string
+  isOverdue: boolean
+  startedAt: string | null
+  completedAt: string | null
+  actualMinutes: number | null
+  efficiencyRatio: number | null
+  submissionNote: string | null
+  deliverableUrl: string | null
+  rejectionReason: string | null
+  createdAt: string | null
+}
+
+export interface TaskInstanceFilter {
+  status?: string
+  assignedUserId?: string
+  teamId?: number
+  taskTypeId?: number
+  isOverdue?: boolean
+  priority?: string
+  fromDate?: string
+  toDate?: string
+  page?: number
+  pageSize?: number
+  sortBy?: string
+  sortDir?: string
+}
+
+export interface CreateTaskInstanceDto {
+  taskTypeId: number
+  title: string
+  assignedUserId: string
+  plannedQuantity?: number
+  expectedCompletion: string
+  priority?: string
+}
+
+export interface UpdateTaskInstanceDto {
+  title?: string
+  expectedCompletion?: string
+  plannedQuantity?: number
+}
+
+export interface BulkCreateTaskInstanceDto {
+  tasks: CreateTaskInstanceDto[]
+}
+
+export interface BulkCreateErrorDto {
+  index: number
+  field: string
+  message: string
+}
+
+export interface BulkCreateResultDto {
+  successCount: number
+  failCount: number
+  errors: BulkCreateErrorDto[]
+  createdIds: number[]
+}
+
+export interface ReassignTaskDto {
+  newAssignedUserId: string
+  reason?: string
+}
+
+export interface UpdateTaskStatusDto {
+  status: 'COMPLETED' | 'CANCELLED' | 'WAITING_FOR_APPROVAL' | 'REJECTED'
+  note?: string
+  submissionNote?: string
+  deliverableUrl?: string
+  rejectionReason?: string
+}
+
+export interface CloneTaskDto {
+  title?: string
+  assignedUserId?: string
+  expectedCompletion?: string
+  priority?: string
+}
+
+export interface TaskCommentDto {
+  id: number
+  taskInstanceId: number
+  userId: string
+  userName: string
+  userAvatarInitials: string | null
+  content: string
+  createdAt: string
+  isOwnComment: boolean
+}
+
+export interface AddCommentDto {
+  content: string
+}
+
 export interface UpdateDepartmentDto {
   name?: string;
   managerUserId?: string;
@@ -242,6 +434,53 @@ export interface UpdateTeamDto {
   teamLeadUserId?: string;
   shift?: string;
   isActive?: boolean;
+}
+
+export interface TaskTypeDto {
+  id: number
+  code: string
+  name: string
+  description: string | null
+  category: string | null
+  isActive: boolean
+  hasActiveStandardTime: boolean
+  currentStandardTime: number | null
+  createdAt: string | null
+}
+
+export interface CreateTaskTypeDto {
+  code: string
+  name: string
+  description?: string
+  category?: string
+}
+
+export interface UpdateTaskTypeDto {
+  code?: string
+  name?: string
+  description?: string
+  category?: string
+  isActive?: boolean
+}
+
+export interface StandardTimeDto {
+  id: number
+  taskTypeId: number
+  taskTypeCode: string
+  taskTypeName: string
+  observedTime: number
+  ratingFactor: number
+  pfdFactor: number
+  standardTime: number | null
+  version: number
+  isActive: boolean
+  createdAt: string | null
+}
+
+export interface CreateStandardTimeDto {
+  observedTime: number
+  ratingFactor: number
+  pfdFactor: number
 }
 
 export interface CreateUserDto {
