@@ -21,6 +21,12 @@ import { UserManagementPanel } from "@/components/panels/admin/UserManagementPan
 import { WorkforceTrendsPanel } from "@/components/panels/admin/WorkforceTrendsPanel";
 import { SettingsPanel } from "@/components/panels/admin/SettingsPanel";
 import DepartmentsPanel from "@/components/panels/admin/DepartmentsPanel";
+// Phase 4: Manager-specific panels
+import { ManagerDashboardPanel } from "@/components/panels/admin/ManagerDashboardPanel";
+import { TaskManagementPanel } from "@/components/panels/admin/TaskManagementPanel";
+import { BurnoutMonitorPanel } from "@/components/panels/admin/BurnoutMonitorPanel";
+import { TeamPerformancePanel } from "@/components/panels/admin/TeamPerformancePanel";
+import { ManagerReportPanel } from "@/components/panels/admin/ManagerReportPanel";
 import ProfilePage from "@/pages/shared/Profile";
 
 import PersonalDashboard from "@/components/panels/employee/PersonalDashboard";
@@ -98,13 +104,36 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Settings",
     subtitle: "Manage dashboard preferences and system options.",
   },
+  // Phase 4: Manager tabs
+  "task-management": {
+    title: "Quản lý Task",
+    subtitle: "Tạo, duyệt, từ chối và theo dõi task của phòng ban.",
+  },
+  "team-performance": {
+    title: "Hiệu suất Nhóm",
+    subtitle: "Hiệu suất theo ngày và báo cáo overtime.",
+  },
+  "burnout-monitor": {
+    title: "Theo dõi Burnout",
+    subtitle: "Phát hiện và xử lý tín hiệu burnout của nhân viên.",
+  },
+  "manager-report": {
+    title: "Báo cáo AI",
+    subtitle: "Báo cáo hàng tuần do Gemini AI tổng hợp.",
+  },
 };
 
 // Panel component map - maps activeTab to the corresponding panel component
-const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
+const getPanelComponent = (
+  activeTab: string,
+  isEmployee: boolean,
+  isManager: boolean,
+) => {
   switch (activeTab) {
     case "overview":
-      return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
+      if (isEmployee) return <PersonalDashboard />;
+      if (isManager) return <ManagerDashboardPanel />;
+      return <OverviewPanel />;
     case "my-tasks":
       return <MyTasks />;
     case "survey":
@@ -116,15 +145,15 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
     case "team":
       return <TeamPanel />;
     case "performance":
-      return <PerformancePanel />;
+      return isManager ? <TeamPerformancePanel /> : <PerformancePanel />;
     case "workload":
       return <WorkloadPanel />;
     case "burnout-risk":
-      return <BurnoutRiskPanel />;
+      return isManager ? <BurnoutMonitorPanel /> : <BurnoutRiskPanel />;
     case "wellbeing-analytics":
       return <WellbeingAnalyticsPanel />;
     case "ai-insights":
-      return <AIInsightsPanel />;
+      return isManager ? <ManagerReportPanel /> : <AIInsightsPanel />;
     case "ai-predictions":
       return <AIPredictionsPanel />;
     case "ai-recommendations":
@@ -139,14 +168,25 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
       return <WorkforceTrendsPanel />;
     case "settings":
       return <SettingsPanel />;
+    // Phase 4: Manager-only tabs
+    case "task-management":
+      return <TaskManagementPanel />;
+    case "team-performance":
+      return <TeamPerformancePanel />;
+    case "burnout-monitor":
+      return <BurnoutMonitorPanel />;
+    case "manager-report":
+      return <ManagerReportPanel />;
     default:
-      return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
+      if (isEmployee) return <PersonalDashboard />;
+      if (isManager) return <ManagerDashboardPanel />;
+      return <OverviewPanel />;
   }
 };
 
 export default function Admin({ initialTab }: { initialTab?: string } = {}) {
   const { user, userEmail } = useAuth();
-  const { isEmployee } = usePermission();
+  const { isEmployee, isManager } = usePermission();
   const [activeTab, setActiveTab] = useState(initialTab ?? "overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -268,7 +308,7 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
             </Button> */}
           </div>
 
-          {getPanelComponent(activeTab, isEmployee())}
+          {getPanelComponent(activeTab, isEmployee(), isManager())}
         </div>
       </main>
 

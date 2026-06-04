@@ -20,6 +20,9 @@ import {
   ChevronDown,
   Settings,
   X,
+  ClipboardList,
+  FileText,
+  ShieldAlert,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -58,10 +61,10 @@ export default function Sidebar({
   };
 
   const topLevelItemClass =
-    "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-100 transition";
+    "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-100 transition text-left";
   const activeTopLevelClass = "bg-slate-100 text-blue-800";
   const subItemClass =
-    "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition";
+    "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition text-left";
   const activeSubItemClass =
     "bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-[0_6px_18px_rgba(37,99,235,0.35)]";
 
@@ -127,217 +130,308 @@ export default function Sidebar({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => toggleSection("people")}
-              className={`${topLevelItemClass} ${expandedSections.people ? activeTopLevelClass : ""}`}
-            >
-              <Users size={18} />
-              <span className="text-sm font-semibold">People</span>
-              <ChevronDown
-                size={16}
-                className={`ml-auto transition-transform ${expandedSections.people ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {expandedSections.people && (
-              <div className="space-y-1 pl-4">
-                {/* Team - visible to all authenticated users */}
+            {/* People Section */}
+            {(isManager() || isHR() || isAdmin()) ? (
+              <>
                 <button
                   type="button"
-                  onClick={() => handleTabClick("team")}
-                  className={`${subItemClass} ${activeTab === "team" ? activeSubItemClass : ""}`}
+                  onClick={() => toggleSection("people")}
+                  className={`${topLevelItemClass} ${expandedSections.people ? activeTopLevelClass : ""}`}
                 >
-                  <UserRound size={17} />
-                  <span className="text-sm font-medium">Team</span>
+                  <Users size={18} />
+                  <span className="text-sm font-semibold">People</span>
+                  <ChevronDown
+                    size={16}
+                    className={`ml-auto transition-transform ${expandedSections.people ? "rotate-180" : ""}`}
+                  />
                 </button>
 
-                {/* Departments - Manager, HR, Admin */}
-                {(isManager() || isHR() || isAdmin()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("departments")}
-                    className={`${subItemClass} ${activeTab === "departments" ? activeSubItemClass : ""}`}
-                  >
-                    <Building2 size={17} />
-                    <span className="text-sm font-medium">Departments</span>
-                  </button>
-                )}
+                {expandedSections.people && (
+                  <div className="space-y-1 pl-4">
+                    {/* Team - visible to all authenticated users */}
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("team")}
+                      className={`${subItemClass} ${activeTab === "team" ? activeSubItemClass : ""}`}
+                    >
+                      <UserRound size={17} />
+                      <span className="text-sm font-medium">Team</span>
+                    </button>
 
-                {/* Users - Admin only */}
-                {isAdmin() && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("user-management")}
-                    className={`${subItemClass} ${activeTab === "user-management" ? activeSubItemClass : ""}`}
-                  >
-                    <Users size={17} />
-                    <span className="text-sm font-medium">Users</span>
-                  </button>
-                )}
+                    {/* Departments - Manager, HR, Admin */}
+                    {(isManager() || isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("departments")}
+                        className={`${subItemClass} ${activeTab === "departments" ? activeSubItemClass : ""}`}
+                      >
+                        <Building2 size={17} />
+                        <span className="text-sm font-medium">Departments</span>
+                      </button>
+                    )}
 
-                {/* Performance - visible to all */}
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("performance")}
-                  className={`${subItemClass} ${activeTab === "performance" ? activeSubItemClass : ""}`}
-                >
-                  <TrendingUp size={17} />
-                  <span className="text-sm font-medium">Performance</span>
-                </button>
+                    {/* Users - Admin only */}
+                    {isAdmin() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("user-management")}
+                        className={`${subItemClass} ${activeTab === "user-management" ? activeSubItemClass : ""}`}
+                      >
+                        <Users size={17} />
+                        <span className="text-sm font-medium">Users</span>
+                      </button>
+                    )}
 
-                {/* Workload - Manager, HR, Admin */}
-                {(isManager() || isHR() || isAdmin()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("workload")}
-                    className={`${subItemClass} ${activeTab === "workload" ? activeSubItemClass : ""}`}
-                  >
-                    <Briefcase size={17} />
-                    <span className="text-sm font-medium">Workload</span>
-                  </button>
+                    {/* Performance - visible to HR, Admin */}
+                    {(isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("performance")}
+                        className={`${subItemClass} ${activeTab === "performance" ? activeSubItemClass : ""}`}
+                      >
+                        <TrendingUp size={17} />
+                        <span className="text-sm font-medium">Performance</span>
+                      </button>
+                    )}
+
+                    {/* Workload - Manager, HR, Admin */}
+                    {(isManager() || isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("workload")}
+                        className={`${subItemClass} ${activeTab === "workload" ? activeSubItemClass : ""}`}
+                      >
+                        <Briefcase size={17} />
+                        <span className="text-sm font-medium">Workload</span>
+                      </button>
+                    )}
+
+                    {/* Task Management - Manager only (Phase 4) */}
+                    {isManager() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("task-management")}
+                        className={`${subItemClass} ${activeTab === "task-management" ? activeSubItemClass : ""}`}
+                      >
+                        <ClipboardList size={17} />
+                        <span className="text-sm font-medium">Quản lý Task</span>
+                      </button>
+                    )}
+
+                    {/* Team Performance - Manager only (Phase 4) */}
+                    {isManager() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("team-performance")}
+                        className={`${subItemClass} ${activeTab === "team-performance" ? activeSubItemClass : ""}`}
+                      >
+                        <TrendingUp size={17} />
+                        <span className="text-sm font-medium">Hiệu suất Nhóm</span>
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
+            ) : (
+              /* Flat item for users who only see 'Team' (Employee, CEO) */
+              <button
+                type="button"
+                onClick={() => handleTabClick("team")}
+                className={`${topLevelItemClass} ${activeTab === "team" ? activeTopLevelClass : ""}`}
+              >
+                <UserRound size={18} />
+                <span className="text-sm font-semibold">Team</span>
+              </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => toggleSection("wellbeing")}
-              className={`${topLevelItemClass} ${expandedSections.wellbeing ? activeTopLevelClass : ""}`}
-            >
-              <Heart size={18} />
-              <span className="text-sm font-semibold">Wellbeing</span>
-              <ChevronDown
-                size={16}
-                className={`ml-auto transition-transform ${expandedSections.wellbeing ? "rotate-180" : ""}`}
-              />
-            </button>
+            {/* Wellbeing Section */}
+            {(isManager() || isHR() || isCEO() || isAdmin()) ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => toggleSection("wellbeing")}
+                  className={`${topLevelItemClass} ${expandedSections.wellbeing ? activeTopLevelClass : ""}`}
+                >
+                  <Heart size={18} />
+                  <span className="text-sm font-semibold">Wellbeing</span>
+                  <ChevronDown
+                    size={16}
+                    className={`ml-auto transition-transform ${expandedSections.wellbeing ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-            {expandedSections.wellbeing && (
-              <div className="space-y-1 pl-4">
-                {/* Burnout Risk - Manager, HR, CEO, Admin */}
-                {(isManager() || isHR() || isCEO() || isAdmin()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("burnout-risk")}
-                    className={`${subItemClass} ${activeTab === "burnout-risk" ? activeSubItemClass : ""}`}
-                  >
-                    <TriangleAlert size={17} />
-                    <span className="text-sm font-medium">Burnout Risk</span>
-                  </button>
+                {expandedSections.wellbeing && (
+                  <div className="space-y-1 pl-4">
+                    {/* Burnout Risk - HR, CEO, Admin */}
+                    {(isHR() || isCEO() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("burnout-risk")}
+                        className={`${subItemClass} ${activeTab === "burnout-risk" ? activeSubItemClass : ""}`}
+                      >
+                        <TriangleAlert size={17} />
+                        <span className="text-sm font-medium">Burnout Risk</span>
+                      </button>
+                    )}
+
+                    {/* Burnout Monitor (full) - Manager only (Phase 4) */}
+                    {isManager() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("burnout-monitor")}
+                        className={`${subItemClass} ${activeTab === "burnout-monitor" ? activeSubItemClass : ""}`}
+                      >
+                        <ShieldAlert size={17} />
+                        <span className="text-sm font-medium">Burnout Monitor</span>
+                      </button>
+                    )}
+
+                    {/* Wellbeing Analytics - visible to Manager, HR, CEO, Admin */}
+                    {(isManager() || isHR() || isCEO() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("wellbeing-analytics")}
+                        className={`${subItemClass} ${activeTab === "wellbeing-analytics" ? activeSubItemClass : ""}`}
+                      >
+                        <Activity size={17} />
+                        <span className="text-sm font-medium">
+                          Wellbeing Analytics
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Monthly Survey - visible to all */}
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("survey")}
+                      className={`${subItemClass} ${activeTab === "survey" ? activeSubItemClass : ""}`}
+                    >
+                      <Sparkles size={17} />
+                      <span className="text-sm font-medium">Monthly Survey</span>
+                    </button>
+                  </div>
                 )}
-
-                {/* Wellbeing Analytics - visible to all */}
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("wellbeing-analytics")}
-                  className={`${subItemClass} ${activeTab === "wellbeing-analytics" ? activeSubItemClass : ""}`}
-                >
-                  <Activity size={17} />
-                  <span className="text-sm font-medium">
-                    Wellbeing Analytics
-                  </span>
-                </button>
-
-                {/* Monthly Survey - visible to all */}
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("survey")}
-                  className={`${subItemClass} ${activeTab === "survey" ? activeSubItemClass : ""}`}
-                >
-                  <Sparkles size={17} />
-                  <span className="text-sm font-medium">Monthly Survey</span>
-                </button>
-              </div>
+              </>
+            ) : (
+              /* Flat item for users who only see 'Monthly Survey' (Employee) */
+              <button
+                type="button"
+                onClick={() => handleTabClick("survey")}
+                className={`${topLevelItemClass} ${activeTab === "survey" ? activeTopLevelClass : ""}`}
+              >
+                <Sparkles size={18} />
+                <span className="text-sm font-semibold">Monthly Survey</span>
+              </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => toggleSection("ai")}
-              className={`${topLevelItemClass} ${expandedSections.ai ? activeTopLevelClass : ""}`}
-            >
-              <Brain size={18} />
-              <span className="text-sm font-semibold">AI Intelligence</span>
-              <ChevronDown
-                size={16}
-                className={`ml-auto transition-transform ${expandedSections.ai ? "rotate-180" : ""}`}
-              />
-            </button>
+            {(isAdmin() || isCEO() || isManager()) && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => toggleSection("ai")}
+                  className={`${topLevelItemClass} ${expandedSections.ai ? activeTopLevelClass : ""}`}
+                >
+                  <Brain size={18} />
+                  <span className="text-sm font-semibold">AI Intelligence</span>
+                  <ChevronDown
+                    size={16}
+                    className={`ml-auto transition-transform ${expandedSections.ai ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-            {expandedSections.ai && (
-              <div className="space-y-1 pl-4">
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("ai-insights")}
-                  className={`${subItemClass} ${activeTab === "ai-insights" ? activeSubItemClass : ""}`}
-                >
-                  <Sparkles size={17} />
-                  <span className="text-sm font-medium">AI Insights</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("ai-predictions")}
-                  className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
-                >
-                  <CornerDownRight size={17} />
-                  <span className="text-sm font-medium">AI Predictions</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("ai-recommendations")}
-                  className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
-                >
-                  <Compass size={17} />
-                  <span className="text-sm font-medium">
-                    AI Recommendations
-                  </span>
-                </button>
-              </div>
+                {expandedSections.ai && (
+                  <div className="space-y-1 pl-4">
+                    {(isAdmin() || isCEO()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("ai-insights")}
+                        className={`${subItemClass} ${activeTab === "ai-insights" ? activeSubItemClass : ""}`}
+                      >
+                        <Sparkles size={17} />
+                        <span className="text-sm font-medium">AI Insights</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("ai-predictions")}
+                      className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
+                    >
+                      <CornerDownRight size={17} />
+                      <span className="text-sm font-medium">AI Predictions</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("ai-recommendations")}
+                      className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
+                    >
+                      <Compass size={17} />
+                      <span className="text-sm font-medium">
+                        AI Recommendations
+                      </span>
+                    </button>
+                    {/* Manager AI Report - Phase 4 */}
+                    {isManager() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("manager-report")}
+                        className={`${subItemClass} ${activeTab === "manager-report" ? activeSubItemClass : ""}`}
+                      >
+                        <FileText size={17} />
+                        <span className="text-sm font-medium">Báo cáo AI</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
             )}
 
-            <button
-              type="button"
-              onClick={() => toggleSection("analytics")}
-              className={`${topLevelItemClass} ${expandedSections.analytics ? activeTopLevelClass : ""}`}
-            >
-              <BarChart3 size={18} />
-              <span className="text-sm font-semibold">Analytics</span>
-              <ChevronDown
-                size={16}
-                className={`ml-auto transition-transform ${expandedSections.analytics ? "rotate-180" : ""}`}
-              />
-            </button>
+            {(isAdmin() || isCEO() || isManager() || isHR()) && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => toggleSection("analytics")}
+                  className={`${topLevelItemClass} ${expandedSections.analytics ? activeTopLevelClass : ""}`}
+                >
+                  <BarChart3 size={18} />
+                  <span className="text-sm font-semibold">Analytics</span>
+                  <ChevronDown
+                    size={16}
+                    className={`ml-auto transition-transform ${expandedSections.analytics ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-            {expandedSections.analytics && (
-              <div className="space-y-1 pl-4">
-                {/* Department Analytics - Manager, HR, Admin */}
-                {(isManager() || isHR() || isAdmin()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("department-analytics")}
-                    className={`${subItemClass} ${activeTab === "department-analytics" ? activeSubItemClass : ""}`}
-                  >
-                    <Building2 size={17} />
-                    <span className="text-sm font-medium">
-                      Department Analytics
-                    </span>
-                  </button>
-                )}
+                {expandedSections.analytics && (
+                  <div className="space-y-1 pl-4">
+                    {/* Department Analytics - Manager, HR, Admin */}
+                    {(isManager() || isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("department-analytics")}
+                        className={`${subItemClass} ${activeTab === "department-analytics" ? activeSubItemClass : ""}`}
+                      >
+                        <Building2 size={17} />
+                        <span className="text-sm font-medium">
+                          Department Analytics
+                        </span>
+                      </button>
+                    )}
 
-                {/* Workforce Trends - Manager, HR, CEO, Admin */}
-                {(isManager() || isHR() || isCEO() || isAdmin()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("workforce-trends")}
-                    className={`${subItemClass} ${activeTab === "workforce-trends" ? activeSubItemClass : ""}`}
-                  >
-                    <Zap size={17} />
-                    <span className="text-sm font-medium">
-                      Workforce Trends
-                    </span>
-                  </button>
+                    {/* Workforce Trends - Manager, HR, CEO, Admin */}
+                    {(isManager() || isHR() || isCEO() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("workforce-trends")}
+                        className={`${subItemClass} ${activeTab === "workforce-trends" ? activeSubItemClass : ""}`}
+                      >
+                        <Zap size={17} />
+                        <span className="text-sm font-medium">
+                          Workforce Trends
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
 
             {/* Settings - Admin only */}

@@ -71,45 +71,43 @@ export default function PersonalDashboard() {
           // fallback to mock
         }
 
-        if (!dData)
+        if (!dData) {
           dData = {
             pendingTasks: 3,
             inProgressTasks: 2,
             completedThisWeek: 12,
             upcomingDeadlines: [],
-            todayPerformance: null,
-            weeklyTrend: [],
+            todayPerformance: {
+              userId: "mock",
+              userName: "",
+              reportDate: today ?? "",
+              totalStandardMinutes: 480,
+              totalActualMinutes: 420,
+              totalTasks: 5,
+              efficiencyRatio: 1.14,
+              efficiencyLabel: "Xuất sắc",
+            },
+            weeklyTrend: [
+              { date: "2026-05-26", efficiencyRatio: 0.9, efficiencyLabel: "Đạt" },
+              { date: "2026-05-27", efficiencyRatio: 1.0, efficiencyLabel: "Tốt" },
+              { date: "2026-05-28", efficiencyRatio: 1.1, efficiencyLabel: "Tốt" },
+              { date: "2026-05-29", efficiencyRatio: 1.2, efficiencyLabel: "Xuất sắc" },
+              { date: "2026-05-30", efficiencyRatio: 0.8, efficiencyLabel: "Cần cải thiện" },
+              { date: "2026-05-31", efficiencyRatio: 0.95, efficiencyLabel: "Tốt" },
+              { date: today ?? "", efficiencyRatio: 1.14, efficiencyLabel: "Xuất sắc" },
+            ],
             burnoutInsight: null,
           };
+        }
 
-        dData.todayPerformance = {
-          userId: "mock",
-          userName: "",
-          reportDate: today ?? "",
-          totalStandardMinutes: 480,
-          totalActualMinutes: 420,
-          totalTasks: 5,
-          efficiencyRatio: 1.14,
-          efficiencyLabel: "Xuất sắc",
-        };
-
-        dData.weeklyTrend = [
-          { date: "2026-05-26", efficiencyRatio: 0.9, efficiencyLabel: "Đạt" },
-          { date: "2026-05-27", efficiencyRatio: 1.0, efficiencyLabel: "Tốt" },
-          { date: "2026-05-28", efficiencyRatio: 1.1, efficiencyLabel: "Tốt" },
-          { date: "2026-05-29", efficiencyRatio: 1.2, efficiencyLabel: "Xuất sắc" },
-          { date: "2026-05-30", efficiencyRatio: 0.8, efficiencyLabel: "Cần cải thiện" },
-          { date: "2026-05-31", efficiencyRatio: 0.95, efficiencyLabel: "Tốt" },
-          { date: today ?? "", efficiencyRatio: 1.14, efficiencyLabel: "Xuất sắc" },
-        ];
-
-        if (!bData)
+        if (!bData) {
           bData = {
             riskLevel: "LOW",
             riskScore: 25,
             triggerFactors: ["Khối lượng công việc ổn định"],
             detectedDate: today ?? "",
           };
+        }
 
         if (isMounted) {
           setDashboard(dData);

@@ -113,10 +113,17 @@ export function useTimeTracking() {
         if (s) {
           setSession(s);
           setElapsedSeconds(s.elapsedSeconds || 0);
+          const action = s.currentAction?.toUpperCase() || "";
           setIsRunning(
-            s.currentAction === "STARTED" || s.currentAction === "RESUMED",
+            action === "STARTED" ||
+            action === "RESUMED" ||
+            action === "START" ||
+            action === "RESUME"
           );
-          setIsPaused(s.currentAction === "PAUSED");
+          setIsPaused(
+            action === "PAUSED" ||
+            action === "PAUSE"
+          );
         }
       }
     } catch (err) {

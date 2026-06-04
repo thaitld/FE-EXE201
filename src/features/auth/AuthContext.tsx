@@ -91,6 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUser();
+    }
+  }, [isAuthenticated]);
+
   const refreshUser = async () => {
     try {
       const resp = await apiClient.get<ApiResponse<UserDto>>("/users/me");

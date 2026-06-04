@@ -53,9 +53,9 @@ export default function TaskDetail() {
   const [attachments, setAttachments] = useState<TaskAttachmentDto[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "comments" | "attachments">("details");
 
-  const fetchData = async () => {
+  const fetchData = async (isSilent = false) => {
     if (!taskId) return;
-    setIsLoading(true);
+    if (!isSilent) setIsLoading(true);
     setErrorMessage(null);
     try {
       const [taskRes, commentsRes, attachmentsRes] = await Promise.allSettled([
@@ -83,12 +83,12 @@ export default function TaskDetail() {
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Không thể tải chi tiết task.");
     } finally {
-      setIsLoading(false);
+      if (!isSilent) setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    void fetchData();
+    void fetchData(false);
   }, [taskId]);
 
   // ── Invalid ID ───────────────────────────────────────────────────────────
@@ -262,10 +262,10 @@ export default function TaskDetail() {
                 <TimeTracker
                   taskId={task.id}
                   status={task.status}
-                  onStopped={() => void fetchData()}
-                  onStarted={() => void fetchData()}
-                  onPaused={() => void fetchData()}
-                  onResumed={() => void fetchData()}
+                  onStopped={() => void fetchData(true)}
+                  onStarted={() => void fetchData(true)}
+                  onPaused={() => void fetchData(true)}
+                  onResumed={() => void fetchData(true)}
                 />
               </div>
             </div>

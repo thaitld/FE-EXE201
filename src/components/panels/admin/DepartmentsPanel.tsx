@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { apiClient, type ApiResponse, type CreateDepartmentDto, type DepartmentDto, type UpdateDepartmentDto } from '@/lib/api'
 import { Plus, RefreshCw, Search } from 'lucide-react'
+import { usePermission } from '@/features/auth/usePermission'
 
 export const DepartmentsPanel = () => {
+  const { isAdmin } = usePermission()
   const [departments, setDepartments] = useState<DepartmentDto[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -103,9 +105,11 @@ export const DepartmentsPanel = () => {
                 <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search departments" className="bg-transparent outline-none text-sm" />
               </div>
             </form>
-            <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">
-              <Plus size={16} /> Create
-            </button>
+            {isAdmin() && (
+              <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">
+                <Plus size={16} /> Create
+              </button>
+            )}
             <button onClick={load} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <RefreshCw size={14} /> Refresh
             </button>
@@ -123,12 +127,14 @@ export const DepartmentsPanel = () => {
                 <th className="px-6 py-3 text-xs font-semibold text-slate-500">Manager</th>
                 <th className="px-6 py-3 text-xs font-semibold text-slate-500">Teams</th>
                 <th className="px-6 py-3 text-xs font-semibold text-slate-500">Status</th>
-                <th className="px-6 py-3 text-xs font-semibold text-slate-500 text-right">Actions</th>
+                {isAdmin() && (
+                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 text-right">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-sm text-slate-500">Loading...</td></tr>
+                <tr><td colSpan={isAdmin() ? 6 : 5} className="px-6 py-8 text-sm text-slate-500">Loading...</td></tr>
               ) : filtered.length > 0 ? (
                 filtered.map((d) => (
                   <tr key={d.id} className="border-t border-slate-100">
@@ -137,16 +143,18 @@ export const DepartmentsPanel = () => {
                     <td className="px-6 py-4">{d.managerName ?? '-'}</td>
                     <td className="px-6 py-4">{d.teamCount}</td>
                     <td className="px-6 py-4">{d.isActive ? 'Active' : 'Inactive'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="inline-flex gap-2">
-                        <button onClick={() => openEdit(d)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">Edit</button>
-                        <button onClick={() => remove(d)} className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-700">Delete</button>
-                      </div>
-                    </td>
+                    {isAdmin() && (
+                      <td className="px-6 py-4 text-right">
+                        <div className="inline-flex gap-2">
+                          <button onClick={() => openEdit(d)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">Edit</button>
+                          <button onClick={() => remove(d)} className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-700">Delete</button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={6} className="px-6 py-8 text-sm text-slate-500">No departments found.</td></tr>
+                <tr><td colSpan={isAdmin() ? 6 : 5} className="px-6 py-8 text-sm text-slate-500">No departments found.</td></tr>
               )}
             </tbody>
           </table>

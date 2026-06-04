@@ -185,15 +185,28 @@ export interface SurveySubmitRequestDto {
   comment?: string;
 }
 
-export interface SurveyHistoryDto {
+export interface SurveyResponseDto {
   id: number;
-  userId: string;
   moraleScore: number;
   stressScore: number;
   comment: string | null;
-  submittedAt: string;
-  year: number;
-  month: number;
+  surveyMonth: number;
+  surveyYear: number;
+  monthLabel: string;
+  createdAt: string;
+  submittedAt?: string;
+}
+
+export interface SurveyHistoryDto {
+  responses: SurveyResponseDto[];
+  avgMoraleScore: number | null;
+  avgStressScore: number | null;
+  trend: {
+    moraleTrend: string;
+    stressTrend: string;
+    moraleChange: number;
+    stressChange: number;
+  } | null;
 }
 
 // ============================================================================
