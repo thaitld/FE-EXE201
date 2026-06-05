@@ -36,6 +36,10 @@ function AdminRoute({ route }: { route: string }) {
       return <Dashboard initialTab="task-detail" />;
     }
 
+    if (route.startsWith("#/admin/hr-report")) {
+      return <Dashboard initialTab="hr-report" />;
+    }
+
     if (route.startsWith("#/roles/admin/task-types")) {
       return <Dashboard initialTab="task-types" />;
     }

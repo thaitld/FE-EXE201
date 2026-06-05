@@ -22,6 +22,7 @@ import { WorkforceTrendsPanel } from "@/components/panels/admin/WorkforceTrendsP
 import { SettingsPanel } from "@/components/panels/admin/SettingsPanel";
 import DepartmentsPanel from "@/components/panels/admin/DepartmentsPanel";
 import ProfilePage from "@/pages/shared/Profile";
+import { HRReportPanel } from "@/components/panels/admin/HRReportPanel";
 
 import PersonalDashboard from "@/components/panels/employee/PersonalDashboard";
 import MyTasks from "@/components/panels/employee/MyTasks";
@@ -108,6 +109,10 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Settings",
     subtitle: "Manage dashboard preferences and system options.",
   },
+  "hr-report": {
+    title: "HR Report",
+    subtitle: "AI-generated company health and risk reports.",
+  },
   // Manager tabs
   "mgr-dashboard": {
     title: "Department Dashboard",
@@ -188,6 +193,8 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
       return <WorkforceTrendsPanel />;
     case "settings":
       return <SettingsPanel />;
+    case "hr-report":
+      return <HRReportPanel />;
     // Manager cases
     case "mgr-dashboard":
       return <DepartmentDashboardPanel />;

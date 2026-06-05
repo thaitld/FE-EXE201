@@ -263,69 +263,70 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
   return (
     <div className="space-y-6">
       {/* Controls visible when dashboard is loaded so user can change period or copy link */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Controls</p>
-            <h3 className="text-lg font-semibold text-slate-900">Period and scope</h3>
-          </div>
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</span>
-              <select
-                value={selectedDepartmentId ?? ''}
-                onChange={(e) => setSelectedDepartmentId(e.target.value ? Number(e.target.value) : null)}
-                className="min-w-56 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+      {!initialDashboard && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Controls</p>
+              <h3 className="text-lg font-semibold text-slate-900">Period and scope</h3>
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="space-y-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</span>
+                <select
+                  value={selectedDepartmentId ?? ''}
+                  onChange={(e) => setSelectedDepartmentId(e.target.value ? Number(e.target.value) : null)}
+                  className="min-w-56 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                >
+                  <option value="">Select department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Month</span>
+                <select
+                  value={month}
+                  onChange={(e) => setMonth(Number(e.target.value))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                >
+                  {MONTH_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Year</span>
+                <select
+                  value={year}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                >
+                  {yearRange.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => setRefreshKey((k) => k + 1)}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 
+                px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
-                <option value="">Select department</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Month</span>
-              <select
-                value={month}
-                onChange={(e) => setMonth(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
-              >
-                {MONTH_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Year</span>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
-              >
-                {yearRange.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              onClick={() => setRefreshKey((k) => k + 1)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 
-              px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              <RefreshCw size={14} />
-              Refresh
-            </button>
-            
+                <RefreshCw size={14} />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <MetricCard key={stat.label} label={stat.label} value={stat.value} hint={stat.hint} icon={stat.icon as any} iconClassName={stat.iconClassName} />

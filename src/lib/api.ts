@@ -775,3 +775,195 @@ export const markNotificationAsRead = (notificationId: number) =>
  */
 export const markAllNotificationsAsRead = () =>
   apiClient.patch<ApiResponse<void>>("/notifications/read-all", {});
+
+// ============================================================================
+// Phase 5: Analytics & AI Insights API Endpoints
+// ============================================================================
+
+export interface MonthlyKpiDto {
+  kpiYear: number;
+  kpiMonth: number;
+  monthLabel: string;
+  avgEfficiency: number | null;
+  avgMorale: number | null;
+  avgStress: number | null;
+  departmentId: number | null;
+  departmentName: string | null;
+}
+
+export interface KpiTrendDto {
+  months: MonthlyKpiDto[];
+  efficiencyTrend: number | null;
+  moraleTrend: number | null;
+}
+
+export interface SurveyAggregationDto {
+  surveyMonth: number;
+  surveyYear: number;
+  monthLabel: string;
+  departmentId: number | null;
+  departmentName: string | null;
+  avgMoraleScore: number;
+  avgStressScore: number;
+  responseCount: number;
+  totalEligible: number;
+  responseRate: number;
+  moraleDistribution: { score1: number; score2: number; score3: number; score4: number; score5: number };
+  stressDistribution: { score1: number; score2: number; score3: number; score4: number; score5: number };
+}
+
+export interface DepartmentInsightDto {
+  departmentId: number;
+  departmentName: string;
+  insightMonth: number;
+  insightYear: number;
+  insightText: string;
+  severity: string;
+  generatedAt: string;
+}
+
+export interface ApiBehavioralPatternDto {
+  id: number;
+  userId: string;
+  userName: string;
+  patternCode: string;
+  description: string;
+  detectedDate: string;
+  severity: string;
+}
+
+export interface BurnoutSignalDto {
+  id: number;
+  userId: string;
+  userName: string;
+  department: string | null;
+  team: string | null;
+  riskScore: number;
+  riskLevel: string;
+  triggerFactors: string[];
+  detectedDate: string;
+  isResolved: boolean;
+  createdAt: string;
+}
+
+export interface PerformanceRangeDto {
+  userId: string;
+  userName: string;
+  fromDate: string;
+  toDate: string;
+  avgEfficiencyRatio: number;
+  avgEfficiencyLabel: string;
+  totalStandardMinutes: number;
+  totalActualMinutes: number;
+  totalTasks: number;
+  dailyBreakdown: DailyPerformanceDto[];
+}
+
+export interface OrgHealthScoreDto {
+  score: number;
+  healthLevel: string;
+  prevMonthScore: number | null;
+  scoreChangePct: number | null;
+  avgEfficiency: number | null;
+  avgMorale: number | null;
+  avgStress: number | null;
+  totalHighBurnout: number;
+  totalMediumBurnout: number;
+  surveyResponseRate: number;
+  totalActiveEmployees: number;
+}
+
+export interface DeptSentimentDto {
+  departmentId?: number;
+  departmentName: string;
+  avgMorale: number;
+  avgStress: number;
+  highRiskBurnoutCount?: number;
+}
+
+export interface SurveyInsightDto {
+  moraleScoreAverage: number;
+  stressScoreAverage: number;
+}
+
+export interface InterventionCaseDto {
+  userId: string;
+  fullName: string;
+  departmentName: string;
+  priority: string;
+  reasons: string[];
+  recommendedAction: string;
+}
+
+export interface FlightRiskDeptDto {
+  departmentName: string;
+  atRiskCount: number;
+  riskDrivers: string[];
+}
+
+export interface HrReportDto {
+  year: number;
+  month: number;
+  monthLabel: string;
+  generatedAt: string;
+  orgHealth: OrgHealthScoreDto;
+  departmentSentiment: DeptSentimentDto[];
+  surveyInsights: SurveyInsightDto;
+  interventionQueue: InterventionCaseDto[];
+  flightRiskDepartments: FlightRiskDeptDto[];
+  aiReport: string;
+}
+
+export const getCompanyKpiTrend = (months: number = 6) =>
+  apiClient.get<ApiResponse<KpiTrendDto>>("/kpi/company", { params: { months } });
+
+export const getDepartmentKpiTrend = (id: number, months: number = 6) =>
+  apiClient.get<ApiResponse<KpiTrendDto>>(`/kpi/department/${id}`, { params: { months } });
+
+export const getKpiTrendAnalysis = () =>
+  apiClient.get<ApiResponse<unknown>>("/kpi/trend-analysis");
+
+export const getSurveyAggregationTrend = (months: number = 6, departmentId?: number) =>
+  apiClient.get<ApiResponse<SurveyAggregationDto[]>>("/survey/aggregation/trend", {
+    params: { months, departmentId },
+  });
+
+export const getSurveyAggregationDepartment = (departmentId: number, year?: number, month?: number) =>
+  apiClient.get<ApiResponse<SurveyAggregationDto>>(`/survey/aggregation/department/${departmentId}`, {
+    params: { year, month },
+  });
+
+export const getDepartmentInsights = (id: number, year?: number, month?: number) =>
+  apiClient.get<ApiResponse<DepartmentInsightDto[]>>(`/insights/department/${id}`, {
+    params: { year, month },
+  });
+
+export const getLatestDepartmentInsight = (id: number) =>
+  apiClient.get<ApiResponse<DepartmentInsightDto | null>>(`/insights/department/${id}/latest`);
+
+export const getLatestCompanyInsight = () =>
+  apiClient.get<ApiResponse<DepartmentInsightDto | null>>("/insights/company/latest");
+
+export const getBurnoutPatterns = (params?: { userId?: string; severity?: string; from?: string; to?: string }) =>
+  apiClient.get<ApiResponse<ApiBehavioralPatternDto[]>>("/burnout/patterns", { params });
+
+export const getBurnoutPatternsByUser = (userId: string) =>
+  apiClient.get<ApiResponse<ApiBehavioralPatternDto[]>>(`/burnout/patterns/user/${userId}`);
+
+export const getBurnoutPatternsByDepartment = (deptId: number, from?: string, to?: string) =>
+  apiClient.get<ApiResponse<ApiBehavioralPatternDto[]>>(`/burnout/patterns/department/${deptId}`, {
+    params: { from, to },
+  });
+
+export const getBurnoutSignals = (params?: { riskLevel?: string; isResolved?: boolean; departmentId?: number; page?: number; pageSize?: number }) =>
+  apiClient.get<ApiResponse<{ items: BurnoutSignalDto[]; totalCount: number }>>("/burnout/signals", { params });
+
+export const getPersonalPerformanceRange = (from: string, to: string) =>
+  apiClient.get<ApiResponse<PerformanceRangeDto>>("/performance/me/range", { params: { from, to } });
+
+export const getDepartmentPerformanceRange = (deptId: number, from?: string, to?: string) =>
+  apiClient.get<ApiResponse<PerformanceRangeDto>>(`/performance/department/${deptId}`, { params: { from, to } });
+
+export const getHrReport = (year?: number, month?: number) =>
+  apiClient.get<ApiResponse<HrReportDto>>("/hr-report", { params: { year, month } });
+
