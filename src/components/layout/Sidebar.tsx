@@ -65,6 +65,8 @@ export default function Sidebar({
   const handleTabClick = (tab: string) => {
     if (tab === "user-management") {
       window.location.hash = "#/admin/user-management";
+    } else if (tab === "hr-report") {
+      window.location.hash = "#/admin/hr-report";
     } else if (tab === "profile") {
       window.location.hash = "#/admin/profile";
     } else {
@@ -345,6 +347,16 @@ export default function Sidebar({
                     AI Recommendations
                   </span>
                 </button>
+                {(isCEO() || isHR() || isAdmin()) && (
+                  <button
+                    type="button"
+                    onClick={() => handleTabClick("hr-report")}
+                    className={`${subItemClass} ${activeTab === "hr-report" ? activeSubItemClass : ""}`}
+                  >
+                    <Sparkles size={17} className="text-violet-500" />
+                    <span className="text-sm font-medium">HR Report</span>
+                  </button>
+                )}
               </div>
             )}
 

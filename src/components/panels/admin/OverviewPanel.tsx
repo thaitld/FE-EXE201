@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { CalendarDays, ChevronDown, RefreshCw, Building2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -41,14 +41,15 @@ const MONTH_OPTIONS = [
   { value: 12, label: 'Dec' },
 ]
 
-const getDefaultMode = (roleName?: string): DashboardMode => {
-  switch (roleName) {
+const getDefaultMode = (roleName?: string | null): DashboardMode => {
+  const normalized = roleName?.toUpperCase()
+  switch (normalized) {
     case 'CEO':
       return 'company'
-    case 'Manager':
+    case 'MANAGER':
     case 'HR':
       return 'department'
-    case 'Admin':
+    case 'ADMIN':
       return 'company'
     default:
       return 'personal'
@@ -84,16 +85,16 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 }
 
 export const OverviewPanel = ({ initialMode }: { initialMode?: DashboardMode } = {}) => {
-  const { user } = useAuth()
+  const { user, role } = useAuth()
   const availableModes = useMemo(() => {
-    const role = user?.roleName
-    if (role === 'Admin') return ['personal', 'department', 'company'] as DashboardMode[]
-    if (role === 'CEO') return ['personal', 'company'] as DashboardMode[]
-    if (role === 'Manager' || role === 'HR') return ['personal', 'department'] as DashboardMode[]
+    const roleName = role?.toUpperCase()
+    if (roleName === 'ADMIN') return ['personal', 'department', 'company'] as DashboardMode[]
+    if (roleName === 'CEO') return ['personal', 'company'] as DashboardMode[]
+    if (roleName === 'MANAGER' || roleName === 'HR') return ['personal', 'department'] as DashboardMode[]
     return ['personal'] as DashboardMode[]
-  }, [user?.roleName])
+  }, [role])
 
-  const [mode, setMode] = useState<DashboardMode>(() => initialMode ?? getDefaultMode(user?.roleName))
+  const [mode, setMode] = useState<DashboardMode>(() => initialMode ?? getDefaultMode(role))
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -108,11 +109,17 @@ export const OverviewPanel = ({ initialMode }: { initialMode?: DashboardMode } =
   const [month, setMonth] = useState(now.getMonth() + 1)
 
   useEffect(() => {
-    const preferred = getDefaultMode(user?.roleName)
+    if (initialMode) {
+      setMode(initialMode)
+    }
+  }, [initialMode])
+
+  useEffect(() => {
+    const preferred = getDefaultMode(role)
     if (!availableModes.includes(mode)) {
       setMode(preferred)
     }
-  }, [availableModes, mode, user?.roleName])
+  }, [availableModes, mode, role])
 
   const loadDepartments = useCallback(async () => {
     if (departments.length > 0 || loadingDepartments) return
