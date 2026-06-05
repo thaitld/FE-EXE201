@@ -137,7 +137,7 @@ export default function Survey() {
             history.map((h) => (
               <div key={h.id} className="rounded-lg bg-gray-50 p-3">
                 <div className="text-sm text-gray-700">
-                  {new Date(h.submittedAt).toLocaleString()}
+                  {new Date(h.submittedAt || h.createdAt).toLocaleString()}
                 </div>
                 <div className="font-semibold">
                   Tinh thần: {h.moraleScore} — Căng thẳng: {h.stressScore}

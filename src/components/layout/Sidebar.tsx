@@ -324,7 +324,7 @@ export default function Sidebar({
               </button>
             )}
 
-            {(isAdmin() || isCEO() || isManager()) && (
+            {(isAdmin() || isCEO() || isManager() || isHR()) && (
               <>
                 <button
                   type="button"
@@ -341,7 +341,7 @@ export default function Sidebar({
 
                 {expandedSections.ai && (
                   <div className="space-y-1 pl-4">
-                    {(isAdmin() || isCEO()) && (
+                    {(isAdmin() || isCEO() || isHR()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("ai-insights")}
@@ -378,6 +378,17 @@ export default function Sidebar({
                       >
                         <FileText size={17} />
                         <span className="text-sm font-medium">Báo cáo AI</span>
+                      </button>
+                    )}
+                    {/* HR AI Report - Phase 5 */}
+                    {isHR() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("hr-report")}
+                        className={`${subItemClass} ${activeTab === "hr-report" ? activeSubItemClass : ""}`}
+                      >
+                        <FileText size={17} />
+                        <span className="text-sm font-medium">Báo cáo HR</span>
                       </button>
                     )}
                   </div>

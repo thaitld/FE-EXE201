@@ -1192,3 +1192,182 @@ export const getSurveyResponseRate = (year: number, month: number) =>
     params: { year, month },
   });
 
+// ============================================================================
+// Phase 5: HR / Analytics & AI Insights DTOs & API Endpoints
+// ============================================================================
+
+export interface MonthlyKpiDto {
+  kpiYear: number;
+  kpiMonth: number;
+  monthLabel: string;
+  avgEfficiency: number | null;
+  avgMorale: number | null;
+  avgStress: number | null;
+  departmentId: number | null;
+  departmentName: string | null;
+}
+
+export interface KpiTrendDto {
+  months: MonthlyKpiDto[];
+  efficiencyTrend: number | null;
+  moraleTrend: number | null;
+}
+
+export interface DepartmentInsightDto {
+  departmentId: number;
+  departmentName: string;
+  insightMonth: number;
+  insightYear: number;
+  insightText: string;
+  severity: string; // "LOW" | "MEDIUM" | "HIGH"
+  generatedAt: string;
+}
+
+export interface OrgHealthScoreDto {
+  score: number;
+  healthLevel: string; // "HEALTHY" | "CAUTION" | "CRITICAL"
+  prevMonthScore: number | null;
+  scoreChangePct: number | null;
+  avgEfficiency: number | null;
+  avgMorale: number | null;
+  avgStress: number | null;
+  totalHighBurnout: number;
+  totalMediumBurnout: number;
+  surveyResponseRate: number;
+  totalActiveEmployees: number;
+}
+
+export interface DeptSentimentDto {
+  departmentId: number;
+  departmentName: string;
+  sentimentStatus: string; // "GREEN" | "YELLOW" | "RED"
+  avgMorale: number | null;
+  avgStress: number | null;
+  avgEfficiency: number | null;
+  totalEmployees: number;
+  surveyResponseCount: number;
+  highBurnoutCount: number;
+  behavioralPatternCount: number;
+}
+
+export interface SurveyInsightDto {
+  totalResponses: number;
+  totalEmployees: number;
+  responseRatePct: number;
+  avgMorale: number;
+  avgStress: number;
+  moraleChangePct: number | null;
+  stressChangePct: number | null;
+  lowMoraleCount: number;
+  highStressCount: number;
+}
+
+export interface InterventionCaseDto {
+  userId: string;
+  fullName: string;
+  departmentName: string;
+  priority: string; // "HIGH" | "MEDIUM"
+  reasons: string[];
+  recommendedAction: string;
+}
+
+export interface FlightRiskDeptDto {
+  departmentName: string;
+  atRiskCount: number;
+  riskDrivers: string[];
+}
+
+export interface HrReportDto {
+  year: number;
+  month: number;
+  monthLabel: string;
+  generatedAt: string;
+  orgHealth: OrgHealthScoreDto;
+  departmentSentiment: DeptSentimentDto[];
+  surveyInsights: SurveyInsightDto;
+  interventionQueue: InterventionCaseDto[];
+  flightRiskDepartments: FlightRiskDeptDto[];
+  aiReport: string;
+}
+
+/**
+ * Generate monthly HR report (calls Gemini — ~30s timeout)
+ * GET /api/hr-report?year=&month=
+ */
+export const getHrReport = (year?: number, month?: number) =>
+  apiClient.get<ApiResponse<HrReportDto>>("/hr-report", {
+    params: { year, month },
+    timeout: 60000, // 60s for AI call
+  });
+
+/**
+ * Get company KPI trends
+ * GET /api/kpi/company?months=6
+ */
+export const getKpiTrendsCompany = (months = 6) =>
+  apiClient.get<ApiResponse<KpiTrendDto>>("/kpi/company", {
+    params: { months },
+  });
+
+/**
+ * Get department KPI trends
+ * GET /api/kpi/department/{id}?months=6
+ */
+export const getKpiTrendsDepartment = (deptId: number, months = 6) =>
+  apiClient.get<ApiResponse<KpiTrendDto>>(`/kpi/department/${deptId}`, {
+    params: { months },
+  });
+
+/**
+ * Get survey aggregation trend
+ * GET /api/survey/aggregation/trend?months=6&departmentId=
+ */
+export const getSurveyAggregationTrend = (months = 6, departmentId?: number) =>
+  apiClient.get<ApiResponse<SurveyAggregationDto[]>>("/survey/aggregation/trend", {
+    params: { months, departmentId },
+  });
+
+/**
+ * Get latest company insight
+ * GET /api/insights/company/latest
+ */
+export const getLatestCompanyInsight = () =>
+  apiClient.get<ApiResponse<DepartmentInsightDto | null>>("/insights/company/latest");
+
+/**
+ * Get latest department insight
+ * GET /api/insights/department/{deptId}/latest
+ */
+export const getLatestDeptInsight = (deptId: number) =>
+  apiClient.get<ApiResponse<DepartmentInsightDto | null>>(`/insights/department/${deptId}/latest`);
+
+/**
+ * Get department insights list
+ * GET /api/insights/department/{deptId}?year=&month=
+ */
+export const getDeptInsights = (deptId: number, year?: number, month?: number) =>
+  apiClient.get<ApiResponse<DepartmentInsightDto[]>>(`/insights/department/${deptId}`, {
+    params: { year, month },
+  });
+
+/**
+ * Get burnout patterns (Manager/HR/CEO view)
+ * GET /api/burnout/patterns?userId=&severity=&from=&to=
+ */
+export const getBurnoutPatterns = (params?: {
+  userId?: string;
+  severity?: string;
+  from?: string;
+  to?: string;
+}) =>
+  apiClient.get<ApiResponse<BehavioralPatternDto[]>>("/burnout/patterns", { params });
+
+/**
+ * Get personal performance range breakdown
+ * GET /api/performance/me/range?from=&to=
+ */
+export const getMyPerformanceRange = (from: string, to: string) =>
+  apiClient.get<ApiResponse<any>>("/performance/me/range", {
+    params: { from, to },
+  });
+

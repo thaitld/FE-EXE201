@@ -27,6 +27,7 @@ import { TaskManagementPanel } from "@/components/panels/admin/TaskManagementPan
 import { BurnoutMonitorPanel } from "@/components/panels/admin/BurnoutMonitorPanel";
 import { TeamPerformancePanel } from "@/components/panels/admin/TeamPerformancePanel";
 import { ManagerReportPanel } from "@/components/panels/admin/ManagerReportPanel";
+import { HrReportPanel } from "@/components/panels/admin/HrReportPanel";
 import ProfilePage from "@/pages/shared/Profile";
 
 import PersonalDashboard from "@/components/panels/employee/PersonalDashboard";
@@ -121,6 +122,10 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Báo cáo AI",
     subtitle: "Báo cáo hàng tuần do Gemini AI tổng hợp.",
   },
+  "hr-report": {
+    title: "Báo cáo HR",
+    subtitle: "Báo cáo sức khỏe tổ chức hàng tháng do Gemini AI tổng hợp.",
+  },
 };
 
 // Panel component map - maps activeTab to the corresponding panel component
@@ -177,6 +182,8 @@ const getPanelComponent = (
       return <BurnoutMonitorPanel />;
     case "manager-report":
       return <ManagerReportPanel />;
+    case "hr-report":
+      return <HrReportPanel />;
     default:
       if (isEmployee) return <PersonalDashboard />;
       if (isManager) return <ManagerDashboardPanel />;
