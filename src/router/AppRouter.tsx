@@ -30,6 +30,10 @@ function AdminRoute({ route }: { route: string }) {
       return <Dashboard initialTab="task-detail" />;
     }
 
+    if (route.startsWith("#/admin/meetings")) {
+      return <Dashboard initialTab="meetings" />;
+    }
+
     return <Dashboard />;
   })();
 
@@ -62,6 +66,11 @@ export default function AppRouter() {
 
   if (pathname.startsWith("/auth/callback")) {
     return <GoogleAuthCallback />;
+  }
+
+  if (pathname.startsWith("/settings/integrations")) {
+    window.location.href = `/#/admin/meetings${window.location.search}`;
+    return null;
   }
 
   if (isAdminRoute(route)) {

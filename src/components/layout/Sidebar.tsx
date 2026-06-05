@@ -23,6 +23,7 @@ import {
   ClipboardList,
   FileText,
   ShieldAlert,
+  CalendarDays,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -116,8 +117,8 @@ export default function Sidebar({
               <span className="text-sm font-semibold">Dashboard</span>
             </button>
 
-            {/* My Tasks - visible to Employees */}
-            {isEmployee() && (
+            {/* My Tasks - visible to Employee, HR, Manager, Admin */}
+            {(isEmployee() || isHR() || isManager() || isAdmin()) && (
               <button
                 type="button"
                 onClick={() => handleTabClick("my-tasks")}
@@ -129,6 +130,18 @@ export default function Sidebar({
                 <span className="text-sm font-semibold">My Tasks</span>
               </button>
             )}
+
+            {/* Meetings - visible to all authenticated users */}
+            <button
+              type="button"
+              onClick={() => handleTabClick("meetings")}
+              className={`${topLevelItemClass} ${
+                activeTab === "meetings" ? activeTopLevelClass : ""
+              }`}
+            >
+              <CalendarDays size={18} />
+              <span className="text-sm font-semibold">Meetings</span>
+            </button>
 
             {/* People Section */}
             {(isManager() || isHR() || isAdmin()) ? (
@@ -170,6 +183,18 @@ export default function Sidebar({
                       </button>
                     )}
 
+                    {/* Task Types - Manager, HR, Admin */}
+                    {(isManager() || isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("task-types")}
+                        className={`${subItemClass} ${activeTab === "task-types" ? activeSubItemClass : ""}`}
+                      >
+                        <ClipboardList size={17} />
+                        <span className="text-sm font-medium">Task Types</span>
+                      </button>
+                    )}
+
                     {/* Users - Admin only */}
                     {isAdmin() && (
                       <button
@@ -194,8 +219,8 @@ export default function Sidebar({
                       </button>
                     )}
 
-                    {/* Workload - Manager, HR, Admin */}
-                    {(isManager() || isHR() || isAdmin()) && (
+                    {/* Workload - Manager, Admin */}
+                    {(isManager() || isAdmin()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("workload")}
@@ -351,24 +376,30 @@ export default function Sidebar({
                         <span className="text-sm font-medium">AI Insights</span>
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => handleTabClick("ai-predictions")}
-                      className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
-                    >
-                      <CornerDownRight size={17} />
-                      <span className="text-sm font-medium">AI Predictions</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleTabClick("ai-recommendations")}
-                      className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
-                    >
-                      <Compass size={17} />
-                      <span className="text-sm font-medium">
-                        AI Recommendations
-                      </span>
-                    </button>
+
+                    {/* Predictions & Recommendations - visible to Admin, CEO, Manager (hidden for HR) */}
+                    {(isAdmin() || isCEO() || isManager()) && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleTabClick("ai-predictions")}
+                          className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
+                        >
+                          <CornerDownRight size={17} />
+                          <span className="text-sm font-medium">AI Predictions</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleTabClick("ai-recommendations")}
+                          className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
+                        >
+                          <Compass size={17} />
+                          <span className="text-sm font-medium">
+                            AI Recommendations
+                          </span>
+                        </button>
+                      </>
+                    )}
                     {/* Manager AI Report - Phase 4 */}
                     {isManager() && (
                       <button
@@ -413,8 +444,9 @@ export default function Sidebar({
 
                 {expandedSections.analytics && (
                   <div className="space-y-1 pl-4">
-                    {/* Department Analytics - Manager, HR, Admin */}
-                    {(isManager() || isHR() || isAdmin()) && (
+
+                    {/* Department Analytics - Manager, Admin */}
+                    {(isManager() || isAdmin()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("department-analytics")}

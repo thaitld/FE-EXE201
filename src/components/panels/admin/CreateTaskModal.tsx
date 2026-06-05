@@ -271,10 +271,10 @@ export function CreateTaskModal({ onClose, onCreated, defaultTeamId }: Props) {
                 </div>
               )}
               {/* Standard Time preview */}
-              {selectedType?.activeStandardTime && (
+              {selectedType?.hasActiveStandardTime && selectedType.currentStandardTime !== null && (
                 <div className="mt-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
                   <span className="font-semibold">Thời gian chuẩn:</span>{" "}
-                  {selectedType.activeStandardTime.standardTime.toFixed(0)} phút
+                  {selectedType.currentStandardTime.toFixed(0)} phút
                   {selectedType.requiresApproval && (
                     <span className="ml-3 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">
                       Cần duyệt

@@ -28,6 +28,8 @@ import { BurnoutMonitorPanel } from "@/components/panels/admin/BurnoutMonitorPan
 import { TeamPerformancePanel } from "@/components/panels/admin/TeamPerformancePanel";
 import { ManagerReportPanel } from "@/components/panels/admin/ManagerReportPanel";
 import { HrReportPanel } from "@/components/panels/admin/HrReportPanel";
+import { MeetingsPanel } from "@/components/panels/admin/MeetingsPanel";
+import { TaskTypesPanel } from "@/components/panels/admin/TaskTypesPanel";
 import ProfilePage from "@/pages/shared/Profile";
 
 import PersonalDashboard from "@/components/panels/employee/PersonalDashboard";
@@ -126,6 +128,14 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Báo cáo HR",
     subtitle: "Báo cáo sức khỏe tổ chức hàng tháng do Gemini AI tổng hợp.",
   },
+  meetings: {
+    title: "Cuộc họp & Lịch trình",
+    subtitle: "Quản lý lịch họp cá nhân, phòng ban và đồng bộ Google Calendar.",
+  },
+  "task-types": {
+    title: "Task Types & Định mức",
+    subtitle: "Quản lý loại công việc và thiết lập định mức thời gian chuẩn IE.",
+  },
 };
 
 // Panel component map - maps activeTab to the corresponding panel component
@@ -184,6 +194,10 @@ const getPanelComponent = (
       return <ManagerReportPanel />;
     case "hr-report":
       return <HrReportPanel />;
+    case "meetings":
+      return <MeetingsPanel />;
+    case "task-types":
+      return <TaskTypesPanel />;
     default:
       if (isEmployee) return <PersonalDashboard />;
       if (isManager) return <ManagerDashboardPanel />;
@@ -220,7 +234,8 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
     if (
       activeTab !== "task-detail" &&
       activeTab !== "user-management" &&
-      activeTab !== "profile"
+      activeTab !== "profile" &&
+      activeTab !== "meetings"
     ) {
       if (hash.startsWith("#/admin/") && hash !== "#/admin") {
         window.location.hash = "#/admin";

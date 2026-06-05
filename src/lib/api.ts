@@ -657,23 +657,28 @@ export interface UpdateWorkScheduleDto {
 export interface StandardTimeDto {
   id: number;
   taskTypeId: number;
+  taskTypeCode: string;
+  taskTypeName: string;
   observedTime: number;
   ratingFactor: number;
   pfdFactor: number;
-  normalTime: number;
-  standardTime: number;
-  isActive: boolean;
+  standardTime: number | null;
   version: number;
+  isActive: boolean;
+  createdAt?: string;
 }
 
 export interface TaskTypeDto {
   id: number;
   code: string;
   name: string;
+  description?: string;
   category: string | null;
-  requiresApproval: boolean;
   isActive: boolean;
-  activeStandardTime: StandardTimeDto | null;
+  hasActiveStandardTime: boolean;
+  currentStandardTime: number | null;
+  createdAt?: string;
+  requiresApproval?: boolean;
 }
 
 export interface CreateTaskInstanceDto {
@@ -1370,4 +1375,133 @@ export const getMyPerformanceRange = (from: string, to: string) =>
   apiClient.get<ApiResponse<any>>("/performance/me/range", {
     params: { from, to },
   });
+
+// ── Meetings & Google Calendar APIs ──────────────────────────────────────────
+
+export interface CreateMeetingDto {
+  title: string;
+  description?: string;
+  startTime: string; // ISO string
+  endTime: string; // ISO string
+  location?: string;
+  departmentId?: number;
+  teamId?: number;
+  participantUserIds: string[];
+}
+
+export interface MeetingParticipantDto {
+  userId: string;
+  fullName: string;
+  email: string;
+  roleName: string;
+  status: string; // "PENDING" | "ACCEPTED" | "DECLINED"
+}
+
+export interface MeetingDto {
+  id: number;
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  meetingLink?: string;
+  departmentId?: number;
+  departmentName?: string;
+  teamId?: number;
+  teamName?: string;
+  organizerId: string;
+  organizerName: string;
+  participantCount: number;
+  participants?: MeetingParticipantDto[];
+}
+
+export interface MeetingLoadDto {
+  userId: string;
+  userName: string;
+  weekStart: string;
+  totalMeetingMinutes: number;
+  workingMinutesPerWeek: number;
+  meetingLoadRatio: number;
+  isOverloaded: boolean;
+  loadLabel: string;
+  meetings: MeetingDto[];
+}
+
+export const getMeetings = (from: string, to: string, userId?: string) =>
+  apiClient.get<ApiResponse<MeetingDto[]>>("/meetings", {
+    params: { from, to, userId },
+  });
+
+export const getMeetingById = (id: number) =>
+  apiClient.get<ApiResponse<MeetingDto>>(`/meetings/${id}`);
+
+export const getMyMeetings = (from: string, to: string) =>
+  apiClient.get<ApiResponse<MeetingDto[]>>("/meetings/me", {
+    params: { from, to },
+  });
+
+export const getMyMeetingLoad = (week?: string) =>
+  apiClient.get<ApiResponse<MeetingLoadDto>>("/meetings/me/load", {
+    params: { week },
+  });
+
+export const getDepartmentMeetings = (deptId: number, from: string, to: string) =>
+  apiClient.get<ApiResponse<MeetingDto[]>>(`/meetings/department/${deptId}`, {
+    params: { from, to },
+  });
+
+export const createMeeting = (dto: CreateMeetingDto) =>
+  apiClient.post<ApiResponse<MeetingDto>>("/meetings", dto);
+
+export interface GoogleAuthUrlDto {
+  authUrl: string;
+}
+
+export const getGoogleCalendarAuthUrl = () =>
+  apiClient.get<ApiResponse<GoogleAuthUrlDto>>("/integrations/google-calendar/auth-url");
+
+export const getGoogleCalendarStatus = () =>
+  apiClient.get<ApiResponse<{ isConnected: boolean; email?: string }>>("/integrations/google-calendar/status");
+
+export const disconnectGoogleCalendar = () =>
+  apiClient.delete<ApiResponse<null>>("/integrations/google-calendar/disconnect");
+
+export const syncGoogleCalendar = () =>
+  apiClient.post<ApiResponse<null>>("/integrations/google-calendar/sync");
+
+// ── TaskType & StandardTime Management APIs ──────────────────────────────────
+
+export interface CreateTaskTypeDto {
+  code: string;
+  name: string;
+  category?: string;
+}
+
+export interface UpdateTaskTypeDto {
+  name: string;
+  category?: string;
+  isActive?: boolean;
+}
+
+export interface CreateStandardTimeDto {
+  observedTime: number; // minutes
+  ratingFactor: number; // 0.8 | 1.0 | 1.2
+  pfdFactor: number; // default 0.15
+}
+
+export const createTaskType = (dto: CreateTaskTypeDto) =>
+  apiClient.post<ApiResponse<TaskTypeDto>>("/task-types", dto);
+
+export const updateTaskType = (id: number, dto: UpdateTaskTypeDto) =>
+  apiClient.put<ApiResponse<TaskTypeDto>>(`/task-types/${id}`, dto);
+
+export const deactivateTaskType = (id: number) =>
+  apiClient.patch<ApiResponse<null>>(`/task-types/${id}/deactivate`);
+
+export const getStandardTimes = (taskTypeId: number) =>
+  apiClient.get<ApiResponse<StandardTimeDto[]>>(`/task-types/${taskTypeId}/standard-times`);
+
+export const createStandardTime = (taskTypeId: number, dto: CreateStandardTimeDto) =>
+  apiClient.post<ApiResponse<StandardTimeDto>>(`/task-types/${taskTypeId}/standard-times`, dto);
+
 
