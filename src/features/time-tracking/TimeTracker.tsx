@@ -33,13 +33,9 @@ export default function TimeTracker({
   } = useTimeTracking(taskId);
 
   const [error, setError] = useState<string | null>(null);
-  const [isStopModalOpen, setIsStopModalOpen] = useState(false);
-  const [stopNote, setStopNote] = useState("");
-
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopNote, setStopNote] = useState("");
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToast({ text, type });
