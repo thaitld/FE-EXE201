@@ -57,6 +57,18 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor: extract meaningful error message from ApiResponse body
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const backendMessage = error?.response?.data?.message;
+    if (backendMessage) {
+      error.message = backendMessage;
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface ApiResponse<T> {
   succeeded: boolean;
   message: string | null;
@@ -986,7 +998,7 @@ export const getLatestDepartmentInsight = (id: number) =>
   apiClient.get<ApiResponse<DepartmentInsightDto | null>>(`/insights/department/${id}/latest`);
 
 export const getLatestCompanyInsight = () =>
-  apiClient.get<ApiResponse<DepartmentInsightDto | null>>("/insights/company/latest");
+  apiClient.get<ApiResponse<DepartmentInsightDto[]>>("/insights/company/latest");
 
 export const getBurnoutPatterns = (params?: { userId?: string; severity?: string; from?: string; to?: string }) =>
   apiClient.get<ApiResponse<ApiBehavioralPatternDto[]>>("/burnout/patterns", { params });

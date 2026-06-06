@@ -11,6 +11,8 @@ import {
   Settings,
   X,
   ChevronDown,
+  CalendarDays,
+  Sparkles,
 } from 'lucide-react'
 
 interface ManagerSidebarProps {
@@ -89,6 +91,16 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => { }, act
             <button type="button" onClick={() => onTabChange('burnout')} className={`${topLevelItemClass} ${activeTab === 'burnout' ? activeTopLevelClass : ''}`}>
               <Activity size={18} />
               <span className="text-sm font-semibold">Burnout Monitor</span>
+            </button>
+
+            <button type="button" onClick={() => onTabChange('survey-analytics')} className={`${topLevelItemClass} ${activeTab === 'survey-analytics' ? activeTopLevelClass : ''}`}>
+              <Sparkles size={18} />
+              <span className="text-sm font-semibold">Survey Analytics</span>
+            </button>
+
+            <button type="button" onClick={() => onTabChange('meetings')} className={`${topLevelItemClass} ${activeTab === 'meetings' ? activeTopLevelClass : ''}`}>
+              <CalendarDays size={18} />
+              <span className="text-sm font-semibold">Meetings</span>
             </button>
 
             <button type="button" onClick={() => onTabChange('performance')} className={`${topLevelItemClass} ${activeTab === 'performance' ? activeTopLevelClass : ''}`}>

@@ -22,6 +22,7 @@ import {
 
 // ── Markdown Renderer ────────────────────────────────────────────────────────
 function renderMarkdown(md: string): React.ReactNode {
+  if (!md) return null;
   const lines = md.split("\n");
   const elements: React.ReactNode[] = [];
   let key = 0;
@@ -107,7 +108,7 @@ export const AIInsightsPanel = () => {
   const [departments, setDepartments] = useState<DepartmentDto[]>([]);
   const [loadingDepts, setLoadingDepts] = useState(false);
 
-  const [insight, setInsight] = useState<DepartmentInsightDto | null>(null);
+  const [insight, setInsight] = useState<DepartmentInsightDto | DepartmentInsightDto[] | null>(null);
   const [history, setHistory] = useState<DepartmentInsightDto[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -166,7 +167,8 @@ export const AIInsightsPanel = () => {
       const res = await getDeptInsights(Number(selectedDeptId));
       if (res.data.succeeded && res.data.data) {
         // Filter out the latest one from history
-        const filteredHistory = res.data.data.filter((h: DepartmentInsightDto) => h.generatedAt !== insight?.generatedAt);
+        const currentGeneratedAt = insight && !Array.isArray(insight) ? insight.generatedAt : undefined;
+        const filteredHistory = res.data.data.filter((h: DepartmentInsightDto) => h.generatedAt !== currentGeneratedAt);
         setHistory(filteredHistory);
         setShowHistory(true);
       }
@@ -282,7 +284,50 @@ export const AIInsightsPanel = () => {
       {/* Insight Content */}
       {!isLoading && !error && (
         <div className="space-y-6 animate-fadeIn">
-          {insight ? (
+          {Array.isArray(insight) ? (
+            insight.length > 0 ? (
+              <div className="space-y-6">
+                {insight.map((item, idx) => (
+                  <div key={idx} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div className="bg-gradient-to-r from-blue-50/50 to-white px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Sparkles size={18} className="text-blue-600" />
+                          <h4 className="font-bold text-slate-900">
+                            Phòng {item.departmentName}
+                          </h4>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-400">
+                          Phát hiện lúc: {item.generatedAt ? new Date(item.generatedAt).toLocaleString("vi-VN") : "—"}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-slate-500">
+                          Kỳ phân tích: <strong>Tháng {item.insightMonth}/{item.insightYear}</strong>
+                        </span>
+                        <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase ${getSeverityBadgeClass(item.severity)}`}>
+                          Rủi ro: {item.severity}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-8">
+                      <div className="prose max-w-none">
+                        {renderMarkdown(item.insightText)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-20 text-slate-400">
+                <Info size={40} className="mb-4 opacity-30 text-blue-500" />
+                <p className="text-base font-semibold text-slate-900">Chưa có insight tháng này</p>
+                <p className="text-sm text-slate-400 mt-1">Hệ thống AI chưa chạy phân tích định kỳ hoặc chưa có dữ liệu tương thích.</p>
+              </div>
+            )
+          ) : insight ? (
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="bg-gradient-to-r from-blue-50/50 to-white px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -293,7 +338,7 @@ export const AIInsightsPanel = () => {
                     </h4>
                   </div>
                   <p className="mt-1 text-xs text-slate-400">
-                    Phát hiện lúc: {new Date(insight.generatedAt).toLocaleString("vi-VN")}
+                    Phát hiện lúc: {insight.generatedAt ? new Date(insight.generatedAt).toLocaleString("vi-VN") : "—"}
                   </p>
                 </div>
 
@@ -343,7 +388,7 @@ export const AIInsightsPanel = () => {
                   <div key={idx} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between border-b pb-3 mb-4 border-slate-100">
                       <div>
-                        <span className="text-xs text-slate-400">Tạo lúc: {new Date(h.generatedAt).toLocaleDateString("vi-VN")}</span>
+                        <span className="text-xs text-slate-400">Tạo lúc: {h.generatedAt ? new Date(h.generatedAt).toLocaleDateString("vi-VN") : "—"}</span>
                         <h5 className="font-semibold text-slate-800 mt-0.5">Tháng {h.insightMonth}/{h.insightYear}</h5>
                       </div>
                       <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase ${getSeverityBadgeClass(h.severity)}`}>

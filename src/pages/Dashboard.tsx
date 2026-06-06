@@ -78,6 +78,10 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Wellbeing Analytics",
     subtitle: "Mental wellbeing trends and score changes.",
   },
+  "survey-analytics": {
+    title: "Survey Analytics",
+    subtitle: "Thống kê kết quả khảo sát tinh thần theo tháng và xu hướng nhiều tháng.",
+  },
   "ai-insights": {
     title: "AI Insights",
     subtitle: "AI-generated highlights from operational data.",
@@ -186,6 +190,8 @@ const getPanelComponent = (
       return isManager ? <BurnoutMonitorPanel /> : <BurnoutRiskPanel />;
     case "wellbeing-analytics":
       return <WellbeingAnalyticsPanel />;
+    case "survey-analytics":
+      return <WellbeingAnalyticsPanel />;
     case "ai-insights":
       return isManager ? <ManagerReportPanel /> : <AIInsightsPanel />;
     case "ai-predictions":
@@ -232,8 +238,15 @@ const getPanelComponent = (
 
 export default function Admin({ initialTab }: { initialTab?: string } = {}) {
   const { user, userEmail } = useAuth();
-  const { isEmployee, isManager } = usePermission();
-  const [activeTab, setActiveTab] = useState(initialTab ?? "overview");
+  const { isEmployee, isManager, isHR, isCEO, isAdmin } = usePermission();
+  
+  const [activeTab, setActiveTab] = useState(() => {
+    if (initialTab) return initialTab;
+    if (isEmployee()) return "my-tasks";
+    if (isCEO() || isAdmin()) return "dashboard-company";
+    if (isHR() || isManager()) return "dashboard-department";
+    return "dashboard-company";
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -247,10 +260,18 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
         activeTab === "user-management" ||
         activeTab === "profile"
       ) {
-        setActiveTab(isEmployee() ? "my-tasks" : "overview");
+        if (isEmployee()) {
+          setActiveTab("my-tasks");
+        } else if (isCEO() || isAdmin()) {
+          setActiveTab("dashboard-company");
+        } else if (isHR() || isManager()) {
+          setActiveTab("dashboard-department");
+        } else {
+          setActiveTab("dashboard-company");
+        }
       }
     }
-  }, [initialTab, isEmployee]);
+  }, [initialTab, isEmployee, isCEO, isAdmin, isHR, isManager]);
 
   // Sync URL hash back to #/admin when clicking sidebar tabs
   // This ensures that clicking a task in MyTasks will reliably trigger a hashchange

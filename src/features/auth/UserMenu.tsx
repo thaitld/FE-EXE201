@@ -65,6 +65,10 @@ export default function UserMenu({
     setProfileOpen(false);
   };
 
+  const roleLower = role?.toLowerCase();
+  const showMyPerformance = roleLower === "employee" || roleLower === "manager" || roleLower === "hr";
+  const showSettings = roleLower === "admin";
+
   return (
     <div className="relative" ref={profileRef}>
       <button
@@ -139,14 +143,16 @@ export default function UserMenu({
               <User size={16} />
               <span className="font-medium">Profile</span>
             </button>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
-              onClick={() => handleProfileAction("performance")}
-            >
-              <TrendingUp size={16} />
-              <span className="font-medium">My Performance</span>
-            </button>
+            {showMyPerformance && (
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
+                onClick={() => handleProfileAction("performance")}
+              >
+                <TrendingUp size={16} />
+                <span className="font-medium">My Performance</span>
+              </button>
+            )}
             <button
               type="button"
               className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
@@ -162,14 +168,16 @@ export default function UserMenu({
                 </span>
               ) : null}
             </button>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
-              onClick={() => handleProfileAction("settings")}
-            >
-              <Settings size={16} />
-              <span className="font-medium">Settings</span>
-            </button>
+            {showSettings && (
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
+                onClick={() => handleProfileAction("settings")}
+              >
+                <Settings size={16} />
+                <span className="font-medium">Settings</span>
+              </button>
+            )}
           </div>
 
           {/* Logout */}

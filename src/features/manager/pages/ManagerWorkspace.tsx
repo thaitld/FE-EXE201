@@ -10,12 +10,16 @@ import TeamPerformancePage from './TeamPerformancePage'
 import ManagerReportPage from './ManagerReportPage'
 import OrgManagementPage from './OrgManagementPage'
 import ProfilePage from '@/pages/shared/Profile'
+import { MeetingsPanel } from '@/components/panels/admin/MeetingsPanel'
+import { WellbeingAnalyticsPanel } from '@/components/panels/admin/WellbeingAnalyticsPanel'
 
 const tabs: ManagerTabItem[] = [
   { id: 'dashboard', label: 'Department Dashboard', description: 'KPI, burnout alerts, and monthly trend.' },
   { id: 'tasks', label: 'Task Management', description: 'Create, approve, reject, reassign, and clone tasks.' },
   { id: 'bulk-create', label: 'Bulk Create Tasks', description: 'Import multiple tasks in one shot.' },
   { id: 'burnout', label: 'Burnout Monitor', description: 'Track high-risk signals and resolve them.' },
+  { id: 'survey-analytics', label: 'Survey Analytics', description: 'Thống kê kết quả khảo sát tinh thần theo tháng và xu hướng.' },
+  { id: 'meetings', label: 'Meetings', description: 'Đặt lịch họp, xem lịch phòng ban và kết nối Google Calendar.' },
   { id: 'performance', label: 'Team Performance', description: 'Efficiency and overtime by team member.' },
   { id: 'report', label: 'Manager Report', description: 'Weekly AI-generated optimization report.' },
   { id: 'organization', label: 'Organization', description: 'Departments, teams, and work schedules.' },
@@ -27,6 +31,8 @@ const routeByTab: Record<string, string> = {
   tasks: '#/roles/manager/tasks',
   'bulk-create': '#/roles/manager/bulk-create',
   burnout: '#/roles/manager/burnout',
+  'survey-analytics': '#/roles/manager/survey-analytics',
+  meetings: '#/roles/manager/meetings',
   performance: '#/roles/manager/performance',
   report: '#/roles/manager/report',
   organization: '#/roles/manager/organization',
@@ -108,6 +114,10 @@ export default function ManagerWorkspace() {
         return <BulkCreateTaskPage />
       case 'burnout':
         return <BurnoutMonitorPage />
+      case 'survey-analytics':
+        return <WellbeingAnalyticsPanel />
+      case 'meetings':
+        return <MeetingsPanel />
       case 'performance':
         return <TeamPerformancePage />
       case 'report':

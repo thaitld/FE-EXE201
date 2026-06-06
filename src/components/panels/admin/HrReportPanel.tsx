@@ -28,6 +28,7 @@ import {
 
 // ── Markdown Renderer ────────────────────────────────────────────────────────
 function renderMarkdown(md: string): React.ReactNode {
+  if (!md) return null;
   const lines = md.split("\n");
   const elements: React.ReactNode[] = [];
   let key = 0;

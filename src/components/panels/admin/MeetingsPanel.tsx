@@ -39,9 +39,18 @@ import { usePermission } from "@/features/auth/usePermission";
 
 export function MeetingsPanel() {
   const { isEmployee, isManager, isHR, isCEO, isAdmin, user } = usePermission();
-  const isLeadership = isManager() || isHR() || isCEO() || isAdmin();
+  // canSeeAll: GET /api/meetings → Admin, Manager, HR only
+  const canSeeAll = isAdmin() || isManager() || isHR();
+  // canSeeDept: GET /api/meetings/department → Admin, Manager, HR, CEO
+  const canSeeDept = isAdmin() || isManager() || isHR() || isCEO();
+  // canCreate: POST /api/meetings → CEO, Manager, HR
+  const canCreate = isCEO() || isManager() || isHR();
+  // Show scope switcher if more than just "me" is available
+  const hasMultiScope = canSeeAll || canSeeDept;
 
-  const [scope, setScope] = useState<"me" | "department" | "all">(isLeadership ? "all" : "me");
+  const [scope, setScope] = useState<"me" | "department" | "all">(
+    canSeeAll ? "all" : canSeeDept ? "department" : "me"
+  );
   const [meetings, setMeetings] = useState<MeetingDto[]>([]);
   const [selectedDeptId, setSelectedDeptId] = useState<number | "">("");
   const [departments, setDepartments] = useState<DepartmentDto[]>([]);
@@ -325,7 +334,7 @@ export function MeetingsPanel() {
             </div>
 
             {/* Scope select */}
-            {isLeadership && (
+            {hasMultiScope && (
               <div className="flex rounded-xl border border-slate-200 p-1 bg-slate-50 text-sm">
                 <button
                   type="button"
@@ -336,24 +345,28 @@ export function MeetingsPanel() {
                 >
                   Của tôi
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setScope("department")}
-                  className={`rounded-lg px-3 py-1.5 font-semibold transition ${
-                    scope === "department" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Phòng ban
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setScope("all")}
-                  className={`rounded-lg px-3 py-1.5 font-semibold transition ${
-                    scope === "all" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Tất cả
-                </button>
+                {canSeeDept && (
+                  <button
+                    type="button"
+                    onClick={() => setScope("department")}
+                    className={`rounded-lg px-3 py-1.5 font-semibold transition ${
+                      scope === "department" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Phòng ban
+                  </button>
+                )}
+                {canSeeAll && (
+                  <button
+                    type="button"
+                    onClick={() => setScope("all")}
+                    className={`rounded-lg px-3 py-1.5 font-semibold transition ${
+                      scope === "all" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Tất cả
+                  </button>
+                )}
               </div>
             )}
 
@@ -373,7 +386,7 @@ export function MeetingsPanel() {
             )}
 
             {/* Schedule new meeting (CEO, Manager, HR only) */}
-            {(isCEO() || isManager() || isHR()) && (
+            {canCreate && (
               <button
                 type="button"
                 onClick={() => setCreateModalOpen(true)}

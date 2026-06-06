@@ -53,21 +53,36 @@ export default function ManagerCreateTaskModal({ onClose, onSuccess }: Props) {
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
     setError(null)
-    if (!form.title.trim()) return setError('Title is required')
-    if (!form.assignedUserId) return setError('Assignee id or email is required')
-    if (!form.expectedCompletion) return setError('Due date is required')
+    if (!form.title.trim()) return setError('Vui lòng nhập tiêu đề công việc')
+    if (!form.taskTypeId) return setError('Vui lòng chọn loại task')
+    if (!form.assignedUserId) return setError('Vui lòng chọn người thực hiện')
+    if (!form.expectedCompletion) return setError('Vui lòng chọn ngày hoàn thành')
+
+    // Convert datetime-local string to proper ISO 8601 UTC string
+    // Input: "2026-06-03T16:32" → Output: "2026-06-03T16:32:00.000Z"
+    const completionDate = new Date(form.expectedCompletion)
+    if (isNaN(completionDate.getTime())) return setError('Ngày hoàn thành không hợp lệ')
+    if (completionDate <= new Date()) return setError('Ngày hoàn thành phải ở tương lai')
+
+    const payload = {
+      ...form,
+      expectedCompletion: completionDate.toISOString(),
+    }
 
     setIsSaving(true)
     try {
-      await createTask(form)
+      await createTask(payload)
       onSuccess()
       onClose()
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to create task')
+      // Show detailed error message from backend if available
+      const msg = err?.response?.data?.message ?? err?.message ?? 'Tạo task thất bại'
+      setError(msg)
     } finally {
       setIsSaving(false)
     }
   }
+
 
   useEffect(() => {
     let mounted = true
@@ -132,6 +147,18 @@ export default function ManagerCreateTaskModal({ onClose, onSuccess }: Props) {
             )}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <label className="form-label font-semibold">Task Title</label>
+                <input
+                  type="text"
+                  placeholder="Nhập tiêu đề công việc..."
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="form-input"
+                  required
+                />
+              </div>
+
               <div>
                 <label className="form-label">Task type</label>
                 <select value={form.taskTypeId} onChange={(e) => setForm({ ...form, taskTypeId: Number(e.target.value) })} className="form-input">

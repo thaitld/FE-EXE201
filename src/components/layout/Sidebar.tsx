@@ -175,8 +175,8 @@ export default function Sidebar({
               </div>
             )}
 
-            {/* My Tasks - visible to Employee, HR, Manager, Admin */}
-            {(isEmployee() || isHR() || isManager() || isAdmin()) && (
+            {/* My Tasks - visible to Employee, HR, Manager */}
+            {(isEmployee() || isHR() || isManager()) && (
               <button
                 type="button"
                 onClick={() => handleTabClick("my-tasks")}
@@ -188,19 +188,17 @@ export default function Sidebar({
               </button>
             )}
 
-            {/* Meetings - visible to Employee, Manager, Admin */}
-            {(isEmployee() || isManager() || isAdmin()) && (
-              <button
-                type="button"
-                onClick={() => handleTabClick("meetings")}
-                className={`${topLevelItemClass} ${
-                  activeTab === "meetings" ? activeTopLevelClass : ""
-                }`}
-              >
-                <CalendarDays size={18} />
-                <span className="text-sm font-semibold">Meetings</span>
-              </button>
-            )}
+            {/* Meetings - visible to all roles (Employee=me only, Manager/HR/CEO/Admin=all/dept/me) */}
+            <button
+              type="button"
+              onClick={() => handleTabClick("meetings")}
+              className={`${topLevelItemClass} ${
+                activeTab === "meetings" ? activeTopLevelClass : ""
+              }`}
+            >
+              <CalendarDays size={18} />
+              <span className="text-sm font-semibold">Meetings</span>
+            </button>
 
             {/* People Section */}
             {(isManager() || isHR() || isAdmin()) ? (
@@ -385,6 +383,18 @@ export default function Sidebar({
                         <span className="text-sm font-medium">
                           Wellbeing Analytics
                         </span>
+                      </button>
+                    )}
+
+                    {/* Survey Analytics - visible to Manager, HR, CEO, Admin */}
+                    {(isManager() || isHR() || isCEO() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("survey-analytics")}
+                        className={`${subItemClass} ${activeTab === "survey-analytics" ? activeSubItemClass : ""}`}
+                      >
+                        <Sparkles size={17} />
+                        <span className="text-sm font-medium">Survey Analytics</span>
                       </button>
                     )}
 
