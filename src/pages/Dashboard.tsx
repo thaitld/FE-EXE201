@@ -21,6 +21,9 @@ import { UserManagementPanel } from "@/components/panels/admin/UserManagementPan
 import { WorkforceTrendsPanel } from "@/components/panels/admin/WorkforceTrendsPanel";
 import { SettingsPanel } from "@/components/panels/admin/SettingsPanel";
 import DepartmentsPanel from "@/components/panels/admin/DepartmentsPanel";
+import { HrReportPanel } from "@/components/panels/admin/HrReportPanel";
+import { MeetingsPanel } from "@/components/panels/admin/MeetingsPanel";
+import { TaskTypesPanel } from "@/components/panels/admin/TaskTypesPanel";
 import ProfilePage from "@/pages/shared/Profile";
 
 import PersonalDashboard from "@/components/panels/employee/PersonalDashboard";
@@ -28,6 +31,15 @@ import MyTasks from "@/components/panels/employee/MyTasks";
 import Survey from "@/components/panels/employee/Survey";
 import TaskDetail from "@/components/panels/employee/TaskDetail";
 import { usePermission } from "@/features/auth/usePermission";
+
+// Manager panel imports
+import DepartmentDashboardPanel from "@/features/manager/pages/DepartmentDashboardPage";
+import TaskManagementPanel from "@/features/manager/pages/TaskManagementPage";
+import BulkCreateTaskPanel from "@/features/manager/pages/BulkCreateTaskPage";
+import BurnoutMonitorPanel from "@/features/manager/pages/BurnoutMonitorPage";
+import TeamPerformancePanel from "@/features/manager/pages/TeamPerformancePage";
+import ManagerReportPanel from "@/features/manager/pages/ManagerReportPage";
+import OrgManagementPanel from "@/features/manager/pages/OrgManagementPage";
 
 const TAB_META: Record<string, { title: string; subtitle: string }> = {
   overview: {
@@ -66,6 +78,10 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Wellbeing Analytics",
     subtitle: "Mental wellbeing trends and score changes.",
   },
+  "survey-analytics": {
+    title: "Survey Analytics",
+    subtitle: "Thống kê kết quả khảo sát tinh thần theo tháng và xu hướng nhiều tháng.",
+  },
   "ai-insights": {
     title: "AI Insights",
     subtitle: "AI-generated highlights from operational data.",
@@ -98,13 +114,64 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Settings",
     subtitle: "Manage dashboard preferences and system options.",
   },
+  "hr-report": {
+    title: "Báo cáo HR",
+    subtitle: "Báo cáo sức khỏe tổ chức hàng tháng do Gemini AI tổng hợp.",
+  },
+  meetings: {
+    title: "Cuộc họp & Lịch trình",
+    subtitle: "Quản lý lịch họp cá nhân, phòng ban và đồng bộ Google Calendar.",
+  },
+  "task-types": {
+    title: "Task Types & Định mức",
+    subtitle: "Quản lý loại công việc và thiết lập định mức thời gian chuẩn IE.",
+  },
+  // Manager tabs
+  "mgr-dashboard": {
+    title: "Department Dashboard",
+    subtitle: "KPI, burnout alerts, and monthly trend.",
+  },
+  "mgr-tasks": {
+    title: "Task Management",
+    subtitle: "Create, approve, reject, reassign, and clone tasks.",
+  },
+  "mgr-bulk-create": {
+    title: "Bulk Create Tasks",
+    subtitle: "Import multiple tasks in one shot.",
+  },
+  "mgr-burnout": {
+    title: "Burnout Monitor",
+    subtitle: "Track high-risk signals and resolve them.",
+  },
+  "mgr-performance": {
+    title: "Team Performance",
+    subtitle: "Efficiency and overtime by team member.",
+  },
+  "mgr-report": {
+    title: "Manager Report",
+    subtitle: "Weekly AI-generated optimization report.",
+  },
+  "mgr-organization": {
+    title: "Organization",
+    subtitle: "Departments, teams, and work schedules.",
+  },
 };
 
 // Panel component map - maps activeTab to the corresponding panel component
-const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
+const getPanelComponent = (
+  activeTab: string,
+  isEmployee: boolean,
+  isManager: boolean,
+) => {
   switch (activeTab) {
     case "overview":
       return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
+    case "dashboard-personal":
+      return <OverviewPanel key="personal" initialMode="personal" />;
+    case "dashboard-department":
+      return <OverviewPanel key="department" initialMode="department" />;
+    case "dashboard-company":
+      return <OverviewPanel key="company" initialMode="company" />;
     case "my-tasks":
       return <MyTasks />;
     case "survey":
@@ -116,15 +183,17 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
     case "team":
       return <TeamPanel />;
     case "performance":
-      return <PerformancePanel />;
+      return isManager ? <TeamPerformancePanel /> : <PerformancePanel />;
     case "workload":
       return <WorkloadPanel />;
     case "burnout-risk":
-      return <BurnoutRiskPanel />;
+      return isManager ? <BurnoutMonitorPanel /> : <BurnoutRiskPanel />;
     case "wellbeing-analytics":
       return <WellbeingAnalyticsPanel />;
+    case "survey-analytics":
+      return <WellbeingAnalyticsPanel />;
     case "ai-insights":
-      return <AIInsightsPanel />;
+      return isManager ? <ManagerReportPanel /> : <AIInsightsPanel />;
     case "ai-predictions":
       return <AIPredictionsPanel />;
     case "ai-recommendations":
@@ -139,15 +208,45 @@ const getPanelComponent = (activeTab: string, isEmployee: boolean) => {
       return <WorkforceTrendsPanel />;
     case "settings":
       return <SettingsPanel />;
+    case "hr-report":
+      return <HrReportPanel />;
+    case "meetings":
+      return <MeetingsPanel />;
+    // Manager cases
+    case "mgr-dashboard":
+      return <DepartmentDashboardPanel />;
+    case "mgr-tasks":
+      return <TaskManagementPanel />;
+    case "mgr-bulk-create":
+      return <BulkCreateTaskPanel />;
+    case "mgr-burnout":
+      return <BurnoutMonitorPanel />;
+    case "mgr-performance":
+      return <TeamPerformancePanel />;
+    case "mgr-report":
+      return <ManagerReportPanel />;
+    case "mgr-organization":
+      return <OrgManagementPanel />;
+    case "task-types":
+      return <TaskTypesPanel />;
     default:
-      return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
+      if (isEmployee) return <PersonalDashboard />;
+      if (isManager) return <DepartmentDashboardPanel />;
+      return <OverviewPanel />;
   }
 };
 
 export default function Admin({ initialTab }: { initialTab?: string } = {}) {
   const { user, userEmail } = useAuth();
-  const { isEmployee } = usePermission();
-  const [activeTab, setActiveTab] = useState(initialTab ?? "overview");
+  const { isEmployee, isManager, isHR, isCEO, isAdmin } = usePermission();
+  
+  const [activeTab, setActiveTab] = useState(() => {
+    if (initialTab) return initialTab;
+    if (isEmployee()) return "my-tasks";
+    if (isCEO() || isAdmin()) return "dashboard-company";
+    if (isHR() || isManager()) return "dashboard-department";
+    return "dashboard-company";
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -161,10 +260,18 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
         activeTab === "user-management" ||
         activeTab === "profile"
       ) {
-        setActiveTab(isEmployee() ? "my-tasks" : "overview");
+        if (isEmployee()) {
+          setActiveTab("my-tasks");
+        } else if (isCEO() || isAdmin()) {
+          setActiveTab("dashboard-company");
+        } else if (isHR() || isManager()) {
+          setActiveTab("dashboard-department");
+        } else {
+          setActiveTab("dashboard-company");
+        }
       }
     }
-  }, [initialTab, isEmployee]);
+  }, [initialTab, isEmployee, isCEO, isAdmin, isHR, isManager]);
 
   // Sync URL hash back to #/admin when clicking sidebar tabs
   // This ensures that clicking a task in MyTasks will reliably trigger a hashchange
@@ -173,7 +280,8 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
     if (
       activeTab !== "task-detail" &&
       activeTab !== "user-management" &&
-      activeTab !== "profile"
+      activeTab !== "profile" &&
+      activeTab !== "meetings"
     ) {
       if (hash.startsWith("#/admin/") && hash !== "#/admin") {
         window.location.hash = "#/admin";
@@ -268,7 +376,7 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
             </Button> */}
           </div>
 
-          {getPanelComponent(activeTab, isEmployee())}
+          {getPanelComponent(activeTab, isEmployee(), isManager())}
         </div>
       </main>
 

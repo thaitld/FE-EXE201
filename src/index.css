@@ -285,3 +285,12 @@ select {
   .c5-animated-gradient { animation: none; }
 }
 
+/* Form component utilities — centralize admin form style */
+@layer components {
+  .form-label { @apply text-xs font-semibold uppercase tracking-wide text-slate-600; }
+  .form-input { @apply h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-cyan-400/60; }
+  .form-select { @apply h-9 appearance-none rounded-xl border border-slate-300 bg-white pl-3 pr-8 text-sm text-slate-900 outline-none focus:border-cyan-400/60; }
+  .form-btn { @apply inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50; }
+  .form-cta { @apply inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300; }
+}
+

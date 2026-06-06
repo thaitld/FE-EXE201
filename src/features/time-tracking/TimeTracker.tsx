@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTimeTracking } from "./useTimeTracking";
 import { notify } from "@/lib/notify";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 
 type Props = {
   taskId: number;
@@ -35,14 +36,28 @@ export default function TimeTracker({
   const [isStopModalOpen, setIsStopModalOpen] = useState(false);
   const [stopNote, setStopNote] = useState("");
 
+  const [showStopModal, setShowStopModal] = useState(false);
+  const [stopNote, setStopNote] = useState("");
+  const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const showToast = (text: string, type: "success" | "error" = "success") => {
+    setToast({ text, type });
+    const timer = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(timer);
+  };
+
   useEffect(() => {
     // If there's an active session for a different task, ignore — UI should reconcile
   }, [session]);
 
-  const handleStart = async () => {
+  const handleStart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setError(null);
     try {
       await start(taskId);
+      showToast("Đã bắt đầu đếm giờ làm việc!");
       if (onStarted) {
         try {
           onStarted();
@@ -51,6 +66,7 @@ export default function TimeTracker({
     } catch (err: any) {
       const msg = err.response?.data?.message || "Không thể bắt đầu đếm giờ.";
       setError(msg);
+      showToast("Không thể bắt đầu đếm giờ!", "error");
       notify({
         title: "Lỗi đếm giờ",
         message: msg,
@@ -59,10 +75,13 @@ export default function TimeTracker({
     }
   };
 
-  const handlePause = async () => {
+  const handlePause = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setError(null);
     try {
       await pause(taskId);
+      showToast("Đã tạm dừng đếm giờ.");
       if (onPaused) {
         try {
           onPaused();
@@ -71,6 +90,7 @@ export default function TimeTracker({
     } catch (err: any) {
       const msg = err.response?.data?.message || "Không thể tạm dừng đếm giờ.";
       setError(msg);
+      showToast("Không thể tạm dừng đếm giờ!", "error");
       notify({
         title: "Lỗi đếm giờ",
         message: msg,
@@ -79,10 +99,13 @@ export default function TimeTracker({
     }
   };
 
-  const handleResume = async () => {
+  const handleResume = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setError(null);
     try {
       await resume(taskId);
+      showToast("Đã tiếp tục đếm giờ làm việc!");
       if (onResumed) {
         try {
           onResumed();
@@ -91,6 +114,7 @@ export default function TimeTracker({
     } catch (err: any) {
       const msg = err.response?.data?.message || "Không thể tiếp tục đếm giờ.";
       setError(msg);
+      showToast("Không thể tiếp tục đếm giờ!", "error");
       notify({
         title: "Lỗi đếm giờ",
         message: msg,
@@ -99,34 +123,37 @@ export default function TimeTracker({
     }
   };
 
-  const handleOpenStopModal = () => {
+  const handleStopClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setStopNote("");
-    setIsStopModalOpen(true);
+    setShowStopModal(true);
   };
 
-  const handleConfirmStop = async () => {
+  const confirmStop = async () => {
     setError(null);
     try {
-      const noteParam = stopNote.trim() || undefined;
-      const res = await stop(taskId, noteParam);
+      const res = await stop(taskId, stopNote.trim() || undefined);
       if (res && res.succeeded === false) {
         setError(res.message || "Không thể kết thúc đếm giờ.");
-        setIsStopModalOpen(false);
+        showToast(res.message || "Không thể dừng phiên đếm giờ", "error");
         return;
       }
-      notify({ title: "Timer", message: "Đã dừng và lưu phiên làm việc" });
-      setIsStopModalOpen(false);
+      setShowStopModal(false);
+      showToast("Đã dừng đếm giờ và ghi nhận kết quả thành công!");
+      notify({
+        title: "Đếm giờ",
+        message: "Đã dừng đếm giờ và lưu phiên làm việc thành công"
+      });
       if (onStopped) {
         try {
           onStopped();
         } catch {}
       }
     } catch (err: any) {
-      console.error("Stop Task Error Details:", err);
-      const backendMsg = err.response?.data?.message || err.response?.data?.Message || (typeof err.response?.data === 'string' ? err.response.data : null);
-      const msg = backendMsg || err.message || "Không thể kết thúc đếm giờ.";
+      const msg = err.response?.data?.message || "Không thể kết thúc đếm giờ.";
       setError(msg);
-      setIsStopModalOpen(false);
+      showToast("Lỗi: Không thể dừng đếm giờ!", "error");
       notify({
         title: "Lỗi đếm giờ",
         message: msg,
@@ -145,7 +172,8 @@ export default function TimeTracker({
         <div className="flex items-center gap-2">
           {status === "PENDING" && (
             <button
-              className="rounded bg-green-500 px-4 py-2 text-white"
+              type="button"
+              className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 transition"
               onClick={handleStart}
               disabled={loading}
             >
@@ -156,15 +184,17 @@ export default function TimeTracker({
           {isRunning && (
             <>
               <button
-                className="rounded bg-orange-400 px-4 py-2 text-white"
+                type="button"
+                className="rounded bg-orange-400 px-4 py-2 text-white hover:bg-orange-500 transition"
                 onClick={handlePause}
                 disabled={loading}
               >
                 ⏸ Tạm dừng
               </button>
               <button
-                className="rounded bg-red-500 px-4 py-2 text-white"
-                onClick={handleOpenStopModal}
+                type="button"
+                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600 transition"
+                onClick={handleStopClick}
                 disabled={loading}
               >
                 ⏹ Dừng
@@ -175,15 +205,17 @@ export default function TimeTracker({
           {isPaused && (
             <>
               <button
-                className="rounded bg-green-500 px-4 py-2 text-white"
+                type="button"
+                className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 transition"
                 onClick={handleResume}
                 disabled={loading}
               >
                 ▶ Tiếp tục
               </button>
               <button
-                className="rounded bg-red-500 px-4 py-2 text-white"
-                onClick={handleOpenStopModal}
+                type="button"
+                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600 transition"
+                onClick={handleStopClick}
                 disabled={loading}
               >
                 ⏹ Dừng
@@ -199,61 +231,62 @@ export default function TimeTracker({
         </div>
       )}
 
-      {/* Modern custom modal for stopping task time tracking */}
-      {isStopModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
+      {/* Modern Dialog Modal for Stopping Tasks */}
+      {showStopModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay */}
           <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsStopModalOpen(false)}
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowStopModal(false)}
           />
 
           {/* Modal Content */}
-          <div className="relative z-10 w-full max-w-md transform rounded-2xl bg-white p-6 shadow-xl transition-all border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-semibold text-slate-950">
-              Kết thúc phiên làm việc
-            </h3>
+          <div className="relative z-10 w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-2xl transition-all border border-slate-100">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Ghi chú kết thúc task</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Nhập ghi chú (tùy chọn) về kết quả hoặc nội dung bạn đã hoàn thành trong phiên này.
+                </p>
+              </div>
 
-            <p className="mt-2 text-sm leading-relaxed text-slate-500">
-              Mục đích ghi chú: Giúp bạn lưu lại nội dung chi tiết các công việc đã hoàn thành trong phiên đếm giờ này (ví dụ: viết tài liệu, sửa bug...) để gửi báo cáo trực tiếp cho Manager tiện theo dõi. Ghi chú này là tùy chọn.
-            </p>
-
-            <div className="mt-4">
-              <label
-                htmlFor="stop-note"
-                className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5"
-              >
-                Ghi chú công việc (Tùy chọn)
-              </label>
               <textarea
-                id="stop-note"
-                rows={3}
                 value={stopNote}
                 onChange={(e) => setStopNote(e.target.value)}
-                placeholder="Nhập nội dung công việc bạn đã thực hiện..."
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none shadow-sm"
+                placeholder="Ví dụ: Đã viết xong unit test cho UserService và fix bug..."
+                className="w-full h-28 rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none"
               />
-            </div>
 
-            <div className="mt-6 flex justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsStopModalOpen(false)}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 active:bg-slate-100 transition-colors"
-                disabled={loading}
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmStop}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-sm disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? "Đang lưu..." : "Xác nhận & Dừng"}
-              </button>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowStopModal(false)}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmStop}
+                  className="rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition"
+                >
+                  Xác nhận
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-2xl bg-slate-900/95 backdrop-blur-md px-5 py-3.5 text-white shadow-2xl border border-slate-800/50 animate-in fade-in slide-in-from-top-4 duration-300">
+          {toast.type === "success" ? (
+            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+          )}
+          <span className="text-sm font-medium text-slate-100">{toast.text}</span>
         </div>
       )}
     </div>

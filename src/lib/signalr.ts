@@ -8,8 +8,11 @@ let connection: signalR.HubConnection | null = null;
  * @returns HubConnection instance
  */
 export function createSignalRConnection(token: string): signalR.HubConnection {
+  const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:5211/api";
+  const hubUrl = apiBase.replace(/\/api\/?$/, "/hubs/notifications");
+
   connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5211/hubs/notifications", {
+    .withUrl(hubUrl, {
       accessTokenFactory: () => token,
       transport:
         signalR.HttpTransportType.WebSockets |

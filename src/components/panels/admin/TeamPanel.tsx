@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { apiClient, type ApiResponse, type CreateTeamDto, type DepartmentDto, type TeamDetailDto, type UpdateTeamDto } from '@/lib/api'
 import { BarChart3, Building2, Plus, RefreshCw, Search, Users } from 'lucide-react'
+import { usePermission } from '@/features/auth/usePermission'
 
 type TeamFormMode = 'create' | 'edit'
 
 export const TeamPanel = () => {
+  const { isEmployee, isAdmin, isManager, user } = usePermission()
   const [teams, setTeams] = useState<TeamDetailDto[]>([])
   const [departments, setDepartments] = useState<DepartmentDto[]>([])
   const [loadingTeams, setLoadingTeams] = useState(false)
@@ -19,6 +21,7 @@ export const TeamPanel = () => {
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<TeamFormMode>('create')
   const [selectedTeam, setSelectedTeam] = useState<TeamDetailDto | null>(null)
+
 
   const loadDepartments = async () => {
     setLoadingDepartments(true)
@@ -38,7 +41,16 @@ export const TeamPanel = () => {
 
     try {
       const params: Record<string, string | number | boolean> = {}
-      if (departmentFilter) params.departmentId = Number(departmentFilter)
+      if (isManager()) {
+        if (user?.departmentId) {
+          params.departmentId = user.departmentId
+        } else {
+          return // Wait for user info to load
+        }
+      } else if (departmentFilter) {
+        params.departmentId = Number(departmentFilter)
+      }
+
       if (isActiveFilter) params.isActive = isActiveFilter === 'true'
 
       const response = await apiClient.get<ApiResponse<TeamDetailDto[]>>('/teams', { params })
@@ -66,7 +78,7 @@ export const TeamPanel = () => {
 
   useEffect(() => {
     loadTeams()
-  }, [departmentFilter, isActiveFilter, searchTerm])
+  }, [departmentFilter, isActiveFilter, searchTerm, user?.departmentId])
 
   const totalMembers = useMemo(() => teams.reduce((sum, team) => sum + team.memberCount, 0), [teams])
   const activeTeams = useMemo(() => teams.filter((team) => team.isActive).length, [teams])
@@ -95,16 +107,24 @@ export const TeamPanel = () => {
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Organization</p>
             <h2 className="text-2xl font-bold text-slate-900">Team Management</h2>
-            <p className="mt-1 text-sm text-slate-500">Danh sách teams, tạo team mới và cập nhật team hiện có.</p>
+            {isManager() && user?.departmentName && (
+              <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 border border-blue-100">
+                <Building2 size={16} />
+                <span>Phòng ban quản lý: {user.departmentName}</span>
+              </div>
+            )}
+            <p className="mt-2 text-sm text-slate-500">Danh sách teams, tạo team mới và cập nhật team hiện có.</p>
           </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            <Plus size={16} />
-            Create team
-          </button>
+          {isAdmin() && (
+            <button
+              type="button"
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              <Plus size={16} />
+              Create team
+            </button>
+          )}
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -126,16 +146,18 @@ export const TeamPanel = () => {
             </div>
           </div>
 
-          <select
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
-          >
-            <option value="">All departments</option>
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>{department.name}</option>
-            ))}
-          </select>
+          {!isManager() && (
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+            >
+              <option value="">All departments</option>
+              {departments.map((department) => (
+                <option key={department.id} value={department.id}>{department.name}</option>
+              ))}
+            </select>
+          )}
 
           <select
             value={isActiveFilter}
@@ -194,13 +216,15 @@ export const TeamPanel = () => {
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Shift</th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Members</th>
                 <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 text-right">Actions</th>
+                {isAdmin() && (
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 text-right">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {loadingTeams ? (
                 <tr>
-                  <td className="px-6 py-8 text-sm text-slate-500" colSpan={8}>Loading teams...</td>
+                  <td className="px-6 py-8 text-sm text-slate-500" colSpan={isAdmin() ? 8 : 7}>Loading teams...</td>
                 </tr>
               ) : teams.length > 0 ? (
                 teams.map((team) => (
@@ -221,20 +245,22 @@ export const TeamPanel = () => {
                         {team.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => openEdit(team)}
-                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                      >
-                        Edit
-                      </button>
-                    </td>
+                    {isAdmin() && (
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => openEdit(team)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td className="px-6 py-8 text-sm text-slate-500" colSpan={8}>No teams found.</td>
+                  <td className="px-6 py-8 text-sm text-slate-500" colSpan={isAdmin() ? 8 : 7}>No teams found.</td>
                 </tr>
               )}
             </tbody>
