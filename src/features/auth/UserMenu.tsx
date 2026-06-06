@@ -25,7 +25,7 @@ export default function UserMenu({
   userEmail,
   profileName,
   activeTab = "overview",
-  onTabChange = () => {},
+  onTabChange = () => { },
   unreadCount = 0,
 }: UserMenuProps) {
   const { logout, role } = useAuth();
@@ -40,7 +40,7 @@ export default function UserMenu({
   }, [profileName]);
 
   const profileRole = useMemo(() => {
-    return role ?? user?.roleName ?? "User";
+    return role ?? user?.roleName ?? user?.role ?? "User";
   }, [role, user]);
 
   useEffect(() => {
@@ -64,6 +64,10 @@ export default function UserMenu({
     onTabChange(tab);
     setProfileOpen(false);
   };
+
+  const roleLower = role?.toLowerCase();
+  const showMyPerformance = roleLower === "employee" || roleLower === "manager" || roleLower === "hr";
+  const showSettings = roleLower === "admin";
 
   return (
     <div className="relative" ref={profileRef}>
@@ -132,21 +136,23 @@ export default function UserMenu({
               type="button"
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
               onClick={() => {
-                window.location.hash = "#/admin/profile";
+                window.location.hash = "#/profile";
                 handleProfileAction("profile");
               }}
             >
               <User size={16} />
               <span className="font-medium">Profile</span>
             </button>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
-              onClick={() => handleProfileAction("performance")}
-            >
-              <TrendingUp size={16} />
-              <span className="font-medium">My Performance</span>
-            </button>
+            {showMyPerformance && (
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
+                onClick={() => handleProfileAction("performance")}
+              >
+                <TrendingUp size={16} />
+                <span className="font-medium">My Performance</span>
+              </button>
+            )}
             <button
               type="button"
               className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
@@ -162,14 +168,16 @@ export default function UserMenu({
                 </span>
               ) : null}
             </button>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
-              onClick={() => handleProfileAction("settings")}
-            >
-              <Settings size={16} />
-              <span className="font-medium">Settings</span>
-            </button>
+            {showSettings && (
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-slate-700 transition hover:bg-slate-100"
+                onClick={() => handleProfileAction("settings")}
+              >
+                <Settings size={16} />
+                <span className="font-medium">Settings</span>
+              </button>
+            )}
           </div>
 
           {/* Logout */}

@@ -113,21 +113,17 @@ export function useTimeTracking(taskId?: number) {
         if (s && (taskId === undefined || s.taskInstanceId === taskId)) {
           setSession(s);
           setElapsedSeconds(s.elapsedSeconds || 0);
+          const action = s.currentAction?.toUpperCase() || "";
           setIsRunning(
-            s.currentAction === "STARTED" ||
-              s.currentAction === "START" ||
-              s.currentAction === "RESUMED" ||
-              s.currentAction === "RESUME",
+            action === "STARTED" ||
+            action === "RESUMED" ||
+            action === "START" ||
+            action === "RESUME"
           );
           setIsPaused(
-            s.currentAction === "PAUSED" ||
-              s.currentAction === "PAUSE",
+            action === "PAUSED" ||
+            action === "PAUSE"
           );
-        } else {
-          setSession(null);
-          setElapsedSeconds(0);
-          setIsRunning(false);
-          setIsPaused(false);
         }
       }
     } catch (err) {

@@ -53,9 +53,9 @@ export default function TaskDetail() {
   const [attachments, setAttachments] = useState<TaskAttachmentDto[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "comments" | "attachments">("details");
 
-  const fetchData = async (silent = false) => {
+  const fetchData = async (isSilent = false) => {
     if (!taskId) return;
-    if (!silent) setIsLoading(true);
+    if (!isSilent) setIsLoading(true);
     setErrorMessage(null);
     try {
       const [taskRes, commentsRes, attachmentsRes] = await Promise.allSettled([
@@ -83,12 +83,12 @@ export default function TaskDetail() {
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Không thể tải chi tiết task.");
     } finally {
-      if (!silent) setIsLoading(false);
+      if (!isSilent) setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    void fetchData();
+    void fetchData(false);
   }, [taskId]);
 
   // ── Invalid ID ───────────────────────────────────────────────────────────

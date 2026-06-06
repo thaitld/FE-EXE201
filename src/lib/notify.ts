@@ -4,7 +4,6 @@ import type { NotificationDto } from "@/features/notifications/notificationStore
 export function notify(
   payload: Partial<NotificationDto> & { title?: string; message: string },
 ) {
-  const { addNotification } = useNotificationStore.getState();
   const notification: NotificationDto = {
     id: Math.floor(Math.random() * 1000000),
     userId: "", // Will be set server-side
@@ -17,5 +16,5 @@ export function notify(
     taskInstanceId: payload.taskInstanceId,
     actionUrl: payload.actionUrl,
   };
-  addNotification(notification);
+  useNotificationStore.getState().addNotification(notification);
 }

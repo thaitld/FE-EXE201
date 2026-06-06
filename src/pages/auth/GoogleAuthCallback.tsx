@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Loader2, TriangleAlert } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
-import { getEmailFromJwt } from "@/lib/api";
+import { getEmailFromJwt, getRoleFromJwt } from "@/lib/api";
 
 export default function GoogleAuthCallback() {
   const { login } = useAuth();
@@ -19,13 +19,15 @@ export default function GoogleAuthCallback() {
     if (token) {
       const decodedEmail =
         getEmailFromJwt(token) || email || "google-user@manto.local";
+      const userRole = getRoleFromJwt(token);
 
       login(decodedEmail, token);
       setStatus("success");
       setMessage("Đăng nhập Google thành công. Đang chuyển hướng...");
 
       const redirectTimer = window.setTimeout(() => {
-        window.location.hash = "#/admin";
+        const targetHash = userRole?.toLowerCase() === "manager" ? "#/roles/manager" : "#/admin";
+        window.location.hash = targetHash;
       }, 1200);
 
       return () => window.clearTimeout(redirectTimer);

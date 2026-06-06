@@ -3,12 +3,16 @@ import { getSurveyStatus, getSurveyHistory, submitSurvey } from "@/lib/api";
 import type {
   SurveyStatusDto,
   SurveyHistoryDto,
+  SurveyResponseDto,
   SurveySubmitRequestDto,
 } from "@/types/employee";
 
 export function useSurveyStatus() {
   const [status, setStatus] = useState<SurveyStatusDto | null>(null);
-  const [history, setHistory] = useState<SurveyHistoryDto[]>([]);
+  const [history, setHistory] = useState<SurveyResponseDto[]>([]);
+  const [avgMorale, setAvgMorale] = useState<number | null>(null);
+  const [avgStress, setAvgStress] = useState<number | null>(null);
+  const [trend, setTrend] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +25,17 @@ export function useSurveyStatus() {
         getSurveyHistory(),
       ]);
       if (sRes.data.succeeded) setStatus(sRes.data.data);
-      if (hRes.data.succeeded) setHistory(hRes.data.data || []);
+      if (hRes.data.succeeded && hRes.data.data) {
+        const data = hRes.data.data;
+        const mappedResponses = (data.responses || []).map((r: SurveyResponseDto) => ({
+          ...r,
+          submittedAt: r.createdAt || r.submittedAt,
+        }));
+        setHistory(mappedResponses);
+        setAvgMorale(data.avgMoraleScore);
+        setAvgStress(data.avgStressScore);
+        setTrend(data.trend);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load survey status",
