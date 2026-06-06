@@ -11,6 +11,7 @@ import {
   markAllNotificationsAsRead,
   getNotifications,
   apiClient,
+  type ApiResponse,
 } from "@/lib/api";
 
 interface NotificationsPanelProps {

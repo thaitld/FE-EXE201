@@ -60,7 +60,7 @@ export default function BulkCreateTaskPage() {
         const membersPromises = activeTeams.map(async (team: any) => {
           try {
             const perf = await getTeamPerformance(team.id)
-            return (perf.members ?? []).map((m: any) => ({
+            return (perf?.members ?? []).map((m: any) => ({
               id: m.userId,
               name: m.userName,
               teamName: team.name,
@@ -157,6 +157,10 @@ export default function BulkCreateTaskPage() {
 
       const response = await bulkCreateTasks(payload)
       
+      if (!response) {
+        throw new Error('Dữ liệu phản hồi rỗng từ server.')
+      }
+
       if (response.errors && response.errors.length > 0) {
         setValidationErrors(response.errors)
         setError(`Không thể tạo. Có ${response.errors.length} lỗi xác thực dữ liệu từ server.`)
