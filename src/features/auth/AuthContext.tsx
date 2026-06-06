@@ -17,6 +17,7 @@ import {
   useNotificationStore,
   type NotificationDto,
 } from "@/features/notifications/notificationStore";
+import { normalizeIncomingNotification } from "@/features/notifications/notify";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -119,15 +120,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn("Failed to load alerts count:", err);
       }
 
-      // Load notification history
+      // Load notification/alert history
       try {
-        const notifResp =
-          await apiClient.get<ApiResponse<NotificationDto[]>>("/notifications");
+        const [notifResp, alertResp] = await Promise.all([
+          apiClient.get<ApiResponse<any>>("/notifications"),
+          apiClient.get<ApiResponse<any[]>>("/alerts").catch(() => ({ data: { succeeded: true, data: [] } }))
+        ]);
+
+        let mergedList: any[] = [];
+
         if (notifResp.data?.succeeded && notifResp.data.data) {
-          useNotificationStore.getState().setInitialList(notifResp.data.data);
+          const rawNotifs = Array.isArray(notifResp.data.data)
+            ? notifResp.data.data
+            : (notifResp.data.data.items || []);
+          mergedList.push(
+            ...rawNotifs.map((n: any) => ({
+              ...normalizeIncomingNotification(n),
+              isAlert: false
+            }))
+          );
         }
+
+        if (alertResp.data?.succeeded && alertResp.data.data) {
+          mergedList.push(
+            ...alertResp.data.data.map((alert: any) => ({
+              id: alert.id,
+              userId: alert.userId || "",
+              title: alert.alertType || "Alert",
+              message: alert.message,
+              type: alert.severity === "HIGH" ? "ERROR" : alert.severity === "MEDIUM" ? "WARNING" : "INFO",
+              severity: alert.severity?.toLowerCase() === "high" ? "high" : alert.severity?.toLowerCase() === "medium" ? "medium" : "low",
+              isRead: alert.isRead,
+              createdAt: alert.createdAt || new Date().toISOString(),
+              isAlert: true
+            }))
+          );
+        }
+
+        mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        useNotificationStore.getState().setInitialList(mergedList);
       } catch (err) {
-        console.warn("Failed to load notifications:", err);
+        console.warn("Failed to load combined notifications:", err);
       }
     } catch {
       setUser(null);

@@ -147,25 +147,25 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
   if (isLoading && !dashboard)
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Controls</p>
-              <h3 className="text-lg font-semibold text-slate-900">Period and scope</h3>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Controls</p>
+              <h3 className="text-sm font-bold text-slate-700">Period and scope</h3>
             </div>
             <div className="flex flex-wrap items-end gap-3 opacity-60">
-              <div className="h-10 w-56 rounded-xl bg-slate-100" />
-              <div className="h-10 w-28 rounded-xl bg-slate-100" />
-              <div className="h-10 w-20 rounded-xl bg-slate-100" />
-              <div className="h-10 w-28 rounded-xl bg-slate-100" />
+              <div className="h-9 w-56 rounded-xl bg-slate-100" />
+              <div className="h-9 w-28 rounded-xl bg-slate-100" />
+              <div className="h-9 w-20 rounded-xl bg-slate-100" />
+              <div className="h-9 w-28 rounded-xl bg-slate-100" />
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border border-white/5 bg-white/4 p-5">
-              <div className="h-6 w-24 rounded bg-slate-100 mb-3" />
+            <div key={i} className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+              <div className="h-4 w-24 rounded bg-slate-100 mb-3" />
               <div className="h-8 w-40 rounded bg-slate-100 mb-2" />
               <div className="h-3 w-20 rounded bg-slate-100" />
             </div>
@@ -173,33 +173,33 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
+          <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm xl:col-span-2">
             <div className="h-40 rounded bg-slate-100" />
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
             <div className="h-40 rounded bg-slate-100" />
           </div>
         </div>
       </div>
     )
-  if (error && !dashboard) return <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700">{error}</div>
+  if (error && !dashboard) return <div className="rounded-xl border border-rose-100 bg-rose-50/50 p-4 text-rose-600 font-medium text-sm">{error}</div>
   
   if (!initialDashboard && !dashboard && selectedDepartmentId != null) {
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Controls</p>
-              <h3 className="text-lg font-semibold text-slate-900">Period and scope</h3>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Controls</p>
+              <h3 className="text-sm font-bold text-slate-700">Period and scope</h3>
             </div>
             <div className="flex flex-wrap items-end gap-3">
-              <label className="space-y-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</span>
+              <label className="space-y-1.5 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Department</span>
                 <select
                   value={selectedDepartmentId ?? ''}
                   onChange={(e) => setSelectedDepartmentId(e.target.value ? Number(e.target.value) : null)}
-                  className="min-w-56 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  className="min-w-56 h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition"
                 >
                   <option value="">Select department</option>
                   {departments.map((dept) => (
@@ -209,12 +209,12 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
                   ))}
                 </select>
               </label>
-              <label className="space-y-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Month</span>
+              <label className="space-y-1.5 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Month</span>
                 <select
                   value={month}
                   onChange={(e) => setMonth(Number(e.target.value))}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition"
                 >
                   {MONTH_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -223,12 +223,12 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
                   ))}
                 </select>
               </label>
-              <label className="space-y-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Year</span>
+              <label className="space-y-1.5 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Year</span>
                 <select
                   value={year}
                   onChange={(e) => setYear(Number(e.target.value))}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition"
                 >
                   {yearRange.map((y) => (
                     <option key={y} value={y}>
@@ -240,9 +240,9 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
               <button
                 type="button"
                 onClick={() => setRefreshKey((k) => k + 1)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 h-9 text-xs font-bold text-slate-600 transition hover:bg-slate-50 active:scale-95"
               >
-                <RefreshCw size={14} />
+                <RefreshCw size={13} className="text-slate-400" />
                 Refresh
               </button>
             </div>
@@ -264,19 +264,19 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
     <div className="space-y-6">
       {/* Controls visible when dashboard is loaded so user can change period or copy link */}
       {!initialDashboard && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Controls</p>
-              <h3 className="text-lg font-semibold text-slate-900">Period and scope</h3>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Controls</p>
+              <h3 className="text-sm font-bold text-slate-700">Period and scope</h3>
             </div>
             <div className="flex flex-wrap items-end gap-3">
-              <label className="space-y-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</span>
+              <label className="space-y-1.5 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Department</span>
                 <select
                   value={selectedDepartmentId ?? ''}
                   onChange={(e) => setSelectedDepartmentId(e.target.value ? Number(e.target.value) : null)}
-                  className="min-w-56 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  className="min-w-56 h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition"
                 >
                   <option value="">Select department</option>
                   {departments.map((dept) => (
@@ -286,12 +286,12 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
                   ))}
                 </select>
               </label>
-              <label className="space-y-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Month</span>
+              <label className="space-y-1.5 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Month</span>
                 <select
                   value={month}
                   onChange={(e) => setMonth(Number(e.target.value))}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition"
                 >
                   {MONTH_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -300,12 +300,12 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
                   ))}
                 </select>
               </label>
-              <label className="space-y-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Year</span>
+              <label className="space-y-1.5 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Year</span>
                 <select
                   value={year}
                   onChange={(e) => setYear(Number(e.target.value))}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition"
                 >
                   {yearRange.map((y) => (
                     <option key={y} value={y}>
@@ -317,10 +317,9 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
               <button
                 type="button"
                 onClick={() => setRefreshKey((k) => k + 1)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 
-                px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 h-9 text-xs font-bold text-slate-600 transition hover:bg-slate-50 active:scale-95"
               >
-                <RefreshCw size={14} />
+                <RefreshCw size={13} className="text-slate-400" />
                 Refresh
               </button>
             </div>
@@ -334,55 +333,57 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-          
-          <div className="mt-6">
-            <SimpleTrendChart title="Monthly trend" description={`${dashboard.departmentName} ·
-             ${dashboard.month}/${dashboard.year}`} points={dashboard.monthlyTrend} />
+        <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm xl:col-span-2">
+          <div className="mt-2">
+            <SimpleTrendChart title="Monthly trend" description={`${dashboard.departmentName} · ${dashboard.month}/${dashboard.year}`} points={dashboard.monthlyTrend} />
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
+        <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-50">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Burnout counts</h3>
-              <p className="text-sm text-slate-500">High / medium risk overview.</p>
+              <h3 className="text-sm font-bold text-slate-700">Burnout counts</h3>
+              <p className="text-xs text-slate-400">High / medium risk overview.</p>
             </div>
-            <Brain size={18} className="text-slate-400" />
+            <div className="rounded-lg bg-slate-50 p-1.5">
+              <Brain size={15} className="text-slate-500" />
+            </div>
           </div>
 
-          <div className="mt-5 space-y-3">
-            <StatRow label="High risk" value={dashboard.highRiskBurnoutCount} tone="text-rose-600" />
-            <StatRow label="Medium risk" value={dashboard.mediumRiskBurnoutCount} tone="text-amber-600" />
-            <StatRow label="Department" value={dashboard.departmentName} tone="text-slate-800" />
+          <div className="mt-5 space-y-2.5">
+            <StatRow label="High risk" value={dashboard.highRiskBurnoutCount} tone="text-rose-600 font-bold" />
+            <StatRow label="Medium risk" value={dashboard.mediumRiskBurnoutCount} tone="text-amber-600 font-bold" />
+            <StatRow label="Department" value={dashboard.departmentName} tone="text-slate-700 font-semibold" />
           </div>
         </section>
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <div className="flex items-center justify-between gap-4">
+        <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm xl:col-span-2">
+          <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-50">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Teams</h3>
-              <p className="text-sm text-slate-500">KPI theo từng team trong phòng ban.</p>
+              <h3 className="text-sm font-bold text-slate-700">Teams</h3>
+              <p className="text-xs text-slate-400">KPI theo từng team trong phòng ban.</p>
             </div>
-            <Building2 size={18} className="text-slate-400" />
+            <div className="rounded-lg bg-slate-50 p-1.5">
+              <Building2 size={15} className="text-slate-500" />
+            </div>
           </div>
 
           <div className="mt-5 space-y-3">
             {dashboard.teams.length > 0 ? (
               dashboard.teams.map((team) => (
-                <div key={team.teamId} className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div key={team.teamId} className="rounded-xl border border-slate-100 bg-white p-4 transition-colors hover:shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="font-semibold text-slate-900">{team.teamName}</p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="font-bold text-slate-700 text-sm">{team.teamName}</p>
+                      <p className="mt-1 text-xs text-slate-400 font-semibold">
                         {team.avgEfficiencyLabel} · {formatPercent(team.avgEfficiencyRatio)}
                       </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm sm:min-w-[16rem]">
-                      <SmallStat label="Morale" value={team.avgMoraleScore != null ? team.avgMoraleScore.toFixed(2) : '-'} />
-                      <SmallStat label="Stress" value={team.avgStressScore != null ? team.avgStressScore.toFixed(2) : '-'} />
+                    <div className="grid grid-cols-2 gap-2 text-xs sm:min-w-[16rem]">
+                      <SmallStat label="Morale" value={team.avgMoraleScore != null ? team.avgMoraleScore.toFixed(1) : '-'} />
+                      <SmallStat label="Stress" value={team.avgStressScore != null ? team.avgStressScore.toFixed(1) : '-'} />
                       <SmallStat label="Members" value={team.activeMembers != null ? String(team.activeMembers) : '-'} />
                       <SmallStat label="High risk" value={team.highRiskBurnoutCount != null ? String(team.highRiskBurnoutCount) : '-'} />
                     </div>
@@ -395,27 +396,33 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
+        <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-50">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Recent alerts</h3>
-              <p className="text-sm text-slate-500">Burnout alerts gần đây.</p>
+              <h3 className="text-sm font-bold text-slate-700">Recent alerts</h3>
+              <p className="text-xs text-slate-400">Burnout alerts gần đây.</p>
             </div>
-            <AlertTriangle size={18} className="text-slate-400" />
+            <div className="rounded-lg bg-slate-50 p-1.5">
+              <AlertTriangle size={15} className="text-slate-500" />
+            </div>
           </div>
 
           <div className="mt-5 space-y-3">
             {dashboard.recentHighRiskAlerts.length > 0 ? (
-              dashboard.recentHighRiskAlerts.map((alert) => (
-                <div key={alert.id} className={`rounded-2xl border border-slate-200 bg-white px-4 py-3 ${alert.riskLevel ?? ''}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold">{alert.userName}</p>
-                    <span className="text-[11px] font-bold uppercase tracking-wide">{alert.riskLevel}</span>
+              dashboard.recentHighRiskAlerts.map((alert) => {
+                const level = (alert.riskLevel ?? '').toLowerCase()
+                const c = burnoutConfig[level === 'high' ? 'high' : level === 'medium' ? 'medium' : 'low'] ?? burnoutConfig.resolved
+                return (
+                  <div key={alert.id} className={`rounded-xl border px-4 py-3 shadow-sm ${c.bg}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-xs font-bold ${c.text}`}>{alert.userName}</p>
+                      <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${c.text} bg-slate-50`}>{alert.riskLevel}</span>
+                    </div>
+                    <p className="mt-1.5 text-xs text-slate-600 font-medium leading-relaxed">{alert.message}</p>
+                    <p className="mt-2 text-[9px] text-slate-400 font-semibold">{new Date(alert.detectedDate).toLocaleString('vi-VN')}</p>
                   </div>
-                  <p className="mt-1 text-sm">{alert.message}</p>
-                  <p className="mt-2 text-xs opacity-80">{new Date(alert.detectedDate).toLocaleString('vi-VN')}</p>
-                </div>
-              ))
+                )
+              })
             ) : (
               <EmptyBlock message="No recent high-risk alerts." />
             )}
@@ -423,28 +430,34 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
         </section>
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
+      <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-50">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Unread alerts</h3>
-            <p className="text-sm text-slate-500">Thông báo chưa đọc trong dashboard phòng ban.</p>
+            <h3 className="text-sm font-bold text-slate-700">Unread alerts</h3>
+            <p className="text-xs text-slate-400">Thông báo chưa đọc trong dashboard phòng ban.</p>
           </div>
-          <ArrowUpRight size={18} className="text-slate-400" />
+          <div className="rounded-lg bg-slate-50 p-1.5">
+            <ArrowUpRight size={15} className="text-slate-500" />
+          </div>
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 xl:grid-cols-2">
-            {dashboard.unreadAlerts.length > 0 ? (
-            dashboard.unreadAlerts.map((alert) => (
-              <div key={alert.id} className={`rounded-2xl border border-slate-200 bg-white px-4 py-3 ${alert.severity ?? ''}`}>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold">{alert.alertType}</p>
-                  <span className="text-[11px] font-bold uppercase tracking-wide">{alert.severity}</span>
+          {dashboard.unreadAlerts.length > 0 ? (
+            dashboard.unreadAlerts.map((alert) => {
+              const severity = (alert.severity ?? '').toUpperCase()
+              const style = alertSeverityStyle[severity] ?? defaultAlertStyle
+              return (
+                <div key={alert.id} className={`rounded-xl border px-4 py-3 shadow-sm ${style.border} ${style.bg}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={`text-xs font-bold uppercase tracking-wider ${style.text}`}>{alert.alertType}</p>
+                    <span className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${style.badge}`}>{alert.severity}</span>
+                  </div>
+                  <p className={`mt-1.5 text-xs leading-relaxed ${style.text} font-medium`}>{alert.message}</p>
                 </div>
-                <p className="mt-1 text-sm">{alert.message}</p>
-              </div>
-            ))
+              )
+            })
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 xl:col-span-2">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-xs text-slate-400 text-center font-medium xl:col-span-2">
               No unread alerts.
             </div>
           )}
@@ -454,8 +467,22 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
   )
 }
 
+const burnoutConfig = {
+  high:     { dot: 'bg-rose-500',    text: 'text-rose-600',    bg: 'bg-rose-50/50 border border-rose-100/60' },
+  medium:   { dot: 'bg-amber-500',   text: 'text-amber-600',   bg: 'bg-amber-50/50 border border-amber-100/60' },
+  low:      { dot: 'bg-emerald-500', text: 'text-emerald-600', bg: 'bg-emerald-50/50 border border-emerald-100/60' },
+  resolved: { dot: 'bg-slate-400',   text: 'text-slate-500',   bg: 'bg-slate-50 border border-slate-100' },
+}
+
+const alertSeverityStyle: Record<string, { border: string; bg: string; badge: string; text: string; dot: string }> = {
+  CRITICAL: { border: 'border-rose-100',   bg: 'bg-rose-50/50',   badge: 'bg-rose-100 text-rose-600',   text: 'text-rose-700',   dot: 'bg-rose-500'   },
+  HIGH:     { border: 'border-orange-100', bg: 'bg-orange-50/50', badge: 'bg-orange-100 text-orange-600', text: 'text-orange-700', dot: 'bg-orange-500' },
+  MEDIUM:   { border: 'border-amber-100',  bg: 'bg-amber-50/50',  badge: 'bg-amber-100 text-amber-600',  text: 'text-amber-700',  dot: 'bg-amber-500'  },
+  LOW:      { border: 'border-slate-100',   bg: 'bg-slate-50/50',  badge: 'bg-slate-100 text-slate-500',  text: 'text-slate-600',  dot: 'bg-slate-400'  },
+}
+const defaultAlertStyle = alertSeverityStyle.LOW
+
 function formatPercent(value?: number | null) {
   if (value == null || Number.isNaN(value)) return '-'
   return `${(value * 100).toFixed(1)}%`
 }
-

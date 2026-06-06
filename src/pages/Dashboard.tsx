@@ -364,17 +364,6 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
 
         {/* Content Area */}
         <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-slate-600">
-                Rendering {currentMeta.title.toLowerCase()} panel with extracted
-                components.
-              </p>
-            </div>
-            {/* <Button className="bg-slate-900 hover:bg-slate-800 text-white">
-              Export
-            </Button> */}
-          </div>
 
           {getPanelComponent(activeTab, isEmployee(), isManager())}
         </div>

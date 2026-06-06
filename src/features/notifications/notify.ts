@@ -41,9 +41,10 @@ const inferSeverity = (
 };
 
 export const normalizeIncomingNotification = (
-  notification: IncomingNotification,
+  notification: any,
 ): NotificationDto => ({
   ...notification,
+  taskInstanceId: notification.taskInstanceId ?? notification.relatedTaskId ?? notification.RelatedTaskId,
   type: notification.type as NotificationDto["type"],
   severity: inferSeverity(notification.type as NotificationDto["type"]),
 });

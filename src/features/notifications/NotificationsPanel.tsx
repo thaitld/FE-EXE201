@@ -10,6 +10,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   getNotifications,
+  apiClient,
 } from "@/lib/api";
 
 interface NotificationsPanelProps {
@@ -32,18 +33,51 @@ export default function NotificationsPanel({
 
     (async () => {
       try {
-        const res = await getNotifications({ unreadOnly: false, limit: 30 });
-        if (!cancelled && res.data.succeeded && res.data.data) {
-          setInitialList(
-            res.data.data.map((notification) =>
-              normalizeIncomingNotification(
-                notification as IncomingNotification,
-              ),
-            ),
+        const [notifRes, alertRes] = await Promise.all([
+          getNotifications({ unreadOnly: false, limit: 30 }),
+          apiClient.get<ApiResponse<any[]>>("/alerts").catch(() => ({ data: { succeeded: true, data: [] } }))
+        ]);
+
+        if (cancelled) return;
+
+        let mergedList: any[] = [];
+
+        // 1. Process notifications
+        if (notifRes.data?.succeeded && notifRes.data.data) {
+          const rawNotifs = Array.isArray(notifRes.data.data)
+            ? notifRes.data.data
+            : ((notifRes.data.data as any)?.items || []);
+          mergedList.push(
+            ...rawNotifs.map((n: any) => ({
+              ...normalizeIncomingNotification(n),
+              isAlert: false
+            }))
           );
         }
+
+        // 2. Process alerts
+        if (alertRes.data?.succeeded && alertRes.data.data) {
+          mergedList.push(
+            ...alertRes.data.data.map((alert: any) => ({
+              id: alert.id,
+              userId: alert.userId || "",
+              title: alert.alertType || "Alert",
+              message: alert.message,
+              type: alert.severity === "HIGH" ? "ERROR" : alert.severity === "MEDIUM" ? "WARNING" : "INFO",
+              severity: alert.severity?.toLowerCase() === "high" ? "high" : alert.severity?.toLowerCase() === "medium" ? "medium" : "low",
+              isRead: alert.isRead,
+              createdAt: alert.createdAt || new Date().toISOString(),
+              isAlert: true
+            }))
+          );
+        }
+
+        // 3. Sort by Date Descending
+        mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        setInitialList(mergedList);
       } catch (err) {
-        console.error("Failed to load notifications", err);
+        console.error("Failed to load notifications and alerts", err);
       }
     })();
 
@@ -132,24 +166,59 @@ export default function NotificationsPanel({
                 // optimistic UI
                 markAllRead();
                 try {
-                  await markAllNotificationsAsRead();
+                  const alertIds = notifications
+                    .filter((n) => (n as any).isAlert && !n.isRead)
+                    .map((n) => n.id);
+                  const hasUnreadNotifs = notifications.some(
+                    (n) => !(n as any).isAlert && !n.isRead
+                  );
+
+                  const promises = [];
+                  if (alertIds.length > 0) {
+                    promises.push(apiClient.patch("/alerts/read", { alertIds }));
+                  }
+                  if (hasUnreadNotifs) {
+                    promises.push(markAllNotificationsAsRead());
+                  }
+
+                  await Promise.all(promises);
                 } catch (err) {
                   console.error("Failed to mark all read", err);
                   // revert by refetching latest list from server
                   try {
-                    const res = await getNotifications({
-                      unreadOnly: false,
-                      limit: 30,
-                    });
-                    if (res.data.succeeded && res.data.data) {
-                      setInitialList(
-                        res.data.data.map((notification) =>
-                          normalizeIncomingNotification(
-                            notification as IncomingNotification,
-                          ),
-                        ),
+                    const [notifRes, alertRes] = await Promise.all([
+                      getNotifications({ unreadOnly: false, limit: 30 }),
+                      apiClient.get<ApiResponse<any[]>>("/alerts").catch(() => ({ data: { succeeded: true, data: [] } }))
+                    ]);
+                    let mergedList: any[] = [];
+                    if (notifRes.data?.succeeded && notifRes.data.data) {
+                      const rawNotifs = Array.isArray(notifRes.data.data)
+                        ? notifRes.data.data
+                        : ((notifRes.data.data as any)?.items || []);
+                      mergedList.push(
+                        ...rawNotifs.map((n: any) => ({
+                          ...normalizeIncomingNotification(n),
+                          isAlert: false
+                        }))
                       );
                     }
+                    if (alertRes.data?.succeeded && alertRes.data.data) {
+                      mergedList.push(
+                        ...alertRes.data.data.map((alert: any) => ({
+                          id: alert.id,
+                          userId: alert.userId || "",
+                          title: alert.alertType || "Alert",
+                          message: alert.message,
+                          type: alert.severity === "HIGH" ? "ERROR" : alert.severity === "MEDIUM" ? "WARNING" : "INFO",
+                          severity: alert.severity?.toLowerCase() === "high" ? "high" : alert.severity?.toLowerCase() === "medium" ? "medium" : "low",
+                          isRead: alert.isRead,
+                          createdAt: alert.createdAt || new Date().toISOString(),
+                          isAlert: true
+                        }))
+                      );
+                    }
+                    mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                    setInitialList(mergedList);
                   } catch (e) {
                     console.error(
                       "Failed to reload notifications after revert",
@@ -198,7 +267,11 @@ export default function NotificationsPanel({
                     if (!notification.isRead) markRead(notification.id);
 
                     try {
-                      await markNotificationAsRead(notification.id);
+                      if ((notification as any).isAlert) {
+                        await apiClient.patch("/alerts/read", { alertIds: [notification.id] });
+                      } else {
+                        await markNotificationAsRead(notification.id);
+                      }
                     } catch (err) {
                       console.error("Failed to mark notification as read", err);
                       // rollback optimistic change
@@ -210,19 +283,39 @@ export default function NotificationsPanel({
                       } catch (e) {
                         // as a fallback, refetch full list
                         try {
-                          const res = await getNotifications({
-                            unreadOnly: false,
-                            limit: 30,
-                          });
-                          if (res.data.succeeded && res.data.data) {
-                            setInitialList(
-                              res.data.data.map((notification) =>
-                                normalizeIncomingNotification(
-                                  notification as IncomingNotification,
-                                ),
-                              ),
+                          const [notifRes, alertRes] = await Promise.all([
+                            getNotifications({ unreadOnly: false, limit: 30 }),
+                            apiClient.get<ApiResponse<any[]>>("/alerts").catch(() => ({ data: { succeeded: true, data: [] } }))
+                          ]);
+                          let mergedList: any[] = [];
+                          if (notifRes.data?.succeeded && notifRes.data.data) {
+                            const rawList = Array.isArray(notifRes.data.data)
+                              ? notifRes.data.data
+                              : ((notifRes.data.data as any)?.items || []);
+                            mergedList.push(
+                              ...rawList.map((n: any) => ({
+                                ...normalizeIncomingNotification(n),
+                                isAlert: false
+                              }))
                             );
                           }
+                          if (alertRes.data?.succeeded && alertRes.data.data) {
+                            mergedList.push(
+                              ...alertRes.data.data.map((alert: any) => ({
+                                id: alert.id,
+                                userId: alert.userId || "",
+                                title: alert.alertType || "Alert",
+                                message: alert.message,
+                                type: alert.severity === "HIGH" ? "ERROR" : alert.severity === "MEDIUM" ? "WARNING" : "INFO",
+                                severity: alert.severity?.toLowerCase() === "high" ? "high" : alert.severity?.toLowerCase() === "medium" ? "medium" : "low",
+                                isRead: alert.isRead,
+                                createdAt: alert.createdAt || new Date().toISOString(),
+                                isAlert: true
+                              }))
+                            );
+                          }
+                          mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                          setInitialList(mergedList);
                         } catch (ee) {
                           console.error(
                             "Failed to reload notifications after rollback",

@@ -10,13 +10,15 @@ export function MetricCard({
   iconClassName?: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/4 p-5">
+    <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs font-medium uppercase tracking-widest text-slate-400">{label}</p>
-        <Icon size={16} className={iconClassName} />
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+        <div className="rounded-lg bg-slate-50 p-1.5">
+          <Icon size={15} className={iconClassName} />
+        </div>
       </div>
-      <p className="mt-4 text-3xl font-bold tracking-tight text-white">{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{hint}</p>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-slate-800">{value}</p>
+      <p className="mt-1 text-xs text-slate-400">{hint}</p>
     </div>
   )
 }
@@ -24,9 +26,9 @@ export function MetricCard({
 // ─── InfoPill ─────────────────────────────────────────────────────────────────
 export function InfoPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-white/8 bg-white/5 px-4 py-3">
-      <p className="text-[10px] uppercase tracking-widest text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-100">{value}</p>
+    <div className="rounded-lg border border-slate-100 bg-slate-50/30 px-4 py-2.5">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-0.5 text-xs font-semibold text-slate-700">{value}</p>
     </div>
   )
 }
@@ -34,9 +36,9 @@ export function InfoPill({ label, value }: { label: string; value: string }) {
 // ─── StatRow ──────────────────────────────────────────────────────────────────
 export function StatRow({ label, value, tone }: { label: string; value: number | string; tone: string }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/4 px-4 py-3">
-      <span className="text-sm text-slate-400">{label}</span>
-      <span className={`text-lg font-bold ${tone}`}>{value}</span>
+    <div className="flex items-center justify-between rounded-xl border border-slate-50 bg-white px-4 py-3 shadow-sm">
+      <span className="text-xs font-medium text-slate-500">{label}</span>
+      <span className={`text-sm font-bold ${tone}`}>{value}</span>
     </div>
   )
 }
@@ -44,9 +46,9 @@ export function StatRow({ label, value, tone }: { label: string; value: number |
 // ─── SmallStat ────────────────────────────────────────────────────────────────
 export function SmallStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white/5 px-3 py-2">
-      <p className="text-[10px] text-slate-500">{label}</p>
-      <p className="font-semibold text-slate-100">{value}</p>
+    <div className="rounded-lg border border-slate-100/60 bg-slate-50/50 px-3 py-2 text-center">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="text-xs font-bold text-slate-700 mt-0.5">{value}</p>
     </div>
   )
 }
@@ -54,7 +56,7 @@ export function SmallStat({ label, value }: { label: string; value: string }) {
 // ─── EmptyBlock ───────────────────────────────────────────────────────────────
 export function EmptyBlock({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-white/10 bg-white/3 px-4 py-5 text-sm text-slate-500">
+    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-sm text-slate-400 text-center font-medium">
       {message}
     </div>
   )
@@ -63,9 +65,9 @@ export function EmptyBlock({ message }: { message: string }) {
 // ─── HeroChip ─────────────────────────────────────────────────────────────────
 export function HeroChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
-      <p className="text-[10px] uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+    <div className="rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-0.5 text-sm font-bold text-slate-800">{value}</p>
     </div>
   )
 }
@@ -107,21 +109,21 @@ export function SimpleTrendChart({
     <div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{title}</p>
-          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-700">{title}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{description}</p>
         </div>
-        <TrendingUp size={16} className="text-cyan-400" />
+        <TrendingUp size={16} className="text-cyan-600" />
       </div>
 
       {points.length === 0 ? (
-        <div className="mt-5 flex h-40 items-center justify-center text-sm text-slate-500">Không có dữ liệu.</div>
+        <div className="mt-5 flex h-40 items-center justify-center text-sm text-slate-400 rounded-xl border border-dashed border-slate-200">Không có dữ liệu.</div>
       ) : (
         <div className="mt-5 overflow-x-auto">
           <svg width={svgW} height={SVG_H} className="block">
             <defs>
               <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                <stop offset="0%" stopColor="#0891b2" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="#0891b2" stopOpacity="0" />
               </linearGradient>
             </defs>
 
@@ -130,7 +132,7 @@ export function SimpleTrendChart({
               const y = CHART_H - CHART_H * 0.85 * f
               return (
                 <line key={f} x1={0} y1={y} x2={svgW} y2={y}
-                  stroke="#334155" strokeWidth={1} strokeDasharray="4 4" />
+                  stroke="#f1f5f9" strokeWidth={1} />
               )
             })}
 
@@ -139,15 +141,15 @@ export function SimpleTrendChart({
 
             {/* Line */}
             {linePath && (
-              <path d={linePath} fill="none" stroke="#22d3ee" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+              <path d={linePath} fill="none" stroke="#0891b2" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
             )}
 
             {/* Dots + labels */}
             {coords.map(({ x, y, p }) => (
               <g key={p.date}>
-                <circle cx={x} cy={y} r={3.5} fill="#22d3ee" />
-                <circle cx={x} cy={y} r={6} fill="#22d3ee" fillOpacity={0.15} />
-                <text x={x} y={CHART_H + 16} textAnchor="middle" fontSize={10} fill="#64748b">
+                <circle cx={x} cy={y} r={3} fill="#0891b2" />
+                <circle cx={x} cy={y} r={5} fill="#0891b2" fillOpacity={0.15} />
+                <text x={x} y={CHART_H + 16} textAnchor="middle" fontSize={10} fill="#94a3b8" fontWeight={500}>
                   {new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
                 </text>
               </g>
@@ -194,26 +196,26 @@ export function TripleTrendChart({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center justify-between gap-4 flex-wrap pb-2 border-b border-slate-50">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{title}</p>
-          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-700">{title}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{description}</p>
         </div>
-        <div className="flex items-center gap-4 text-[11px]">
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="h-0.5 w-4 rounded-full bg-cyan-400 inline-block" />Efficiency
+        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-wider">
+          <span className="flex items-center gap-1.5 text-slate-500">
+            <span className="h-2 w-2 rounded bg-cyan-500 inline-block" />Efficiency
           </span>
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="h-0.5 w-4 rounded-full bg-emerald-400 inline-block" />Morale
+          <span className="flex items-center gap-1.5 text-slate-500">
+            <span className="h-2 w-2 rounded bg-emerald-500 inline-block" />Morale
           </span>
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="h-0.5 w-4 rounded-full bg-amber-400 inline-block" />Stress
+          <span className="flex items-center gap-1.5 text-slate-500">
+            <span className="h-2 w-2 rounded bg-amber-500 inline-block" />Stress
           </span>
         </div>
       </div>
 
       {points.length === 0 ? (
-        <div className="mt-6 flex h-40 items-center justify-center rounded-xl border border-dashed border-white/10 text-sm text-slate-500">
+        <div className="mt-6 flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400">
           Chưa có dữ liệu xu hướng.
         </div>
       ) : (
@@ -221,16 +223,16 @@ export function TripleTrendChart({
           <svg width={svgW} height={SVG_H} className="block">
             <defs>
               <linearGradient id={`eff-${uid}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.20" />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.12" />
+                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
               </linearGradient>
               <linearGradient id={`mor-${uid}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34d399" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.10" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
               </linearGradient>
               <linearGradient id={`str-${uid}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.10" />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
               </linearGradient>
             </defs>
 
@@ -239,7 +241,7 @@ export function TripleTrendChart({
               const y = CHART_H - CHART_H * 0.88 * f
               return (
                 <line key={f} x1={0} y1={y} x2={svgW} y2={y}
-                  stroke="#1e293b" strokeWidth={1} strokeDasharray="4 3" />
+                  stroke="#f1f5f9" strokeWidth={1} />
               )
             })}
 
@@ -249,19 +251,19 @@ export function TripleTrendChart({
             {stressPath.area && <path d={stressPath.area} fill={`url(#str-${uid})`} />}
 
             {/* Lines */}
-            {effPath.line    && <path d={effPath.line}    fill="none" stroke="#22d3ee" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
-            {moralePath.line && <path d={moralePath.line} fill="none" stroke="#34d399" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
-            {stressPath.line && <path d={stressPath.line} fill="none" stroke="#fbbf24" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
+            {effPath.line    && <path d={effPath.line}    fill="none" stroke="#06b6d4" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
+            {moralePath.line && <path d={moralePath.line} fill="none" stroke="#10b981" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
+            {stressPath.line && <path d={stressPath.line} fill="none" stroke="#f59e0b" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />}
 
             {/* Dots */}
             {effPath.pts?.map((pt, i) => (
-              <circle key={`e${i}`} cx={pt.x} cy={pt.y} r={3} fill="#22d3ee" />
+              <circle key={`e${i}`} cx={pt.x} cy={pt.y} r={2.5} fill="#06b6d4" />
             ))}
             {moralePath.pts?.map((pt, i) => (
-              <circle key={`m${i}`} cx={pt.x} cy={pt.y} r={3} fill="#34d399" />
+              <circle key={`m${i}`} cx={pt.x} cy={pt.y} r={2.5} fill="#10b981" />
             ))}
             {stressPath.pts?.map((pt, i) => (
-              <circle key={`s${i}`} cx={pt.x} cy={pt.y} r={3} fill="#fbbf24" />
+              <circle key={`s${i}`} cx={pt.x} cy={pt.y} r={2.5} fill="#f59e0b" />
             ))}
 
             {/* Month labels */}
@@ -271,9 +273,9 @@ export function TripleTrendChart({
                 x={i * SLOT_W + SLOT_W / 2}
                 y={CHART_H + 18}
                 textAnchor="middle"
-                fontSize={11}
-                fontWeight={500}
-                fill="#475569"
+                fontSize={10}
+                fontWeight={600}
+                fill="#94a3b8"
               >
                 T{point.month}
               </text>
