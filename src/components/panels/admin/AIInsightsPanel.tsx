@@ -166,7 +166,7 @@ export const AIInsightsPanel = () => {
       const res = await getDeptInsights(Number(selectedDeptId));
       if (res.data.succeeded && res.data.data) {
         // Filter out the latest one from history
-        const filteredHistory = res.data.data.filter((h) => h.generatedAt !== insight?.generatedAt);
+        const filteredHistory = res.data.data.filter((h: DepartmentInsightDto) => h.generatedAt !== insight?.generatedAt);
         setHistory(filteredHistory);
         setShowHistory(true);
       }

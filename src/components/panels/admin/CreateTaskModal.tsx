@@ -80,10 +80,9 @@ export function CreateTaskModal({ onClose, onCreated, defaultTeamId }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [detectedTeamId, setDetectedTeamId] = useState<number | undefined>(undefined);
 
-  // Load task types
   useEffect(() => {
     getTaskTypes(true)
-      .then((res) => {
+      .then((res: any) => {
         if (res.data.succeeded) setTaskTypes(res.data.data ?? []);
       })
       .finally(() => setIsLoadingTypes(false));

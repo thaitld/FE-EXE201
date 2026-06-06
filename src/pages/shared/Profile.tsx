@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Bell, Edit3 } from "lucide-react";
+import { Shield, Bell, Edit3, ArrowLeft, Building, Users, Calendar, Award, Mail } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import ProfileEditModal from "@/features/auth/ProfileEditModal";
 import ChangePasswordModal from "@/features/auth/ChangePasswordModal";
@@ -62,100 +62,172 @@ export default function ProfilePage() {
         await refreshUser();
       }
     } catch {
-      // ignore - refresh will happen later
+      // ignore
     }
   };
 
-  // Keep preview in sync with `user.avatarUrl` so other components' updates reflect here
   React.useEffect(() => {
     if (user?.avatarUrl) {
       setPreviewUrl(user.avatarUrl);
     }
   }, [user?.avatarUrl]);
 
-  return (
-    <div className="max-w-3xl mx-auto">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="flex items-center gap-4 justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center">
-              <AvatarBadge
-                src={previewUrl ?? user?.avatarUrl ?? null}
-                initials={userInitials}
-                onClick={triggerInput}
-              />
-              <input
-                ref={inputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  handleHeaderFile(f);
-                  e.currentTarget.value = "";
-                }}
-              />
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!confirm("Delete avatar and revert to default?")) return;
-                  try {
-                    await apiClient.delete("/users/me/avatar");
-                    setPreviewUrl(null);
-                    await refreshUser();
-                  } catch {
-                    // ignore errors for now; could show toast
-                  }
-                }}
-                className="mt-2 text-sm text-rose-600 hover:underline"
-              >
-                Delete avatar
-              </button>
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-900">
-                {profileName}
-              </h1>
-              <p className="text-sm text-slate-600">
-                {user?.email ?? "unknown@manto.local"}
-              </p>
-              <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
-                <Shield size={14} />
-                Current Role: {profileRole}
-              </div>
-            </div>
+  React.useEffect(() => {
+    if (!user) {
+      window.location.hash = "#/login";
+    }
+  }, [user]);
+
+  const handleBack = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.history.back();
+  };
+
+  const isStandalone = !window.location.hash.startsWith("#/admin") && !window.location.hash.startsWith("#/roles/manager");
+
+  const cardContent = (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] space-y-8 text-slate-700">
+      {/* Header row */}
+      <div className="flex flex-col md:flex-row items-center gap-6 justify-between border-b border-slate-100 pb-8">
+        <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+          <div className="relative group">
+            <AvatarBadge
+              src={previewUrl ?? user?.avatarUrl ?? null}
+              initials={userInitials}
+              onClick={triggerInput}
+            />
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                handleHeaderFile(f);
+                e.currentTarget.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={async () => {
+                if (!confirm("Delete avatar and revert to default?")) return;
+                try {
+                  await apiClient.delete("/users/me/avatar");
+                  setPreviewUrl(null);
+                  await refreshUser();
+                } catch {
+                  // ignore
+                }
+              }}
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white hover:bg-rose-50 border border-slate-200 px-2 py-0.5 rounded-full text-[10px] text-rose-600 whitespace-nowrap hover:text-rose-700 transition-colors shadow-sm"
+            >
+              Delete Avatar
+            </button>
           </div>
-          <div className="flex items-center gap-2">
-            <ProfileEditModalHolder />
-            <ChangePasswordHolder />
+          <div className="space-y-2 mt-4 md:mt-0">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+              {profileName}
+            </h1>
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 items-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-600">
+                <Mail size={14} className="text-slate-400" />
+                {user?.email ?? "unknown@manto.local"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-sm font-semibold text-blue-600">
+                <Shield size={14} />
+                Role: {profileRole}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4">
-          <div className="flex items-center justify-between rounded-lg border border-slate-100 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Bell size={18} />
-              <div>
-                <p className="font-medium">Notifications</p>
-                <p className="text-sm text-slate-500">
-                  Manage your notification settings.
-                </p>
-              </div>
+        <div className="flex flex-row gap-3 w-full md:w-auto justify-center">
+          <ProfileEditModalHolder />
+          <ChangePasswordHolder />
+        </div>
+      </div>
+
+      {/* Details Section */}
+      <div className="space-y-6">
+        <h2 className="text-lg font-semibold text-slate-900">Workplace Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50">
+            <div className="p-3 rounded-xl bg-purple-50 border border-purple-100 text-purple-600">
+              <Building size={20} />
             </div>
-            <button className="text-sm text-slate-600">Manage</button>
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Department</p>
+              <p className="font-semibold text-slate-800 mt-0.5">{user?.departmentName || "No Department Assigned"}</p>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-slate-100 p-4">
-            <p className="font-medium">Account</p>
-            <p className="text-sm text-slate-500 mt-2">
-              Update your profile details and change password.
-            </p>
-            <div className="mt-4 text-sm text-slate-500">
-              Click the avatar above to upload a new image.
+          <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50">
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600">
+              <Users size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Team</p>
+              <p className="font-semibold text-slate-800 mt-0.5">{user?.teamName || "No Team Assigned"}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50">
+            <div className="p-3 rounded-xl bg-orange-50 border border-orange-100 text-orange-600">
+              <Award size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Role In Team</p>
+              <p className="font-semibold text-slate-800 mt-0.5">{user?.roleInTeam || "Member"}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50">
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-600">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Member Since</p>
+              <p className="font-semibold text-slate-800 mt-0.5">
+                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "N/A"}
+              </p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Quick tips / info banner */}
+      <div className="rounded-2xl border border-blue-100 bg-blue-50/30 p-4 flex gap-3 text-sm text-blue-800">
+        <Bell size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
+        <p>
+          To change your display picture, click on the circular avatar badge above. You can upload files up to 5MB (PNG, JPG, JPEG).
+        </p>
+      </div>
+    </div>
+  );
+
+  if (isStandalone) {
+    return (
+      <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Back Button */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors duration-200 text-sm font-medium bg-transparent border-0 cursor-pointer p-0"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+          {cardContent}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      {cardContent}
     </div>
   );
 }
@@ -166,10 +238,10 @@ function ProfileEditModalHolder() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md border px-3 py-2"
+        className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition duration-200"
       >
         <Edit3 size={16} />
-        <span className="hidden sm:inline">Edit profile</span>
+        <span>Edit Profile</span>
       </button>
       <ProfileEditModal open={open} onClose={() => setOpen(false)} />
     </>
@@ -182,9 +254,9 @@ function ChangePasswordHolder() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-white"
+        className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition duration-200"
       >
-        Change password
+        Change Password
       </button>
       <ChangePasswordModal open={open} onClose={() => setOpen(false)} />
     </>
@@ -210,7 +282,7 @@ function AvatarBadge({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex h-20 w-20 items-center justify-center rounded-full overflow-hidden cursor-pointer bg-blue-600 text-2xl font-bold text-white"
+      className="relative flex h-24 w-24 items-center justify-center rounded-full overflow-hidden cursor-pointer bg-gradient-to-br from-blue-500 to-indigo-600 text-3xl font-extrabold text-white border-2 border-white shadow-md hover:brightness-95 transition duration-200"
       title="Click to change avatar"
     >
       {src && !imageFailed ? (
@@ -226,3 +298,4 @@ function AvatarBadge({
     </button>
   );
 }
+

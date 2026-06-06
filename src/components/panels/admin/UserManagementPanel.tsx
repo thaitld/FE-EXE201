@@ -176,7 +176,7 @@ export function UserManagementPanel() {
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          
+
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
@@ -665,8 +665,8 @@ function UserModal({ open, mode, user, userId, roles, teams, onClose, onSaved }:
               </Field>
               <Field label="First name" value={firstName} onChange={setFirstName} placeholder="Nguyen" />
               <Field label="Last name" value={lastName} onChange={setLastName} placeholder="Van A" />
-              <Field label="Role" value={roles.find((role) => role.name === user?.roleName)?.name ?? user?.roleName ?? ''} onChange={() => {}} disabled />
-              <Field label="Team" value={user?.teamName ?? 'No team'} onChange={() => {}} disabled />
+              <Field label="Role" value={roles.find((role) => role.name === user?.roleName)?.name ?? user?.roleName ?? ''} onChange={() => { }} disabled />
+              <Field label="Team" value={user?.teamName ?? 'No team'} onChange={() => { }} disabled />
             </>
           )}
         </div>

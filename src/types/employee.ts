@@ -87,7 +87,7 @@ export interface TaskCommentDto {
   taskInstanceId: number;
   userId: string;
   userName: string;
-  userAvatarInitials: string;
+  userAvatarInitials: string | null;
   content: string;
   createdAt: string;
   isOwnComment: boolean;

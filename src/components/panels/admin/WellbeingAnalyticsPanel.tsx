@@ -1,352 +1,334 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from 'react'
 import {
   Heart,
-  Brain,
-  AlertTriangle,
-  Loader2,
-  RefreshCw,
-  Building2,
-  Users,
-  CalendarDays,
-  Activity,
   Smile,
   Frown,
-} from "lucide-react";
+  Activity,
+  Users,
+  ChevronDown,
+  Sparkles,
+} from 'lucide-react'
 import {
-  getSurveyAggregation,
-  getSurveyAggregationTrend,
   apiClient,
   type ApiResponse,
   type DepartmentDto,
-} from "@/lib/api";
+  type SurveyAggregationDto,
+} from '@/lib/api'
 import {
+  ResponsiveContainer,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
+  CartesianGrid,
+  LineChart,
+  Line,
   Legend,
-  ResponsiveContainer,
-} from "recharts";
+} from 'recharts'
 
 export const WellbeingAnalyticsPanel = () => {
-  const [year, setYear] = useState<number>(2026);
-  const [month, setMonth] = useState<number>(5); // Default to May 2026
-  const [selectedDeptId, setSelectedDeptId] = useState<number | "">("");
-  const [departments, setDepartments] = useState<DepartmentDto[]>([]);
-  const [loadingDepts, setLoadingDepts] = useState(false);
-
-  const [aggData, setAggData] = useState<any | null>(null);
-  const [trendData, setTrendData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load departments
-  const loadDepartments = async () => {
-    setLoadingDepts(true);
-    try {
-      const response = await apiClient.get<ApiResponse<DepartmentDto[]>>("/departments");
-      setDepartments(response.data.data ?? []);
-    } catch {
-      setDepartments([]);
-    } finally {
-      setLoadingDepts(false);
-    }
-  };
-
-  // Load survey aggregation and trend
-  const loadData = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const deptId = selectedDeptId === "" ? undefined : Number(selectedDeptId);
-      
-      const [aggRes, trendRes] = await Promise.all([
-        getSurveyAggregation({ year, month, departmentId: deptId }),
-        getSurveyAggregationTrend(6, deptId),
-      ]);
-
-      if (aggRes.data.succeeded && aggRes.data.data) {
-        setAggData(aggRes.data.data);
-      } else {
-        setAggData(null);
-        setError(aggRes.data.message ?? "Không có dữ liệu khảo sát cho kỳ này.");
-      }
-
-      if (trendRes.data.succeeded && trendRes.data.data) {
-        setTrendData(trendRes.data.data);
-      } else {
-        setTrendData([]);
-      }
-    } catch {
-      setError("Lỗi kết nối với API khảo sát.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [departments, setDepartments] = useState<DepartmentDto[]>([])
+  const [selectedDeptId, setSelectedDeptId] = useState<number | ''>('')
+  
+  const now = useMemo(() => new Date(), [])
+  const [year, setYear] = useState<number>(now.getFullYear())
+  const [month, setMonth] = useState<number>(now.getMonth() + 1)
+  
+  const [monthsTrend, setMonthsTrend] = useState<number>(6)
+  
+  const [aggData, setAggData] = useState<SurveyAggregationDto | null>(null)
+  const [trendData, setTrendData] = useState<SurveyAggregationDto[]>([])
+  
+  const [loadingAgg, setLoadingAgg] = useState<boolean>(false)
+  const [loadingTrend, setLoadingTrend] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    loadDepartments();
-  }, []);
+    // Load departments
+    apiClient
+      .get<ApiResponse<DepartmentDto[]>>('/departments')
+      .then((res) => {
+        const list = res.data.data ?? []
+        setDepartments(list)
+        if (list.length > 0) setSelectedDeptId(list[0].id)
+      })
+      .catch((err) => console.error('Failed to load departments', err))
+  }, [])
 
+  // Fetch Aggregation
   useEffect(() => {
-    loadData();
-  }, [year, month, selectedDeptId]);
+    const fetchAggregation = async () => {
+      setLoadingAgg(true)
+      setError(null)
+      try {
+        const res = await apiClient.get<ApiResponse<SurveyAggregationDto>>('/survey/aggregation', {
+          params: {
+            year,
+            month,
+            departmentId: selectedDeptId || undefined,
+          },
+        })
+        setAggData(res.data.data ?? null)
+      } catch (err: any) {
+        setError(err.message ?? 'Không thể tải thống kê khảo sát.')
+      } finally {
+        setLoadingAgg(false)
+      }
+    }
+    void fetchAggregation()
+  }, [year, month, selectedDeptId])
 
-  // Format distribution for charts
-  const getDistributionData = (dist: any) => {
-    if (!dist) return [];
+  // Fetch Trend
+  useEffect(() => {
+    const fetchTrend = async () => {
+      setLoadingTrend(true)
+      try {
+        const res = await apiClient.get<ApiResponse<SurveyAggregationDto[]>>('/survey/aggregation/trend', {
+          params: {
+            months: monthsTrend,
+            departmentId: selectedDeptId || undefined,
+          },
+        })
+        setTrendData(res.data.data ?? [])
+      } catch (err) {
+        console.error('Failed to load wellbeing trend', err)
+      } finally {
+        setLoadingTrend(false)
+      }
+    }
+    void fetchTrend()
+  }, [monthsTrend, selectedDeptId])
+
+  const moraleDistributionData = useMemo(() => {
+    if (!aggData?.moraleDistribution) return []
+    const dist = aggData.moraleDistribution
     return [
-      { name: "1 - Rất tệ", count: dist.score1 ?? 0 },
-      { name: "2 - Tệ", count: dist.score2 ?? 0 },
-      { name: "3 - Bình thường", count: dist.score3 ?? 0 },
-      { name: "4 - Tốt", count: dist.score4 ?? 0 },
-      { name: "5 - Rất tốt", count: dist.score5 ?? 0 },
-    ];
-  };
+      { score: '1 sao', count: dist.score1 || 0 },
+      { score: '2 sao', count: dist.score2 || 0 },
+      { score: '3 sao', count: dist.score3 || 0 },
+      { score: '4 sao', count: dist.score4 || 0 },
+      { score: '5 sao', count: dist.score5 || 0 },
+    ]
+  }, [aggData])
+
+  const stressDistributionData = useMemo(() => {
+    if (!aggData?.stressDistribution) return []
+    const dist = aggData.stressDistribution
+    return [
+      { score: '1 sao', count: dist.score1 || 0 },
+      { score: '2 sao', count: dist.score2 || 0 },
+      { score: '3 sao', count: dist.score3 || 0 },
+      { score: '4 sao', count: dist.score4 || 0 },
+      { score: '5 sao', count: dist.score5 || 0 },
+    ]
+  }, [aggData])
+
+  const chartTrendData = useMemo(() => {
+    return [...trendData].reverse()
+  }, [trendData])
+
+  const responseRatePct = aggData ? Math.round(aggData.responseRate * 100) : 0
 
   return (
     <div className="space-y-6">
-      {/* Selection controls */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      {/* Filters Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-500">
+            <Heart size={20} />
+          </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Phân tích Sức khỏe & Tâm lý (Wellbeing)</h3>
-            <p className="text-sm text-slate-500">Thống kê chỉ số tinh thần và áp lực của nhân viên từ khảo sát định kỳ.</p>
+            <h3 className="text-lg font-bold text-slate-900">Sức Khỏe & Tinh Thần Tổ Chức</h3>
+            <p className="text-xs text-slate-500">Thống kê chỉ số hài lòng và stress từ khảo sát nhân viên</p>
           </div>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Department select */}
-            <select
-              value={selectedDeptId}
-              onChange={(e) => setSelectedDeptId(e.target.value === "" ? "" : Number(e.target.value))}
-              disabled={loadingDepts || isLoading}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 disabled:opacity-50"
-            >
-              <option value="">Tất cả phòng ban</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Department filter */}
+          <select
+            value={selectedDeptId}
+            onChange={(e) => setSelectedDeptId(e.target.value ? Number(e.target.value) : '')}
+            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 outline-none focus:border-rose-500"
+          >
+            <option value="">Toàn công ty</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
 
-            {/* Month select */}
-            <select
-              value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
-              disabled={isLoading}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 disabled:opacity-50"
-            >
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Tháng {i + 1}
-                </option>
-              ))}
-            </select>
+          {/* Month picker */}
+          <select
+            value={month}
+            onChange={(e) => setMonth(Number(e.target.value))}
+            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 outline-none"
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+              <option key={m} value={m}>
+                Tháng {m}
+              </option>
+            ))}
+          </select>
 
-            {/* Year select */}
-            <select
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-              disabled={isLoading}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 disabled:opacity-50"
-            >
-              {[2025, 2026, 2027].map((y) => (
-                <option key={y} value={y}>
-                  Năm {y}
-                </option>
-              ))}
-            </select>
-
-            {/* Refresh button */}
-            <button
-              type="button"
-              onClick={loadData}
-              disabled={isLoading}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 disabled:opacity-50"
-            >
-              <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
-            </button>
-          </div>
+          {/* Year picker */}
+          <select
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 outline-none"
+          >
+            <option value={year - 1}>{year - 1}</option>
+            <option value={year}>{year}</option>
+            <option value={year + 1}>{year + 1}</option>
+          </select>
         </div>
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-slate-200 bg-white">
-          <div className="flex items-center gap-3 text-slate-600">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Đang tải dữ liệu khảo sát...
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-600">{error}</div>
+      )}
+
+      {/* Primary Metrics Cards */}
+      {aggData && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider">Tinh thần</span>
+              <p className="text-3xl font-extrabold text-slate-900 mt-1">{aggData.avgMoraleScore.toFixed(2)}</p>
+              <span className="text-[10px] text-slate-400 mt-2 block">Thang điểm 1 - 5</span>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Smile size={20} />
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider">Áp lực (Stress)</span>
+              <p className="text-3xl font-extrabold text-slate-900 mt-1">{aggData.avgStressScore.toFixed(2)}</p>
+              <span className="text-[10px] text-slate-400 mt-2 block">Thang điểm 1 - 5</span>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+              <Frown size={20} />
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+            <div className="flex justify-between items-center text-xs text-slate-400 mb-2 font-semibold uppercase tracking-wider">
+              <span>Tỷ lệ tham gia khảo sát</span>
+              <span>{aggData.responseCount} / {aggData.totalEligible} nhân sự</span>
+            </div>
+            <div className="flex items-center gap-3 mt-3">
+              <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full transition-all duration-500"
+                  style={{ width: `${responseRatePct}%` }}
+                />
+              </div>
+              <span className="text-sm font-bold text-rose-600">{responseRatePct}%</span>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Error state */}
-      {error && !isLoading && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-800">
-          <p className="font-semibold">Thông báo</p>
-          <p className="mt-1 text-sm">{error}</p>
-        </div>
-      )}
-
-      {/* Analytics Overview and Charts */}
-      {aggData && !isLoading && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* Metrics summary */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {/* Avg Morale */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Điểm Tinh thần (Morale)</span>
-                <Smile className="text-emerald-500" size={18} />
-              </div>
-              <p className="mt-4 text-3xl font-extrabold text-slate-900">
-                {aggData.avgMoraleScore.toFixed(2)}
-                <span className="text-sm font-normal text-slate-400 ml-1">/ 5</span>
-              </p>
-              <div className="mt-2 text-xs text-slate-500">
-                Càng cao biểu thị tinh thần nhân viên càng tốt
-              </div>
-            </div>
-
-            {/* Avg Stress */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Mức độ Căng thẳng (Stress)</span>
-                <Frown className="text-rose-500" size={18} />
-              </div>
-              <p className="mt-4 text-3xl font-extrabold text-slate-900">
-                {aggData.avgStressScore.toFixed(2)}
-                <span className="text-sm font-normal text-slate-400 ml-1">/ 5</span>
-              </p>
-              <div className="mt-2 text-xs text-slate-500">
-                Càng thấp biểu thị áp lực công việc càng nhẹ nhàng
-              </div>
-            </div>
-
-            {/* Participation */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Tỷ lệ tham gia khảo sát</span>
-                <Users className="text-blue-500" size={18} />
-              </div>
-              <p className="mt-4 text-3xl font-extrabold text-slate-900">
-                {(aggData.responseRate * 100).toFixed(0)}%
-              </p>
-              <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-                <span>Đã nộp: <strong>{aggData.responseCount}</strong></span>
-                <span>Tổng số: <strong>{aggData.totalEligible}</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* Morale and Stress distributions */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Morale distribution chart */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h4 className="font-bold text-slate-900 mb-1">Phân bố điểm Tinh thần</h4>
-              <p className="text-xs text-slate-500 mb-4">Số lượng phản hồi theo thang điểm từ 1 đến 5.</p>
-
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={getDistributionData(aggData.moraleDistribution)}
-                    margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11 }} />
-                    <YAxis allowDecimals={false} stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11 }} />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid #e2e8f0",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
-                    />
-                    <Bar dataKey="count" name="Số nhân viên" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Stress distribution chart */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h4 className="font-bold text-slate-900 mb-1">Phân bố mức độ Căng thẳng</h4>
-              <p className="text-xs text-slate-500 mb-4">Số lượng phản hồi theo thang điểm từ 1 đến 5.</p>
-
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={getDistributionData(aggData.stressDistribution)}
-                    margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11 }} />
-                    <YAxis allowDecimals={false} stroke="#64748b" tick={{ fill: "#64748b", fontSize: 11 }} />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid #e2e8f0",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
-                    />
-                    <Bar dataKey="count" name="Số nhân viên" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Trend Chart */}
-          {trendData.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h4 className="font-bold text-slate-900 mb-1">Xu hướng biến động tâm lý (6 tháng)</h4>
-              <p className="text-xs text-slate-500 mb-6">Theo dõi biến thiên tinh thần và stress trung bình qua các chu kỳ khảo sát.</p>
-
-              <div className="h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={trendData}
-                    margin={{ top: 10, right: 30, left: -20, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="monthLabel" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 12 }} />
-                    <YAxis domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} stroke="#64748b" tick={{ fill: "#64748b", fontSize: 12 }} />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "1px solid #e2e8f0",
-                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.05)",
-                      }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
-                    <Line
-                      type="monotone"
-                      dataKey="avgMoraleScore"
-                      name="Tinh thần trung bình"
-                      stroke="#10b981"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 0, fill: "#10b981" }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="avgStressScore"
-                      name="Stress trung bình"
-                      stroke="#f43f5e"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 0, fill: "#f43f5e" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+      {/* Distributions (Bar Charts) */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <h4 className="text-sm font-bold text-slate-800 mb-6">Phân Phối Điểm Tinh Thần</h4>
+          {loadingAgg ? (
+            <div className="h-60 flex items-center justify-center text-slate-400 animate-pulse text-xs">Đang tải...</div>
+          ) : moraleDistributionData.length === 0 ? (
+            <div className="h-60 flex items-center justify-center text-slate-400 text-xs">Chưa có dữ liệu phân phối.</div>
+          ) : (
+            <div className="h-60 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={moraleDistributionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="score" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(241, 245, 249, 0.5)' }}
+                    contentStyle={{ border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} name="Số lượng" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           )}
         </div>
-      )}
+
+        <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <h4 className="text-sm font-bold text-slate-800 mb-6">Phân Phối Điểm Stress</h4>
+          {loadingAgg ? (
+            <div className="h-60 flex items-center justify-center text-slate-400 animate-pulse text-xs">Đang tải...</div>
+          ) : stressDistributionData.length === 0 ? (
+            <div className="h-60 flex items-center justify-center text-slate-400 text-xs">Chưa có dữ liệu phân phối.</div>
+          ) : (
+            <div className="h-60 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stressDistributionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="score" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(241, 245, 249, 0.5)' }}
+                    contentStyle={{ border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="Số lượng" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Trend Analysis (Line Chart) */}
+      <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h4 className="text-sm font-bold text-slate-800">Biến Động Tinh Thần & Stress Theo Thời Gian</h4>
+            <p className="text-xs text-slate-400 mt-0.5">Xu hướng nhiều tháng qua</p>
+          </div>
+
+          <select
+            value={monthsTrend}
+            onChange={(e) => setMonthsTrend(Number(e.target.value))}
+            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 outline-none"
+          >
+            <option value={4}>4 tháng</option>
+            <option value={6}>6 tháng</option>
+            <option value={12}>12 tháng</option>
+          </select>
+        </div>
+
+        {loadingTrend ? (
+          <div className="h-64 w-full flex items-center justify-center text-slate-400 animate-pulse text-xs">Đang tải xu hướng...</div>
+        ) : chartTrendData.length === 0 ? (
+          <div className="h-64 w-full flex items-center justify-center text-slate-400 text-xs">Chưa có dữ liệu xu hướng.</div>
+        ) : (
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartTrendData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="monthLabel" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: '#fff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                <Line type="monotone" name="Tinh thần trung bình" dataKey="avgMoraleScore" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" name="Stress trung bình" dataKey="avgStressScore" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
     </div>
-  );
-};
+  )
+}

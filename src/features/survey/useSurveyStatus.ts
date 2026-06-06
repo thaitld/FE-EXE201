@@ -27,7 +27,7 @@ export function useSurveyStatus() {
       if (sRes.data.succeeded) setStatus(sRes.data.data);
       if (hRes.data.succeeded && hRes.data.data) {
         const data = hRes.data.data;
-        const mappedResponses = (data.responses || []).map((r) => ({
+        const mappedResponses = (data.responses || []).map((r: SurveyResponseDto) => ({
           ...r,
           submittedAt: r.createdAt || r.submittedAt,
         }));

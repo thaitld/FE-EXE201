@@ -35,6 +35,7 @@ export default function TimeTracker({
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopNote, setStopNote] = useState("");
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToast({ text, type });
@@ -49,6 +50,7 @@ export default function TimeTracker({
   const handleStart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setError(null);
     try {
       await start(taskId);
       showToast("Đã bắt đầu đếm giờ làm việc!");
@@ -57,14 +59,22 @@ export default function TimeTracker({
           onStarted();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể bắt đầu đếm giờ.";
+      setError(msg);
       showToast("Không thể bắt đầu đếm giờ!", "error");
+      notify({
+        title: "Lỗi đếm giờ",
+        message: msg,
+        type: "ERROR",
+      });
     }
   };
 
   const handlePause = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setError(null);
     try {
       await pause(taskId);
       showToast("Đã tạm dừng đếm giờ.");
@@ -73,14 +83,22 @@ export default function TimeTracker({
           onPaused();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể tạm dừng đếm giờ.";
+      setError(msg);
       showToast("Không thể tạm dừng đếm giờ!", "error");
+      notify({
+        title: "Lỗi đếm giờ",
+        message: msg,
+        type: "ERROR",
+      });
     }
   };
 
   const handleResume = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setError(null);
     try {
       await resume(taskId);
       showToast("Đã tiếp tục đếm giờ làm việc!");
@@ -89,8 +107,15 @@ export default function TimeTracker({
           onResumed();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể tiếp tục đếm giờ.";
+      setError(msg);
       showToast("Không thể tiếp tục đếm giờ!", "error");
+      notify({
+        title: "Lỗi đếm giờ",
+        message: msg,
+        type: "ERROR",
+      });
     }
   };
 
@@ -102,29 +127,34 @@ export default function TimeTracker({
   };
 
   const confirmStop = async () => {
+    setError(null);
     try {
       const res = await stop(taskId, stopNote.trim() || undefined);
-      if (res && res.succeeded === undefined) {
-        // if res is ApiResponse wrapper returned directly, tolerate both shapes
+      if (res && res.succeeded === false) {
+        setError(res.message || "Không thể kết thúc đếm giờ.");
+        showToast(res.message || "Không thể dừng phiên đếm giờ", "error");
+        return;
       }
       setShowStopModal(false);
       showToast("Đã dừng đếm giờ và ghi nhận kết quả thành công!");
-      notify({ 
-        title: "Đếm giờ", 
-        message: "Đã dừng đếm giờ và lưu phiên làm việc thành công" 
+      notify({
+        title: "Đếm giờ",
+        message: "Đã dừng đếm giờ và lưu phiên làm việc thành công"
       });
       if (onStopped) {
         try {
           onStopped();
         } catch {}
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể kết thúc đếm giờ.";
+      setError(msg);
+      showToast("Lỗi: Không thể dừng đếm giờ!", "error");
       notify({
         title: "Lỗi đếm giờ",
-        message: "Không thể dừng phiên đếm giờ",
+        message: msg,
         type: "ERROR",
       });
-      showToast("Lỗi: Không thể dừng đếm giờ!", "error");
     }
   };
 
@@ -191,6 +221,12 @@ export default function TimeTracker({
         </div>
       </div>
 
+      {error && (
+        <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700">
+          Lỗi: {error}
+        </div>
+      )}
+
       {/* Modern Dialog Modal for Stopping Tasks */}
       {showStopModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -237,6 +273,7 @@ export default function TimeTracker({
           </div>
         </div>
       )}
+
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-2xl bg-slate-900/95 backdrop-blur-md px-5 py-3.5 text-white shadow-2xl border border-slate-800/50 animate-in fade-in slide-in-from-top-4 duration-300">

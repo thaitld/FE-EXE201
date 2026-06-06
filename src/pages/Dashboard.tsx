@@ -21,12 +21,6 @@ import { UserManagementPanel } from "@/components/panels/admin/UserManagementPan
 import { WorkforceTrendsPanel } from "@/components/panels/admin/WorkforceTrendsPanel";
 import { SettingsPanel } from "@/components/panels/admin/SettingsPanel";
 import DepartmentsPanel from "@/components/panels/admin/DepartmentsPanel";
-// Phase 4: Manager-specific panels
-import { ManagerDashboardPanel } from "@/components/panels/admin/ManagerDashboardPanel";
-import { TaskManagementPanel } from "@/components/panels/admin/TaskManagementPanel";
-import { BurnoutMonitorPanel } from "@/components/panels/admin/BurnoutMonitorPanel";
-import { TeamPerformancePanel } from "@/components/panels/admin/TeamPerformancePanel";
-import { ManagerReportPanel } from "@/components/panels/admin/ManagerReportPanel";
 import { HrReportPanel } from "@/components/panels/admin/HrReportPanel";
 import { MeetingsPanel } from "@/components/panels/admin/MeetingsPanel";
 import { TaskTypesPanel } from "@/components/panels/admin/TaskTypesPanel";
@@ -37,6 +31,15 @@ import MyTasks from "@/components/panels/employee/MyTasks";
 import Survey from "@/components/panels/employee/Survey";
 import TaskDetail from "@/components/panels/employee/TaskDetail";
 import { usePermission } from "@/features/auth/usePermission";
+
+// Manager panel imports
+import DepartmentDashboardPanel from "@/features/manager/pages/DepartmentDashboardPage";
+import TaskManagementPanel from "@/features/manager/pages/TaskManagementPage";
+import BulkCreateTaskPanel from "@/features/manager/pages/BulkCreateTaskPage";
+import BurnoutMonitorPanel from "@/features/manager/pages/BurnoutMonitorPage";
+import TeamPerformancePanel from "@/features/manager/pages/TeamPerformancePage";
+import ManagerReportPanel from "@/features/manager/pages/ManagerReportPage";
+import OrgManagementPanel from "@/features/manager/pages/OrgManagementPage";
 
 const TAB_META: Record<string, { title: string; subtitle: string }> = {
   overview: {
@@ -107,23 +110,6 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Settings",
     subtitle: "Manage dashboard preferences and system options.",
   },
-  // Phase 4: Manager tabs
-  "task-management": {
-    title: "Quản lý Task",
-    subtitle: "Tạo, duyệt, từ chối và theo dõi task của phòng ban.",
-  },
-  "team-performance": {
-    title: "Hiệu suất Nhóm",
-    subtitle: "Hiệu suất theo ngày và báo cáo overtime.",
-  },
-  "burnout-monitor": {
-    title: "Theo dõi Burnout",
-    subtitle: "Phát hiện và xử lý tín hiệu burnout của nhân viên.",
-  },
-  "manager-report": {
-    title: "Báo cáo AI",
-    subtitle: "Báo cáo hàng tuần do Gemini AI tổng hợp.",
-  },
   "hr-report": {
     title: "Báo cáo HR",
     subtitle: "Báo cáo sức khỏe tổ chức hàng tháng do Gemini AI tổng hợp.",
@@ -136,6 +122,35 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Task Types & Định mức",
     subtitle: "Quản lý loại công việc và thiết lập định mức thời gian chuẩn IE.",
   },
+  // Manager tabs
+  "mgr-dashboard": {
+    title: "Department Dashboard",
+    subtitle: "KPI, burnout alerts, and monthly trend.",
+  },
+  "mgr-tasks": {
+    title: "Task Management",
+    subtitle: "Create, approve, reject, reassign, and clone tasks.",
+  },
+  "mgr-bulk-create": {
+    title: "Bulk Create Tasks",
+    subtitle: "Import multiple tasks in one shot.",
+  },
+  "mgr-burnout": {
+    title: "Burnout Monitor",
+    subtitle: "Track high-risk signals and resolve them.",
+  },
+  "mgr-performance": {
+    title: "Team Performance",
+    subtitle: "Efficiency and overtime by team member.",
+  },
+  "mgr-report": {
+    title: "Manager Report",
+    subtitle: "Weekly AI-generated optimization report.",
+  },
+  "mgr-organization": {
+    title: "Organization",
+    subtitle: "Departments, teams, and work schedules.",
+  },
 };
 
 // Panel component map - maps activeTab to the corresponding panel component
@@ -146,9 +161,13 @@ const getPanelComponent = (
 ) => {
   switch (activeTab) {
     case "overview":
-      if (isEmployee) return <PersonalDashboard />;
-      if (isManager) return <ManagerDashboardPanel />;
-      return <OverviewPanel />;
+      return isEmployee ? <PersonalDashboard /> : <OverviewPanel />;
+    case "dashboard-personal":
+      return <OverviewPanel key="personal" initialMode="personal" />;
+    case "dashboard-department":
+      return <OverviewPanel key="department" initialMode="department" />;
+    case "dashboard-company":
+      return <OverviewPanel key="company" initialMode="company" />;
     case "my-tasks":
       return <MyTasks />;
     case "survey":
@@ -183,24 +202,30 @@ const getPanelComponent = (
       return <WorkforceTrendsPanel />;
     case "settings":
       return <SettingsPanel />;
-    // Phase 4: Manager-only tabs
-    case "task-management":
-      return <TaskManagementPanel />;
-    case "team-performance":
-      return <TeamPerformancePanel />;
-    case "burnout-monitor":
-      return <BurnoutMonitorPanel />;
-    case "manager-report":
-      return <ManagerReportPanel />;
     case "hr-report":
       return <HrReportPanel />;
     case "meetings":
       return <MeetingsPanel />;
+    // Manager cases
+    case "mgr-dashboard":
+      return <DepartmentDashboardPanel />;
+    case "mgr-tasks":
+      return <TaskManagementPanel />;
+    case "mgr-bulk-create":
+      return <BulkCreateTaskPanel />;
+    case "mgr-burnout":
+      return <BurnoutMonitorPanel />;
+    case "mgr-performance":
+      return <TeamPerformancePanel />;
+    case "mgr-report":
+      return <ManagerReportPanel />;
+    case "mgr-organization":
+      return <OrgManagementPanel />;
     case "task-types":
       return <TaskTypesPanel />;
     default:
       if (isEmployee) return <PersonalDashboard />;
-      if (isManager) return <ManagerDashboardPanel />;
+      if (isManager) return <DepartmentDashboardPanel />;
       return <OverviewPanel />;
   }
 };

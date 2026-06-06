@@ -40,10 +40,19 @@ export default function Sidebar({
   onTabChange,
 }: SidebarProps) {
   const { user } = useAuth();
-  const { isAdmin, isCEO, isManager, isHR, isEmployee } = usePermission();
+  const {
+    isAdmin,
+    isCEO,
+    isManager,
+    isHR,
+    isEmployee,
+    canViewCompanyDashboard,
+    canViewDepartmentDashboard,
+  } = usePermission();
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
   }>({
+    dashboard: true,
     people: true,
     wellbeing: true,
     ai: true,
@@ -58,7 +67,18 @@ export default function Sidebar({
   };
 
   const handleTabClick = (tab: string) => {
-    onTabChange(tab);
+    if (tab === "user-management") {
+      window.location.hash = "#/admin/user-management";
+    } else if (tab === "hr-report") {
+      window.location.hash = "#/admin/hr-report";
+    } else if (tab === "profile") {
+      window.location.hash = "#/admin/profile";
+    } else {
+      if (window.location.hash !== "#/admin") {
+        window.location.hash = "#/admin";
+      }
+      onTabChange(tab);
+    }
   };
 
   const topLevelItemClass =
@@ -81,19 +101,15 @@ export default function Sidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40 transition-all duration-300 md:translate-x-0 ${
-          !isOpen ? "-translate-x-full" : ""
-        }`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40 transition-all duration-300 md:translate-x-0 ${!isOpen ? "-translate-x-full" : ""
+          }`}
       >
         <div className="h-full flex flex-col overflow-y-auto">
           {/* Logo Section */}
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center text-white font-bold text-sm">
-                  M
-                </div>
-                <h1 className="text-lg font-bold text-slate-900">MANTO</h1>
+              <div className="flex items-center">
+                <img src="/manto.png" className="h-30 w-auto object-contain transition-transform duration-300 hover:scale-105" alt="MANTO" loading="lazy" />
               </div>
               <button
                 onClick={onClose}
@@ -108,23 +124,62 @@ export default function Sidebar({
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             <button
               type="button"
-              onClick={() => handleTabClick("overview")}
-              className={`${topLevelItemClass} ${
-                activeTab === "overview" ? activeTopLevelClass : ""
-              }`}
+              onClick={() => toggleSection("dashboard")}
+              className={`${topLevelItemClass} ${expandedSections.dashboard ? activeTopLevelClass : ""
+                }`}
             >
               <LayoutDashboard size={18} />
               <span className="text-sm font-semibold">Dashboard</span>
+              <ChevronDown
+                size={16}
+                className={`ml-auto transition-transform ${expandedSections.dashboard ? "rotate-180" : ""
+                  }`}
+              />
             </button>
+
+            {expandedSections.dashboard && (
+              <div className="space-y-1 pl-4">
+                <button
+                  type="button"
+                  onClick={() => handleTabClick("dashboard-personal")}
+                  className={`${subItemClass} ${activeTab === "dashboard-personal" ? activeSubItemClass : ""
+                    }`}
+                >
+                  <UserRound size={17} />
+                  <span className="text-sm font-medium">Personal</span>
+                </button>
+                {canViewDepartmentDashboard() && (
+                  <button
+                    type="button"
+                    onClick={() => handleTabClick("dashboard-department")}
+                    className={`${subItemClass} ${activeTab === "dashboard-department" ? activeSubItemClass : ""
+                      }`}
+                  >
+                    <Building2 size={17} />
+                    <span className="text-sm font-medium">Department</span>
+                  </button>
+                )}
+                {canViewCompanyDashboard() && (
+                  <button
+                    type="button"
+                    onClick={() => handleTabClick("dashboard-company")}
+                    className={`${subItemClass} ${activeTab === "dashboard-company" ? activeSubItemClass : ""
+                      }`}
+                  >
+                    <BarChart3 size={17} />
+                    <span className="text-sm font-medium">Company</span>
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* My Tasks - visible to Employee, HR, Manager, Admin */}
             {(isEmployee() || isHR() || isManager() || isAdmin()) && (
               <button
                 type="button"
                 onClick={() => handleTabClick("my-tasks")}
-                className={`${topLevelItemClass} ${
-                  activeTab === "my-tasks" ? activeTopLevelClass : ""
-                }`}
+                className={`${topLevelItemClass} ${activeTab === "my-tasks" ? activeTopLevelClass : ""
+                  }`}
               >
                 <Briefcase size={18} />
                 <span className="text-sm font-semibold">My Tasks</span>
@@ -364,67 +419,47 @@ export default function Sidebar({
                   />
                 </button>
 
-                {expandedSections.ai && (
-                  <div className="space-y-1 pl-4">
-                    {(isAdmin() || isCEO() || isHR()) && (
-                      <button
-                        type="button"
-                        onClick={() => handleTabClick("ai-insights")}
-                        className={`${subItemClass} ${activeTab === "ai-insights" ? activeSubItemClass : ""}`}
-                      >
-                        <Sparkles size={17} />
-                        <span className="text-sm font-medium">AI Insights</span>
-                      </button>
-                    )}
-
-                    {/* Predictions & Recommendations - visible to Admin, CEO, Manager (hidden for HR) */}
-                    {(isAdmin() || isCEO() || isManager()) && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => handleTabClick("ai-predictions")}
-                          className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
-                        >
-                          <CornerDownRight size={17} />
-                          <span className="text-sm font-medium">AI Predictions</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleTabClick("ai-recommendations")}
-                          className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
-                        >
-                          <Compass size={17} />
-                          <span className="text-sm font-medium">
-                            AI Recommendations
-                          </span>
-                        </button>
-                      </>
-                    )}
-                    {/* Manager AI Report - Phase 4 */}
-                    {isManager() && (
-                      <button
-                        type="button"
-                        onClick={() => handleTabClick("manager-report")}
-                        className={`${subItemClass} ${activeTab === "manager-report" ? activeSubItemClass : ""}`}
-                      >
-                        <FileText size={17} />
-                        <span className="text-sm font-medium">Báo cáo AI</span>
-                      </button>
-                    )}
-                    {/* HR AI Report - Phase 5 */}
-                    {isHR() && (
-                      <button
-                        type="button"
-                        onClick={() => handleTabClick("hr-report")}
-                        className={`${subItemClass} ${activeTab === "hr-report" ? activeSubItemClass : ""}`}
-                      >
-                        <FileText size={17} />
-                        <span className="text-sm font-medium">Báo cáo HR</span>
-                      </button>
-                    )}
-                  </div>
+            {expandedSections.ai && (
+              <div className="space-y-1 pl-4">
+                <button
+                  type="button"
+                  onClick={() => handleTabClick("ai-insights")}
+                  className={`${subItemClass} ${activeTab === "ai-insights" ? activeSubItemClass : ""}`}
+                >
+                  <Sparkles size={17} />
+                  <span className="text-sm font-medium">AI Insights</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick("ai-predictions")}
+                  className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
+                >
+                  <CornerDownRight size={17} />
+                  <span className="text-sm font-medium">AI Predictions</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick("ai-recommendations")}
+                  className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
+                >
+                  <Compass size={17} />
+                  <span className="text-sm font-medium">
+                    AI Recommendations
+                  </span>
+                </button>
+                {(isCEO() || isHR() || isAdmin()) && (
+                  <button
+                    type="button"
+                    onClick={() => handleTabClick("hr-report")}
+                    className={`${subItemClass} ${activeTab === "hr-report" ? activeSubItemClass : ""}`}
+                  >
+                    <Sparkles size={17} className="text-violet-500" />
+                    <span className="text-sm font-medium">HR Report</span>
+                  </button>
                 )}
-              </>
+              </div>
+            )}
+          </>
             )}
 
             {(isAdmin() || isCEO() || isManager() || isHR()) && (
