@@ -30,7 +30,11 @@ export default function TimeTracker({
     resume,
     stop,
     timeLabel,
-  } = useTimeTracking();
+  } = useTimeTracking(taskId);
+
+  const [error, setError] = useState<string | null>(null);
+  const [isStopModalOpen, setIsStopModalOpen] = useState(false);
+  const [stopNote, setStopNote] = useState("");
 
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopNote, setStopNote] = useState("");

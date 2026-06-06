@@ -11,7 +11,7 @@ import type {
   TimeTrackingStopResponseDto,
 } from "@/types/employee";
 
-export function useTimeTracking() {
+export function useTimeTracking(taskId?: number) {
   const [session, setSession] = useState<TimeTrackingSessionDto | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -110,7 +110,7 @@ export function useTimeTracking() {
       const res = await getActiveTimeSession();
       if (res.data.succeeded) {
         const s = res.data.data;
-        if (s) {
+        if (s && (taskId === undefined || s.taskInstanceId === taskId)) {
           setSession(s);
           setElapsedSeconds(s.elapsedSeconds || 0);
           const action = s.currentAction?.toUpperCase() || "";
@@ -150,7 +150,7 @@ export function useTimeTracking() {
 
   useEffect(() => {
     void restore();
-  }, []);
+  }, [taskId]);
 
   const format = (seconds: number) => {
     const mm = Math.floor(seconds / 60)
