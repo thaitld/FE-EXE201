@@ -12,6 +12,7 @@ import type {
 } from "@/types/employee";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
+console.log("Manto API Base URL initialized:", apiBaseUrl);
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,

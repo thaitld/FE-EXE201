@@ -88,9 +88,9 @@ export const OverviewPanel = ({ initialMode }: { initialMode?: DashboardMode } =
   const { user, role } = useAuth()
   const availableModes = useMemo(() => {
     const roleName = role?.toUpperCase()
-    if (roleName === 'ADMIN') return ['personal', 'department', 'company'] as DashboardMode[]
-    if (roleName === 'CEO') return ['personal', 'company'] as DashboardMode[]
-    if (roleName === 'MANAGER' || roleName === 'HR') return ['personal', 'department'] as DashboardMode[]
+    if (roleName === 'ADMIN') return ['department', 'company'] as DashboardMode[]
+    if (roleName === 'CEO') return ['company'] as DashboardMode[]
+    if (roleName === 'MANAGER' || roleName === 'HR') return ['department'] as DashboardMode[]
     return ['personal'] as DashboardMode[]
   }, [role])
 
@@ -303,9 +303,11 @@ export const OverviewPanel = ({ initialMode }: { initialMode?: DashboardMode } =
               ) : null}
             </div>
 
-            <div className="flex flex-wrap gap-2 rounded-full border border-white/10 bg-white/10 p-2 backdrop-blur-sm">
-              {availableModes.map(renderModeButton)}
-            </div>
+            {availableModes.length > 1 && (
+              <div className="flex flex-wrap gap-2 rounded-full border border-white/10 bg-white/10 p-2 backdrop-blur-sm">
+                {availableModes.map(renderModeButton)}
+              </div>
+            )}
           </div>
 
           <div className="relative mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">

@@ -116,9 +116,9 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => { }, act
               </div>
             )}
 
-            <button type="button" onClick={() => onTabChange('settings')} className={`${topLevelItemClass} ${activeTab === 'settings' ? activeTopLevelClass : ''}`}>
+            <button type="button" onClick={() => onTabChange('profile')} className={`${topLevelItemClass} ${activeTab === 'profile' ? activeTopLevelClass : ''}`}>
               <Settings size={18} />
-              <span className="text-sm font-semibold">Settings</span>
+              <span className="text-sm font-semibold">Profile</span>
             </button>
           </nav>
 

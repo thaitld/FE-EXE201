@@ -139,15 +139,17 @@ export default function Sidebar({
 
             {expandedSections.dashboard && (
               <div className="space-y-1 pl-4">
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("dashboard-personal")}
-                  className={`${subItemClass} ${activeTab === "dashboard-personal" ? activeSubItemClass : ""
-                    }`}
-                >
-                  <UserRound size={17} />
-                  <span className="text-sm font-medium">Personal</span>
-                </button>
+                {(isEmployee() || isHR()) && (
+                  <button
+                    type="button"
+                    onClick={() => handleTabClick("dashboard-personal")}
+                    className={`${subItemClass} ${activeTab === "dashboard-personal" ? activeSubItemClass : ""
+                      }`}
+                  >
+                    <UserRound size={17} />
+                    <span className="text-sm font-medium">Personal</span>
+                  </button>
+                )}
                 {canViewDepartmentDashboard() && (
                   <button
                     type="button"
@@ -186,17 +188,19 @@ export default function Sidebar({
               </button>
             )}
 
-            {/* Meetings - visible to all authenticated users */}
-            <button
-              type="button"
-              onClick={() => handleTabClick("meetings")}
-              className={`${topLevelItemClass} ${
-                activeTab === "meetings" ? activeTopLevelClass : ""
-              }`}
-            >
-              <CalendarDays size={18} />
-              <span className="text-sm font-semibold">Meetings</span>
-            </button>
+            {/* Meetings - visible to Employee, Manager, Admin */}
+            {(isEmployee() || isManager() || isAdmin()) && (
+              <button
+                type="button"
+                onClick={() => handleTabClick("meetings")}
+                className={`${topLevelItemClass} ${
+                  activeTab === "meetings" ? activeTopLevelClass : ""
+                }`}
+              >
+                <CalendarDays size={18} />
+                <span className="text-sm font-semibold">Meetings</span>
+              </button>
+            )}
 
             {/* People Section */}
             {(isManager() || isHR() || isAdmin()) ? (
@@ -216,15 +220,17 @@ export default function Sidebar({
 
                 {expandedSections.people && (
                   <div className="space-y-1 pl-4">
-                    {/* Team - visible to all authenticated users */}
-                    <button
-                      type="button"
-                      onClick={() => handleTabClick("team")}
-                      className={`${subItemClass} ${activeTab === "team" ? activeSubItemClass : ""}`}
-                    >
-                      <UserRound size={17} />
-                      <span className="text-sm font-medium">Team</span>
-                    </button>
+                    {/* Team - visible to Manager, Admin */}
+                    {(isManager() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("team")}
+                        className={`${subItemClass} ${activeTab === "team" ? activeSubItemClass : ""}`}
+                      >
+                        <UserRound size={17} />
+                        <span className="text-sm font-medium">Team</span>
+                      </button>
+                    )}
 
                     {/* Departments - Manager, HR, Admin */}
                     {(isManager() || isHR() || isAdmin()) && (
@@ -238,8 +244,8 @@ export default function Sidebar({
                       </button>
                     )}
 
-                    {/* Task Types - Manager, HR, Admin */}
-                    {(isManager() || isHR() || isAdmin()) && (
+                    {/* Task Types - Manager, Admin */}
+                    {(isManager() || isAdmin()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("task-types")}
@@ -313,15 +319,17 @@ export default function Sidebar({
                 )}
               </>
             ) : (
-              /* Flat item for users who only see 'Team' (Employee, CEO) */
-              <button
-                type="button"
-                onClick={() => handleTabClick("team")}
-                className={`${topLevelItemClass} ${activeTab === "team" ? activeTopLevelClass : ""}`}
-              >
-                <UserRound size={18} />
-                <span className="text-sm font-semibold">Team</span>
-              </button>
+              /* Flat item for users who only see 'Team' (Employee) */
+              isEmployee() && (
+                <button
+                  type="button"
+                  onClick={() => handleTabClick("team")}
+                  className={`${topLevelItemClass} ${activeTab === "team" ? activeTopLevelClass : ""}`}
+                >
+                  <UserRound size={18} />
+                  <span className="text-sm font-semibold">Team</span>
+                </button>
+              )
             )}
 
             {/* Wellbeing Section */}
@@ -342,8 +350,8 @@ export default function Sidebar({
 
                 {expandedSections.wellbeing && (
                   <div className="space-y-1 pl-4">
-                    {/* Burnout Risk - HR, CEO, Admin */}
-                    {(isHR() || isCEO() || isAdmin()) && (
+                    {/* Burnout Risk - HR, Admin */}
+                    {(isHR() || isAdmin()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("burnout-risk")}
@@ -366,8 +374,8 @@ export default function Sidebar({
                       </button>
                     )}
 
-                    {/* Wellbeing Analytics - visible to Manager, HR, CEO, Admin */}
-                    {(isManager() || isHR() || isCEO() || isAdmin()) && (
+                    {/* Wellbeing Analytics - visible to HR, CEO, Admin */}
+                    {(isHR() || isCEO() || isAdmin()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("wellbeing-analytics")}
@@ -380,28 +388,32 @@ export default function Sidebar({
                       </button>
                     )}
 
-                    {/* Monthly Survey - visible to all */}
-                    <button
-                      type="button"
-                      onClick={() => handleTabClick("survey")}
-                      className={`${subItemClass} ${activeTab === "survey" ? activeSubItemClass : ""}`}
-                    >
-                      <Sparkles size={17} />
-                      <span className="text-sm font-medium">Monthly Survey</span>
-                    </button>
+                    {/* Monthly Survey - visible to Employee only */}
+                    {isEmployee() && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("survey")}
+                        className={`${subItemClass} ${activeTab === "survey" ? activeSubItemClass : ""}`}
+                      >
+                        <Sparkles size={17} />
+                        <span className="text-sm font-medium">Monthly Survey</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </>
             ) : (
               /* Flat item for users who only see 'Monthly Survey' (Employee) */
-              <button
-                type="button"
-                onClick={() => handleTabClick("survey")}
-                className={`${topLevelItemClass} ${activeTab === "survey" ? activeTopLevelClass : ""}`}
-              >
-                <Sparkles size={18} />
-                <span className="text-sm font-semibold">Monthly Survey</span>
-              </button>
+              isEmployee() && (
+                <button
+                  type="button"
+                  onClick={() => handleTabClick("survey")}
+                  className={`${topLevelItemClass} ${activeTab === "survey" ? activeTopLevelClass : ""}`}
+                >
+                  <Sparkles size={18} />
+                  <span className="text-sm font-semibold">Monthly Survey</span>
+                </button>
+              )
             )}
 
             {(isAdmin() || isCEO() || isManager() || isHR()) && (
@@ -494,8 +506,8 @@ export default function Sidebar({
                       </button>
                     )}
 
-                    {/* Workforce Trends - Manager, HR, CEO, Admin */}
-                    {(isManager() || isHR() || isCEO() || isAdmin()) && (
+                    {/* Workforce Trends - HR, CEO, Admin */}
+                    {(isHR() || isCEO() || isAdmin()) && (
                       <button
                         type="button"
                         onClick={() => handleTabClick("workforce-trends")}
