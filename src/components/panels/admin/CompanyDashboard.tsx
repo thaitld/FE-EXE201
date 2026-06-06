@@ -57,7 +57,7 @@ export default function CompanyDashboardView({ dashboard: initialDashboard }: { 
 
   if (isLoading && !dashboard) return <DashboardSkeleton />
   if (error && !dashboard) return (
-    <div className="flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-5 py-4 text-rose-400">
+    <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/50 px-5 py-4 text-rose-600">
       <AlertTriangle size={18} className="shrink-0" />
       <span className="text-sm font-medium">{error}</span>
     </div>
@@ -67,14 +67,14 @@ export default function CompanyDashboardView({ dashboard: initialDashboard }: { 
 
   if (!initialDashboard) {
     return (
-      <div className="min-h-screen bg-white px-4 py-6 font-sans text-slate-900 sm:px-6">
+      <div className="min-h-screen bg-[#fafbfc] px-4 py-6 font-sans text-slate-900 sm:px-6">
         {/* Top bar */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-3.5">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-100 bg-white px-5 py-3.5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-400/10">
-              <CalendarDays size={15} className="text-cyan-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50">
+              <CalendarDays size={15} className="text-cyan-600" />
             </div>
-            <span className="text-sm font-semibold text-black-200">Kỳ báo cáo</span>
+            <span className="text-sm font-semibold text-slate-700">Kỳ báo cáo</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <PeriodSelect value={month} onChange={(v) => setMonth(Number(v))} options={MONTH_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
@@ -83,9 +83,9 @@ export default function CompanyDashboardView({ dashboard: initialDashboard }: { 
               type="button"
               onClick={() => setRefreshKey((k) => k + 1)}
               disabled={isLoading}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:border-cyan-400/30 hover:bg-cyan-400/8 hover:text-cyan-300 active:scale-95 disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-800 active:scale-95 disabled:opacity-40"
             >
-              <RefreshCw size={13} className={isLoading ? 'animate-spin text-cyan-400' : ''} />
+              <RefreshCw size={13} className={isLoading ? 'animate-spin text-cyan-600' : 'text-slate-500'} />
               Làm mới
             </button>
           </div>
@@ -93,7 +93,7 @@ export default function CompanyDashboardView({ dashboard: initialDashboard }: { 
 
         {isLoading && !dashboard && <LoadingBar />}
         {error && (
-          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-5 py-4 text-rose-400">
+          <div className="mb-5 flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/50 px-5 py-4 text-rose-600">
             <AlertTriangle size={18} className="shrink-0" />
             <span className="text-sm font-medium">{error}</span>
           </div>
@@ -105,7 +105,7 @@ export default function CompanyDashboardView({ dashboard: initialDashboard }: { 
 
   if (!dashboard) return null
   return (
-    <div className="min-h-screen bg-white px-4 py-6 font-sans text-slate-900 sm:px-6">
+    <div className="min-h-screen bg-[#fafbfc] px-4 py-6 font-sans text-slate-900 sm:px-6">
       <CompanyDashboardContent dashboard={dashboard} isRefreshing={false} />
     </div>
   )
@@ -124,13 +124,13 @@ function PeriodSelect({
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-9 appearance-none rounded-xl border border-white/8 white pl-3 pr-8 text-black font-medium text-slate-200 outline-none transition hover:border-white/14 focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/10"
+        className="h-9 appearance-none rounded-xl border border-slate-200 bg-white pl-3 pr-8 text-slate-700 font-semibold text-xs outline-none transition hover:border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-white">{opt.label}</option>
         ))}
       </select>
-      <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+      <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
     </div>
   )
 }
@@ -274,13 +274,13 @@ function CompanyDashboardContent({
 
       {/* Monthly Insight */}
       {dashboard.monthlyInsight && (
-        <div className="flex gap-4 rounded-2xl border border-violet-500/20 bg-violet-500/8 px-5 py-4">
-          <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-violet-500/15">
-            <Sparkles size={13} className="text-violet-400" />
+        <div className="flex gap-4 rounded-xl border border-violet-100 bg-violet-50/50 px-5 py-4">
+          <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-100/50">
+            <Sparkles size={13} className="text-violet-600" />
           </div>
           <div>
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-violet-400">Nhận xét tháng</p>
-            <p className="text-sm leading-relaxed text-slate-300">{dashboard.monthlyInsight}</p>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-violet-600">Nhận xét tháng</p>
+            <p className="text-sm leading-relaxed text-slate-600 font-medium">{dashboard.monthlyInsight}</p>
           </div>
         </div>
       )}
@@ -299,10 +299,10 @@ function BurnoutDonut({ high, medium, low, resolved }: { high: number; medium: n
   const CIRC = 2 * Math.PI * R
 
   const segments = [
-    { value: high,     color: '#f43f5e', label: 'Cao' },
+    { value: high,     color: '#ef4444', label: 'Cao' },
     { value: medium,   color: '#f59e0b', label: 'TB'  },
     { value: low,      color: '#10b981', label: 'Thấp' },
-    { value: resolved, color: '#334155', label: 'OK'  },
+    { value: resolved, color: '#94a3b8', label: 'OK'  },
   ]
 
   let offset = 0
@@ -314,9 +314,9 @@ function BurnoutDonut({ high, medium, low, resolved }: { high: number; medium: n
   })
 
   return (
-    <div className="mt-5 flex items-center gap-4">
+    <div className="mt-5 flex items-center gap-6">
       <svg width={100} height={100} className="shrink-0 -rotate-90">
-        <circle cx={CX} cy={CY} r={R} fill="none" stroke="#1e293b" strokeWidth={10} />
+        <circle cx={CX} cy={CY} r={R} fill="none" stroke="#f1f5f9" strokeWidth={10} />
         {arcs.map((arc, i) => (
           <circle
             key={i}
@@ -330,16 +330,16 @@ function BurnoutDonut({ high, medium, low, resolved }: { high: number; medium: n
           />
         ))}
       </svg>
-      <div className="space-y-1 text-xs">
+      <div className="space-y-1.5 text-xs flex-1">
         {segments.map((s) => (
           <div key={s.label} className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full inline-block shrink-0" style={{ background: s.color }} />
-            <span className="text-slate-400">{s.label}</span>
-            <span className="ml-auto font-semibold text-slate-200">{s.value}</span>
+            <span className="text-slate-500 font-medium">{s.label}</span>
+            <span className="ml-auto font-bold text-slate-700">{s.value}</span>
           </div>
         ))}
-        <div className="mt-1 border-t border-slate-200 pt-1 text-slate-600">
-          Tổng: <span className="font-semibold text-slate-900">{total}</span>
+        <div className="mt-2 border-t border-slate-100 pt-2 text-slate-400 font-medium">
+          Tổng: <span className="font-bold text-slate-800">{total}</span>
         </div>
       </div>
     </div>
@@ -349,10 +349,10 @@ function BurnoutDonut({ high, medium, low, resolved }: { high: number; medium: n
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const accentRing: Record<string, { ring: string; glow: string; track: string; progress: string; icon: string }> = {
-  cyan:    { ring: 'ring-cyan-400/15',   glow: 'text-cyan-400',   track: '#0e2a33', progress: '#22d3ee', icon: 'bg-cyan-400/10 text-cyan-400'    },
-  emerald: { ring: 'ring-emerald-400/15',glow: 'text-emerald-400',track: '#0d2b1f', progress: '#34d399', icon: 'bg-emerald-400/10 text-emerald-400'},
-  amber:   { ring: 'ring-amber-400/15',  glow: 'text-amber-400',  track: '#2c1d07', progress: '#fbbf24', icon: 'bg-amber-400/10 text-amber-400'   },
-  indigo:  { ring: 'ring-indigo-400/15', glow: 'text-indigo-400', track: '#17183a', progress: '#818cf8', icon: 'bg-indigo-400/10 text-indigo-400' },
+  cyan:    { ring: 'ring-cyan-100', glow: 'text-cyan-600',   track: '#f1f5f9', progress: '#06b6d4', icon: 'bg-cyan-50 text-cyan-600' },
+  emerald: { ring: 'ring-emerald-100', glow: 'text-emerald-600', track: '#f1f5f9', progress: '#10b981', icon: 'bg-emerald-50 text-emerald-600' },
+  amber:   { ring: 'ring-amber-100', glow: 'text-amber-600', track: '#f1f5f9', progress: '#f59e0b', icon: 'bg-amber-50 text-amber-600' },
+  indigo:  { ring: 'ring-indigo-100', glow: 'text-indigo-600', track: '#f1f5f9', progress: '#6366f1', icon: 'bg-indigo-50 text-indigo-600' },
 }
 
 function KpiCard({
@@ -367,13 +367,13 @@ function KpiCard({
   const dash = Math.max(0, Math.min(1, ratio)) * CIRC
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 ring-1 ${a.ring} transition-shadow hover:shadow-md`}>
+    <div className={`relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ring-1 ${a.ring}`}>
       {/* Subtle gradient accent */}
-      <div className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-10 blur-2xl`}
+      <div className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-5 blur-2xl`}
         style={{ background: a.progress }} />
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
         {/* Mini ring chart */}
         <svg width={52} height={52} className="-rotate-90 shrink-0">
           <circle cx={26} cy={26} r={R} fill="none" stroke={a.track} strokeWidth={5} />
@@ -385,24 +385,22 @@ function KpiCard({
             strokeDasharray={`${dash} ${CIRC - dash}`}
             strokeLinecap="round"
           />
-          {/* Icon in center */}
         </svg>
       </div>
 
-      {/* Icon overlay on ring — rendered as sibling for simplicity */}
       <div className="absolute right-[18px] top-[18px] flex h-[52px] w-[52px] items-center justify-center">
         <Icon size={14} className={a.glow} />
       </div>
 
-      <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{value}</p>
-      <p className="mt-0.5 text-xs text-slate-600">{sub}</p>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-slate-800">{value}</p>
+      <p className="mt-0.5 text-xs text-slate-500 font-medium">{sub}</p>
     </div>
   )
 }
 
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl border border-slate-200 bg-white p-6 ${className}`}>
+    <div className={`rounded-xl border border-slate-100 bg-white p-6 shadow-sm ${className}`}>
       {children}
     </div>
   )
@@ -414,21 +412,21 @@ function SectionHeader({
   title: string; subtitle: string; icon: React.ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-3">
+    <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-50">
       <div>
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        <p className="mt-0.5 text-xs text-slate-600">{subtitle}</p>
+        <h3 className="text-sm font-bold text-slate-700">{title}</h3>
+        <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>
       </div>
-      <div className="mt-0.5 shrink-0">{icon}</div>
+      <div className="mt-0.5 shrink-0 rounded-lg bg-slate-50 p-1.5">{icon}</div>
     </div>
   )
 }
 
 const burnoutConfig = {
-  high:     { dot: 'bg-rose-500',    text: 'text-rose-400',    bg: 'bg-rose-500/8   border border-rose-500/15'   },
-  medium:   { dot: 'bg-amber-400',   text: 'text-amber-400',   bg: 'bg-amber-400/8  border border-amber-400/15'  },
-  low:      { dot: 'bg-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-400/8 border border-emerald-400/15'},
-  resolved: { dot: 'bg-slate-500',   text: 'text-slate-400',   bg: 'bg-white/3       border border-white/6'       },
+  high:     { dot: 'bg-rose-500',    text: 'text-rose-600',    bg: 'bg-rose-50/50 border border-rose-100/60' },
+  medium:   { dot: 'bg-amber-500',   text: 'text-amber-600',   bg: 'bg-amber-50/50 border border-amber-100/60' },
+  low:      { dot: 'bg-emerald-500', text: 'text-emerald-600', bg: 'bg-emerald-50/50 border border-emerald-100/60' },
+  resolved: { dot: 'bg-slate-400',   text: 'text-slate-500',   bg: 'bg-slate-50 border border-slate-100' },
 }
 
 function BurnoutRow({ label, value, level }: { label: string; value: number; level: keyof typeof burnoutConfig }) {
@@ -437,9 +435,9 @@ function BurnoutRow({ label, value, level }: { label: string; value: number; lev
     <div className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 ${c.bg}`}>
       <div className="flex items-center gap-2.5">
         <span className={`h-2 w-2 rounded-full ${c.dot}`} />
-        <span className="text-sm text-slate-400">{label}</span>
+        <span className="text-xs font-semibold text-slate-500">{label}</span>
       </div>
-      <span className={`text-sm font-bold ${c.text}`}>{value}</span>
+      <span className={`text-xs font-bold ${c.text}`}>{value}</span>
     </div>
   )
 }
@@ -448,24 +446,23 @@ function DepartmentRow({ dept }: { dept: any }) {
   const effPct = Math.round((dept.avgEfficiencyRatio ?? 0) * 100)
 
   return (
-    <div className="group rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:shadow-md">
+    <div className="group rounded-xl border border-slate-100 bg-white p-4 transition-colors hover:shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">{dept.departmentName}</p>
-          <div className="mt-2 flex items-center gap-2">
-            {/* Efficiency bar */}
+          <p className="truncate text-sm font-bold text-slate-700">{dept.departmentName}</p>
+          <div className="mt-2 flex items-center gap-3">
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full bg-cyan-600 transition-all"
                 style={{ width: `${effPct}%` }}
               />
             </div>
-            <span className="shrink-0 text-xs font-medium text-cyan-600">{effPct}%</span>
-            <span className="shrink-0 text-xs text-slate-600">{dept.avgEfficiencyLabel}</span>
+            <span className="shrink-0 text-xs font-bold text-cyan-600">{effPct}%</span>
+            <span className="shrink-0 text-xs text-slate-400 font-semibold">{dept.avgEfficiencyLabel}</span>
           </div>
         </div>
         <div className="grid grid-cols-4 gap-2 sm:min-w-[22rem]">
-          <MiniMetric label="Tinh thần" value={dept.avgMoraleScore.toFixed(2)} />
+          <MiniMetric label="Tinh thần" value={dept.avgMoraleScore.toFixed(1)} />
           <MiniMetric label="Headcount" value={String(dept.headCount)} />
           <MiniMetric label="Rủi ro cao" value={String(dept.highRiskBurnoutCount)} warn={dept.highRiskBurnoutCount > 0} />
           <MiniMetric label="ID" value={`#${dept.departmentId}`} muted />
@@ -479,9 +476,9 @@ function MiniMetric({ label, value, warn = false, muted = false }: {
   label: string; value: string; warn?: boolean; muted?: boolean
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-center">
-      <p className="text-[9px] font-medium uppercase tracking-wide text-slate-600">{label}</p>
-      <p className={`mt-0.5 text-sm font-bold ${warn ? 'text-rose-400' : muted ? 'text-slate-600' : 'text-slate-900'}`}>
+    <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-2 py-1.5 text-center">
+      <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className={`mt-0.5 text-xs font-bold ${warn ? 'text-rose-600' : muted ? 'text-slate-400' : 'text-slate-700'}`}>
         {value}
       </p>
     </div>
@@ -489,10 +486,10 @@ function MiniMetric({ label, value, warn = false, muted = false }: {
 }
 
 const alertSeverityStyle: Record<string, { border: string; bg: string; badge: string; text: string; dot: string }> = {
-  CRITICAL: { border: 'border-rose-500/25',   bg: 'bg-rose-500/8',   badge: 'bg-rose-500/20 text-rose-400',   text: 'text-rose-400',   dot: 'bg-rose-500'   },
-  HIGH:     { border: 'border-orange-400/25', bg: 'bg-orange-400/8', badge: 'bg-orange-400/20 text-orange-400', text: 'text-orange-400', dot: 'bg-orange-400' },
-  MEDIUM:   { border: 'border-amber-400/25',  bg: 'bg-amber-400/8',  badge: 'bg-amber-400/20 text-amber-400',  text: 'text-amber-400',  dot: 'bg-amber-400'  },
-  LOW:      { border: 'border-white/6',        bg: 'bg-white/3',       badge: 'bg-white/8 text-slate-400',       text: 'text-slate-400',  dot: 'bg-slate-500'  },
+  CRITICAL: { border: 'border-rose-100',   bg: 'bg-rose-50/50',   badge: 'bg-rose-100 text-rose-600',   text: 'text-rose-700',   dot: 'bg-rose-500'   },
+  HIGH:     { border: 'border-orange-100', bg: 'bg-orange-50/50', badge: 'bg-orange-100 text-orange-600', text: 'text-orange-700', dot: 'bg-orange-500' },
+  MEDIUM:   { border: 'border-amber-100',  bg: 'bg-amber-50/50',  badge: 'bg-amber-100 text-amber-600',  text: 'text-amber-700',  dot: 'bg-amber-500'  },
+  LOW:      { border: 'border-slate-100',   bg: 'bg-slate-50/50',  badge: 'bg-slate-100 text-slate-500',  text: 'text-slate-600',  dot: 'bg-slate-400'  },
 }
 const defaultAlertStyle = alertSeverityStyle.LOW
 
@@ -500,11 +497,11 @@ function AlertItem({ alert }: { alert: any }) {
   const severity = (alert.severity ?? '').toUpperCase()
   const style = alertSeverityStyle[severity] ?? defaultAlertStyle
   return (
-    <div className={`rounded-xl border px-4 py-3 ${style.border} ${style.bg}`}>
+    <div className={`rounded-xl border px-4 py-3 shadow-sm ${style.border} ${style.bg}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-          <p className={`text-sm font-semibold ${style.text}`}>{alert.alertType}</p>
+          <p className={`text-xs font-bold uppercase tracking-wider ${style.text}`}>{alert.alertType}</p>
         </div>
         {alert.severity && (
           <span className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${style.badge}`}>
@@ -512,41 +509,41 @@ function AlertItem({ alert }: { alert: any }) {
           </span>
         )}
       </div>
-      <p className={`mt-1.5 text-xs leading-relaxed ${style.text} opacity-75`}>{alert.message}</p>
-      <p className="mt-2 text-[10px] text-slate-600">{new Date(alert.createdAt ?? '').toLocaleString('vi-VN')}</p>
+      <p className={`mt-1.5 text-xs leading-relaxed ${style.text} font-medium`}>{alert.message}</p>
+      <p className="mt-2 text-[9px] font-semibold text-slate-400">{new Date(alert.createdAt ?? '').toLocaleString('vi-VN')}</p>
     </div>
   )
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-8 text-center">
-      <p className="text-sm text-slate-600">{message}</p>
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-8 text-center bg-slate-50/20">
+      <p className="text-xs font-medium text-slate-400">{message}</p>
     </div>
   )
 }
 
+// ─── LoadingBar ──────────────────────────────────────────────────────────────
 function LoadingBar() {
   return (
-    <div className="mb-5 h-0.5 overflow-hidden rounded-full bg-slate-100">
+    <div className="mb-5 h-1 overflow-hidden rounded-full bg-slate-100">
       <div className="h-full w-1/3 animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-cyan-600" />
     </div>
   )
 }
 
+// ─── DashboardSkeleton ────────────────────────────────────────────────────────
 function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-white px-4 py-6 sm:px-6">
+    <div className="min-h-screen bg-[#fafbfc] px-4 py-6 sm:px-6">
       <div className="animate-pulse space-y-5">
-        <div className="h-12 w-64 rounded-xl bg-white/5" />
+        <div className="h-8 w-62 rounded-xl bg-slate-200/50" />
         <div className="grid grid-cols-2 gap-3.5 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl bg-white/5" />
+            <div key={i} className="h-28 rounded-xl bg-slate-200/50" />
           ))}
         </div>
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-          <div className="h-72 rounded-2xl bg-white/5 xl:col-span-2" />
-          <div className="h-72 rounded-2xl bg-white/5" />
         </div>
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
           <div className="h-64 rounded-2xl bg-white/5 xl:col-span-2" />

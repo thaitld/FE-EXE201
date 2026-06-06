@@ -48,7 +48,9 @@ export const PerformancePanel = () => {
 // 1. LEADERSHIP VIEW: KPI TREND PAGE
 // ==========================================
 function KpiTrendPage() {
-  const [scope, setScope] = useState<'company' | 'department'>('company')
+  const { isAdmin, isCEO } = usePermission()
+  const canViewCompany = isAdmin() || isCEO()
+  const [scope, setScope] = useState<'company' | 'department'>(canViewCompany ? 'company' : 'department')
   const [departments, setDepartments] = useState<DepartmentDto[]>([])
   const [selectedDeptId, setSelectedDeptId] = useState<number | ''>('')
   const [months, setMonths] = useState<number>(6)
@@ -136,24 +138,26 @@ function KpiTrendPage() {
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Scope Toggle */}
-          <div className="flex rounded-xl bg-slate-100 p-1">
-            <button
-              onClick={() => setScope('company')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-                scope === 'company' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              Công ty
-            </button>
-            <button
-              onClick={() => setScope('department')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-                scope === 'department' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              Phòng ban
-            </button>
-          </div>
+          {canViewCompany && (
+            <div className="flex rounded-xl bg-slate-100 p-1">
+              <button
+                onClick={() => setScope('company')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
+                  scope === 'company' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                Công ty
+              </button>
+              <button
+                onClick={() => setScope('department')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
+                  scope === 'department' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                Phòng ban
+              </button>
+            </div>
+          )}
 
           {/* Department Select */}
           {scope === 'department' && (
