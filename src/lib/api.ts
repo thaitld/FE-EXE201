@@ -9,6 +9,10 @@ import type {
   BehavioralPatternDto,
   NotificationDto,
   TaskFilterParams,
+  CreateCustomSurveyDto,
+  CustomSurveyDto,
+  CustomSurveyResultDto,
+  SubmitCustomSurveyAnswersDto,
 } from "@/types/employee";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
@@ -511,6 +515,9 @@ export interface UpdateUserDto {
   firstName?: string;
   lastName?: string;
   isActive?: boolean;
+  roleId?: number;
+  teamId?: number | null;
+  roleInTeam?: string;
 }
 
 export interface AssigneeSuggestionMetrics {
@@ -1150,4 +1157,33 @@ export const getLatestDeptInsight = getLatestDepartmentInsight;
 export const getDeptInsights = getDepartmentInsights;
 export const getKpiTrendsCompany = getCompanyKpiTrend;
 export const getKpiTrendsDepartment = getDepartmentKpiTrend;
+
+// ── Custom Survey API functions ──────────────────────────────────────────────
+export const getDepartments = () =>
+  apiClient.get<ApiResponse<DepartmentDto[]>>("/departments");
+
+export const getTeams = (params?: { departmentId?: number; isActive?: boolean }) =>
+  apiClient.get<ApiResponse<TeamDetailDto[]>>("/teams", { params });
+
+export const createCustomSurvey = (data: CreateCustomSurveyDto) =>
+  apiClient.post<ApiResponse<CustomSurveyDto>>("/custom-surveys", data);
+
+export const getMyCustomSurveys = () =>
+  apiClient.get<ApiResponse<CustomSurveyDto[]>>("/custom-surveys/my");
+
+export const getCustomSurveyResults = (id: number) =>
+  apiClient.get<ApiResponse<CustomSurveyResultDto>>(`/custom-surveys/${id}/results`);
+
+export const closeCustomSurvey = (id: number) =>
+  apiClient.put<ApiResponse<CustomSurveyDto>>(`/custom-surveys/${id}/close`);
+
+export const getAssignedCustomSurveys = () =>
+  apiClient.get<ApiResponse<CustomSurveyDto[]>>("/custom-surveys/assigned");
+
+export const getCustomSurveyDetail = (id: number) =>
+  apiClient.get<ApiResponse<CustomSurveyDto>>(`/custom-surveys/${id}`);
+
+export const submitCustomSurveyAnswers = (id: number, data: SubmitCustomSurveyAnswersDto) =>
+  apiClient.post<ApiResponse<boolean>>(`/custom-surveys/${id}/answers`, data);
+
 

@@ -250,3 +250,83 @@ export interface TaskFilterParams {
   sortBy?: string; // default: "expectedCompletion"
   sortDir?: "asc" | "desc";
 }
+
+// ============================================================================
+// Custom Survey DTOs
+// ============================================================================
+
+export interface CreateCustomSurveyQuestionDto {
+  questionText: string;
+  questionType: "Rating" | "Text";
+  isRequired: boolean;
+  orderIndex: number;
+}
+
+export interface CreateCustomSurveyDto {
+  title: string;
+  description?: string;
+  targetType: "All" | "Department" | "Team";
+  targetDepartmentId?: number;
+  targetTeamId?: number;
+  startDate: string;
+  endDate: string;
+  questions: CreateCustomSurveyQuestionDto[];
+}
+
+export interface CustomSurveyQuestionDto {
+  id: number;
+  questionText: string;
+  questionType: "Rating" | "Text";
+  isRequired: boolean;
+  orderIndex: number;
+}
+
+export interface CustomSurveyDto {
+  id: number;
+  title: string;
+  description?: string;
+  createdByUserId: string;
+  createdByName: string;
+  targetType: "All" | "Department" | "Team";
+  targetDepartmentId?: number;
+  targetDepartmentName?: string;
+  targetTeamId?: number;
+  targetTeamName?: string;
+  startDate: string;
+  endDate: string;
+  status: "Active" | "Closed";
+  createdAt: string;
+  totalTargetCount: number;
+  responseCount: number;
+  hasAnswered: boolean;
+  questions: CustomSurveyQuestionDto[];
+}
+
+export interface SurveyAnswerItemDto {
+  questionId: number;
+  ratingValue?: number;
+  textValue?: string;
+}
+
+export interface SubmitCustomSurveyAnswersDto {
+  answers: SurveyAnswerItemDto[];
+}
+
+export interface QuestionResultDto {
+  questionId: number;
+  questionText: string;
+  questionType: "Rating" | "Text";
+  averageRating?: number;
+  ratingDistribution?: Record<number, number>;
+  textAnswers?: string[];
+}
+
+export interface CustomSurveyResultDto {
+  surveyId: number;
+  title: string;
+  totalTargetCount: number;
+  responseCount: number;
+  responseRate: number;
+  questions: QuestionResultDto[];
+}
+

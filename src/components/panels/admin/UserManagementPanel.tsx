@@ -599,6 +599,9 @@ function UserModal({ open, mode, user, userId, roles, teams, onClose, onSaved }:
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           isActive,
+          roleId: roleId !== '' ? Number(roleId) : undefined,
+          teamId: teamId !== '' ? Number(teamId) : 0,
+          roleInTeam: roleInTeam.trim() || undefined,
         }
         const response = await apiClient.put<ApiResponse<UserDto>>(`/admin/users/${userId}`, payload)
         if (!response.data.succeeded) {
@@ -665,8 +668,22 @@ function UserModal({ open, mode, user, userId, roles, teams, onClose, onSaved }:
               </Field>
               <Field label="First name" value={firstName} onChange={setFirstName} placeholder="Nguyen" />
               <Field label="Last name" value={lastName} onChange={setLastName} placeholder="Van A" />
-              <Field label="Role" value={roles.find((role) => role.name === user?.roleName)?.name ?? user?.roleName ?? ''} onChange={() => { }} disabled />
-              <Field label="Team" value={user?.teamName ?? 'No team'} onChange={() => { }} disabled />
+              <Field label="Role" value={String(roleId)} onChange={(value) => setRoleId(value ? Number(value) : '')} select>
+                <option value="">Select role</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>{role.name}</option>
+                ))}
+              </Field>
+              <Field label="Team" value={String(teamId)} onChange={(value) => setTeamId(value ? Number(value) : '')} select>
+                <option value="">No team</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>{team.name}</option>
+                ))}
+              </Field>
+              <Field label="Role in team" value={roleInTeam} onChange={setRoleInTeam} select>
+                <option value="Member">Member</option>
+                <option value="TeamLead">TeamLead</option>
+              </Field>
             </>
           )}
         </div>

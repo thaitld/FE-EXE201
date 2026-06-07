@@ -11,6 +11,7 @@ export default function GoogleAuthCallback() {
   const [message, setMessage] = useState("Đang xử lý đăng nhập Google...");
 
   useEffect(() => {
+    console.log("[GoogleAuthCallback] useEffect mounted. Search:", window.location.search);
     const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get("token");
     const error = searchParams.get("error");
@@ -20,19 +21,33 @@ export default function GoogleAuthCallback() {
       const decodedEmail =
         getEmailFromJwt(token) || email || "google-user@manto.local";
       const userRole = getRoleFromJwt(token);
+      console.log("[GoogleAuthCallback] Found token. userRole:", userRole, "decodedEmail:", decodedEmail);
 
+      console.log("[GoogleAuthCallback] Calling login()...");
       login(decodedEmail, token);
       setStatus("success");
       setMessage("Đăng nhập Google thành công. Đang chuyển hướng...");
 
+      console.log("[GoogleAuthCallback] Scheduling redirect timer in 800ms...");
       const redirectTimer = window.setTimeout(() => {
         const targetHash = userRole?.toLowerCase() === "manager" ? "#/roles/manager" : "#/admin";
-        window.location.hash = targetHash;
-      }, 1200);
+        console.log("[GoogleAuthCallback] Timer fired! Redirecting via history API to:", targetHash);
+        
+        // Use HTML5 History API to change pathname to / and set the hash, removing the token query param
+        window.history.replaceState(null, "", "/" + targetHash);
+        
+        // Dispatch events to trigger AppRouter's state updates
+        window.dispatchEvent(new Event("popstate"));
+        window.dispatchEvent(new Event("hashchange"));
+      }, 800);
 
-      return () => window.clearTimeout(redirectTimer);
+      return () => {
+        console.log("[GoogleAuthCallback] Cleaning up redirect timer:", redirectTimer);
+        window.clearTimeout(redirectTimer);
+      };
     }
 
+    console.log("[GoogleAuthCallback] No token. Error:", error);
     setStatus("error");
 
     if (error === "not_registered") {
@@ -50,11 +65,17 @@ export default function GoogleAuthCallback() {
     }
 
     const redirectTimer = window.setTimeout(() => {
-      window.location.hash = "#/login";
+      const redirectUrl = window.location.origin + "/#/login";
+      console.log("[GoogleAuthCallback] Error Timer fired! Redirecting to:", redirectUrl);
+      window.location.href = redirectUrl;
     }, 2200);
 
-    return () => window.clearTimeout(redirectTimer);
-  }, [login]);
+    return () => {
+      console.log("[GoogleAuthCallback] Cleaning up error redirect timer:", redirectTimer);
+      window.clearTimeout(redirectTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">

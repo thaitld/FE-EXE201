@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { apiClient, type ApiResponse, type CreateTeamDto, type DepartmentDto, type TeamDetailDto, type UpdateTeamDto } from '@/lib/api'
+import { apiClient, type ApiResponse, type CreateTeamDto, type DepartmentDto, type TeamDetailDto, type UpdateTeamDto, type UserDto } from '@/lib/api'
 import { BarChart3, Building2, Plus, RefreshCw, Search, Users } from 'lucide-react'
 import { usePermission } from '@/features/auth/usePermission'
 
@@ -320,6 +320,31 @@ function TeamModal({ open, mode, team, departments, onClose, onSaved }: TeamModa
   const [error, setError] = useState<string | null>(null)
   const hasMembers = Boolean(team && team.memberCount > 0)
 
+  const [users, setUsers] = useState<UserDto[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+
+    const fetchUsers = async () => {
+      setLoadingUsers(true)
+      try {
+        const res = await apiClient.get<ApiResponse<import('@/lib/api').PagedResult<UserDto>>>('/admin/users', {
+          params: { pageSize: 500, isActive: true }
+        })
+        if (res.data?.succeeded) {
+          setUsers(res.data.data?.items ?? [])
+        }
+      } catch (err) {
+        console.error('Failed to load users for team lead selection', err)
+      } finally {
+        setLoadingUsers(false)
+      }
+    }
+
+    void fetchUsers()
+  }, [open])
+
   useEffect(() => {
     if (!open) return
     setError(null)
@@ -433,8 +458,26 @@ function TeamModal({ open, mode, team, departments, onClose, onSaved }: TeamModa
               <option key={department.id} value={department.id}>{department.name}</option>
             ))}
           </Field>
-          <Field label="Team lead userId" value={teamLeadUserId} onChange={setTeamLeadUserId} placeholder="GUID" />
-          <Field label="Shift" value={shift} onChange={setShift} placeholder="Sáng / Chiều / Tối" />
+          <Field
+            label="Team lead"
+            value={teamLeadUserId}
+            onChange={setTeamLeadUserId}
+            select
+            helperText={loadingUsers ? 'Loading users...' : undefined}
+          >
+            <option value="">No team lead</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {`${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email} ({u.roleName})
+              </option>
+            ))}
+          </Field>
+          <Field label="Shift" value={shift} onChange={setShift} select>
+            <option value="">Select shift</option>
+            <option value="Sáng">Sáng</option>
+            <option value="Chiều">Chiều</option>
+            <option value="Tối">Tối</option>
+          </Field>
           {mode === 'edit' ? (
             <Field
               label="Active"

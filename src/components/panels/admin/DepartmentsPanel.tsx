@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { apiClient, type ApiResponse, type CreateDepartmentDto, type DepartmentDto, type UpdateDepartmentDto } from '@/lib/api'
+import { apiClient, type ApiResponse, type CreateDepartmentDto, type DepartmentDto, type UpdateDepartmentDto, type UserDto } from '@/lib/api'
 import { Plus, RefreshCw, Search } from 'lucide-react'
 import { usePermission } from '@/features/auth/usePermission'
 
@@ -15,6 +15,31 @@ export const DepartmentsPanel = () => {
   const [editing, setEditing] = useState<DepartmentDto | null>(null)
   const [name, setName] = useState('')
   const [managerUserId, setManagerUserId] = useState('')
+
+  const [users, setUsers] = useState<UserDto[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+
+  useEffect(() => {
+    if (!modalOpen) return
+
+    const fetchUsers = async () => {
+      setLoadingUsers(true)
+      try {
+        const res = await apiClient.get<ApiResponse<import('@/lib/api').PagedResult<UserDto>>>('/admin/users', {
+          params: { pageSize: 500, isActive: true }
+        })
+        if (res.data?.succeeded) {
+          setUsers(res.data.data?.items ?? [])
+        }
+      } catch (err) {
+        console.error('Failed to load users for department manager selection', err)
+      } finally {
+        setLoadingUsers(false)
+      }
+    }
+
+    void fetchUsers()
+  }, [modalOpen])
 
   const load = async () => {
     setLoading(true)
@@ -172,8 +197,23 @@ export const DepartmentsPanel = () => {
                 <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
               </label>
               <label className="space-y-1">
-                <span className="text-sm font-medium">Manager UserId</span>
-                <input value={managerUserId} onChange={(e) => setManagerUserId(e.target.value)} className="w-full rounded-xl border px-3 py-2" placeholder="GUID or blank" />
+                <span className="text-sm font-medium">Manager</span>
+                {loadingUsers ? (
+                  <p className="text-xs text-slate-500">Loading users...</p>
+                ) : (
+                  <select
+                    value={managerUserId}
+                    onChange={(e) => setManagerUserId(e.target.value)}
+                    className="w-full rounded-xl border px-3 py-2 bg-white text-sm outline-none"
+                  >
+                    <option value="">No manager (blank)</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {`${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email} ({u.roleName})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </label>
               {error ? <p className="text-rose-600">{error}</p> : null}
             </div>
