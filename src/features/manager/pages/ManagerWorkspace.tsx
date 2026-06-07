@@ -12,6 +12,7 @@ import OrgManagementPage from './OrgManagementPage'
 import ProfilePage from '@/pages/shared/Profile'
 import { MeetingsPanel } from '@/components/panels/admin/MeetingsPanel'
 import { WellbeingAnalyticsPanel } from '@/components/panels/admin/WellbeingAnalyticsPanel'
+import { AssignedSurveysWidget } from '@/components/panels/employee/AssignedSurveysWidget'
 
 const tabs: ManagerTabItem[] = [
   { id: 'dashboard', label: 'Department Dashboard', description: 'KPI, burnout alerts, and monthly trend.' },
@@ -131,7 +132,10 @@ export default function ManagerWorkspace() {
 
   return (
     <ManagerShell title={getTitle(activeTab)} subtitle={getSubtitle(activeTab)} activeTab={activeTab} onTabChange={setActiveTab}>
-      {content}
+      <div className="space-y-6">
+        <AssignedSurveysWidget />
+        {content}
+      </div>
     </ManagerShell>
   )
 }

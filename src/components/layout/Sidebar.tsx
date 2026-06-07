@@ -398,6 +398,18 @@ export default function Sidebar({
                       </button>
                     )}
 
+                    {/* Custom Surveys - visible to HR, Admin */}
+                    {(isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("custom-surveys")}
+                        className={`${subItemClass} ${activeTab === "custom-surveys" ? activeSubItemClass : ""}`}
+                      >
+                        <FileText size={17} />
+                        <span className="text-sm font-medium">Custom Surveys</span>
+                      </button>
+                    )}
+
                     {/* Monthly Survey - visible to Employee only */}
                     {isEmployee() && (
                       <button

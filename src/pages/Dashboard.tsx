@@ -25,12 +25,14 @@ import { HrReportPanel } from "@/components/panels/admin/HrReportPanel";
 import { MeetingsPanel } from "@/components/panels/admin/MeetingsPanel";
 import { TaskTypesPanel } from "@/components/panels/admin/TaskTypesPanel";
 import ProfilePage from "@/pages/shared/Profile";
+import { CustomSurveysPanel } from "@/components/panels/admin/CustomSurveysPanel";
 
 import PersonalDashboard from "@/components/panels/employee/PersonalDashboard";
 import MyTasks from "@/components/panels/employee/MyTasks";
 import Survey from "@/components/panels/employee/Survey";
 import TaskDetail from "@/components/panels/employee/TaskDetail";
 import { usePermission } from "@/features/auth/usePermission";
+import { AssignedSurveysWidget } from "@/components/panels/employee/AssignedSurveysWidget";
 
 // Manager panel imports
 import DepartmentDashboardPanel from "@/features/manager/pages/DepartmentDashboardPage";
@@ -81,6 +83,10 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
   "survey-analytics": {
     title: "Survey Analytics",
     subtitle: "Thống kê kết quả khảo sát tinh thần theo tháng và xu hướng nhiều tháng.",
+  },
+  "custom-surveys": {
+    title: "Khảo sát tùy chỉnh",
+    subtitle: "Tạo và quản lý các đợt khảo sát tùy chỉnh trong công ty.",
   },
   "ai-insights": {
     title: "AI Insights",
@@ -192,6 +198,8 @@ const getPanelComponent = (
       return <WellbeingAnalyticsPanel />;
     case "survey-analytics":
       return <WellbeingAnalyticsPanel />;
+    case "custom-surveys":
+      return <CustomSurveysPanel />;
     case "ai-insights":
       return isManager ? <ManagerReportPanel /> : <AIInsightsPanel />;
     case "ai-predictions":
@@ -363,8 +371,8 @@ export default function Admin({ initialTab }: { initialTab?: string } = {}) {
         </header>
 
         {/* Content Area */}
-        <div className="p-6">
-
+        <div className="p-6 space-y-6">
+          <AssignedSurveysWidget />
           {getPanelComponent(activeTab, isEmployee(), isManager())}
         </div>
       </main>
