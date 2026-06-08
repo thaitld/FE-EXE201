@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import Homepage from "@/pages/shared/Homepage";
-import Footer from "@/components/layout/Footer";
 import Login from "@/pages/auth/Login";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import Register from "@/pages/auth/Register";
@@ -150,7 +149,6 @@ export default function AppRouter() {
   return (
     <>
       <Homepage />
-      <Footer />
     </>
   );
 }

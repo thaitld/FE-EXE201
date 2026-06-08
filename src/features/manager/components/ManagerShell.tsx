@@ -6,6 +6,7 @@ import { Bell, ChevronDown, Menu, Shield } from 'lucide-react'
 import { useNotificationStore } from '@/features/notifications/notificationStore'
 import NotificationsPanel from '@/features/notifications/NotificationsPanel'
 import AlertBell from '@/features/notifications/AlertBell'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export default function ManagerShell({ title, subtitle, children, activeTab, onTabChange }: { title: string; subtitle?: string; children: any; activeTab?: string; onTabChange?: (tab: string) => void }) {
   const { logout, user, userEmail } = useAuth()
@@ -82,6 +83,7 @@ export default function ManagerShell({ title, subtitle, children, activeTab, onT
             </div>
 
             <div className="flex items-center gap-4" ref={profileRef}>
+              <LanguageSwitcher />
               <AlertBell onOpenNotifications={() => setNotificationsOpen(true)} />
 
               <div className="relative">

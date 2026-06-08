@@ -4,6 +4,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import AlertBell from "@/features/notifications/AlertBell";
 import UserMenu from "@/features/auth/UserMenu";
 import NotificationsPanel from "@/features/notifications/NotificationsPanel";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Menu } from "lucide-react";
 
 interface AppShellProps {
@@ -75,6 +76,7 @@ export default function AppShell({
             </div>
 
             <div className="flex items-center gap-3">
+              <LanguageSwitcher />
               <AlertBell
                 onOpenNotifications={() => setNotificationsOpen(true)}
               />

@@ -1,651 +1,1384 @@
-import { useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
-import { Lock, ArrowUpRight, Sparkle, Package, Frame, Palette, PenTool, Layers, Type, Aperture, Home, Camera, Brush, Box, Wand2, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useEffect, useRef } from "react";
+import { ChevronRight, Check } from "lucide-react";
+import heroBg from "../../assets/hero.jpg";
 
-const videoSrc =
-	'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4'
 
-const SoftwareIcon = ({ icon: Icon }: { icon: any }) => (
-  <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl liquid-glass flex items-center justify-center flex-shrink-0">
-    <Icon className="h-6 w-6 md:h-7 md:w-7 text-white/80" strokeWidth={1.5} />
-  </div>
-)
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface WhyTabData {
+	title: string;
+	desc: string;
+	p1: string;
+	d1: string;
+	p2: string;
+	d2: string;
+}
 
-function Homepage() {
-	const [mounted, setMounted] = useState(false)
-	const [activeIndex, setActiveIndex] = useState<number | null>(0)
-	const videoWrapRef = useRef<HTMLDivElement | null>(null)
-	const videoRef = useRef<HTMLVideoElement | null>(null)
+interface Testimonial {
+	text: string;
+	name: string;
+	role: string;
+	initials: string;
+}
 
-	const toggleFAQ = (index: number) => {
-		setActiveIndex(activeIndex === index ? null : index)
-	}
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const WHY_TABS: WhyTabData[] = [
+	{
+		title: "Why Teams Choose Manto to Prevent Burnout",
+		desc: "We make wellbeing part of the natural work day. No extra homework, no corporate box-checking. Just simple, caring moments that matter for your employees.",
+		p1: "Seamless Chat Integrations",
+		d1: "We embed short wellbeing check-ins directly into Slack and Microsoft Teams where your employees already work.",
+		p2: "100% Anonymous & Secure",
+		d2: "Employees reply with total confidence, providing authentic feedback without any fear of exposure.",
+	},
+	{
+		title: "Understand Your Team's Pulse in Real-Time",
+		desc: "No more waiting for annual survey results. Track exhaustion levels, sentiment trends, and alignment across departments instantly.",
+		p1: "Burnout Risk Forecasts",
+		d1: "Identify stress and burnout indicators weeks before high attrition or resignation letters occur.",
+		p2: "Siloed Team Breakdowns",
+		d2: "Filter data by department to address localized issues in engineering, sales, or support.",
+	},
+	{
+		title: "Proven Retention and Productivity ROI",
+		desc: "A healthy workplace culture is your best growth driver. We help you reduce unplanned leaves and build a sustainable organization.",
+		p1: "Lower Attrition Costs",
+		d1: "Keep key players in your team by addressing work satisfaction issues proactively.",
+		p2: "Peer Recognition Drives Morale",
+		d2: "Encourage a culture of appreciation and recognition that breaks team isolation.",
+	},
+];
 
-	const faqItems = [
-		{
-			question: "How do teams integrate MANTO with their workflows?",
-			answer: "MANTO seamlessly integrates with popular tools like Slack, Microsoft Teams, and email. Setup takes just minutes through our intuitive dashboard, and our support team can help with custom integrations."
-		},
-		{
-			question: "Can team leaders track wellbeing metrics?",
-			answer: "Yes, leadership dashboards provide anonymized insights into team wellbeing trends. You get actionable data without compromising individual privacy, helping you identify and address burnout patterns early."
-		},
-		{
-			question: "How is employee data protected?",
-			answer: "We use enterprise-grade encryption (AES-256), SOC 2 Type II compliance, and GDPR-compliant data handling. Your team's data is never shared with third parties and you maintain full control."
-		},
-		{
-			question: "What if team members work across time zones?",
-			answer: "MANTO is built for global teams. Async workflows respect local time zones, and all communications are logged so no one misses critical insights regardless of when they work."
-		},
-		{
-			question: "Do you offer dedicated onboarding?",
-			answer: "Enterprise plans include white-glove onboarding with our product specialists. We'll help customize workflows for your team, train staff, and ensure successful adoption."
-		}
-	]
+const TESTIMONIALS: Testimonial[] = [
+	{
+		text: '"Manto completely transformed our engineering team\'s mental health. We reduced burnout indicators by 35% in under 3 months — and our employee retention skyrocketed."',
+		name: "Maya Lindström",
+		role: "VP Engineering, Paylume",
+		initials: "ML",
+	},
+	{
+		text: '"I was skeptical about adding another employee tool. But Manto feels natural. Our participation rate is over 82%, and it gives us clear signals before burnout occurs."',
+		name: "Sophie Hartmann",
+		role: "Chief People Officer — Corepath Partners",
+		initials: "SH",
+	},
+	{
+		text: '"The anonymous check-ins were an eye-opener. They helped us identify systemic work-overload issues in our product team. Addressing them saved us key staff members."',
+		name: "Daniel Okafor",
+		role: "HR Director — Lumis Capital Group",
+		initials: "DO",
+	},
+	{
+		text: '"Peer appreciation loops in Manto have boosted our remote culture immensely. It takes less than 5 minutes of admin time weekly to keep the team supported and happy."',
+		name: "Priya Nair",
+		role: "VP Operations — Arkon Ventures",
+		initials: "PN",
+	},
+];
+
+// ─── Shared micro-components ──────────────────────────────────────────────────
+function Eyebrow({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
+	return (
+		<div
+			className={`inline-flex items-center gap-1.5 text-[0.7rem] font-bold tracking-widest uppercase mb-4 ${light ? "text-green-400" : "text-blue-600"
+				}`}
+		>
+			<span
+				className={`inline-block w-4 h-0.5 rounded-full ${light ? "bg-green-400" : "bg-blue-600"}`}
+			/>
+			{children}
+		</div>
+	);
+}
+
+function CheckIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={3}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className="w-3 h-3"
+		>
+			<polyline points="20 6 9 17 4 12" />
+		</svg>
+	);
+}
+
+function ArrowRight({ size = 18 }: { size?: number }) {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<line x1="5" y1="12" x2="19" y2="12" />
+			<polyline points="12 5 19 12 12 19" />
+		</svg>
+	);
+}
+
+function LinkBtn({
+	href,
+	children,
+	className = "",
+}: {
+	href: string;
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<a
+			href={href}
+			className={`inline-flex items-center gap-2 text-[0.9rem] font-bold text-blue-600 transition-all duration-200 hover:gap-3 ${className}`}
+		>
+			{children}
+			<ArrowRight size={18} />
+		</a>
+	);
+}
+
+// ─── Navbar ──────────────────────────────────────────────────────────────────
+function Navbar() {
+	const [scrolled, setScrolled] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(false);
 
 	useEffect(() => {
-		setMounted(true)
-	}, [])
-
-	useEffect(() => {
-		const videoWrap = videoWrapRef.current
-
-		if (!videoWrap) {
-			return undefined
-		}
-
-		let rafId = 0
-		let currentX = 0
-		let currentY = 0
-		let targetX = 0
-		let targetY = 0
-
-		const handleMouseMove = (event: MouseEvent) => {
-			const cx = window.innerWidth / 2
-			const cy = window.innerHeight / 2
-
-			targetX = ((event.clientX - cx) / cx) * 20
-			targetY = ((event.clientY - cy) / cy) * 20
-		}
-
-		const updateParallax = () => {
-			currentX += (targetX - currentX) * 0.06
-			currentY += (targetY - currentY) * 0.06
-
-			gsap.set(videoWrap, {
-				x: currentX,
-				y: currentY,
-			})
-
-			rafId = window.requestAnimationFrame(updateParallax)
-		}
-
-		window.addEventListener('mousemove', handleMouseMove, { passive: true })
-		rafId = window.requestAnimationFrame(updateParallax)
-
-		return () => {
-			window.removeEventListener('mousemove', handleMouseMove)
-			window.cancelAnimationFrame(rafId)
-		}
-	}, [])
-
-	const handleLoadedMetadata = () => {
-		if (videoRef.current) {
-			videoRef.current.playbackRate = 1.25
-		}
-	}
-
-	const softwareRow1 = [Package, Frame, Palette, PenTool, Layers, Type, Aperture, Home]
-	const softwareRow2 = [Camera, Brush, Box, Wand2, Package, Frame, Type, Layers]
-
-	const timeline = [
-		{ year: '', role: '', company: '' },
-		{ year: '', role: '', company: '' },
-		{ year: '', role: '', company: '' },
-	]
+		const onScroll = () => setScrolled(window.scrollY > 20);
+		window.addEventListener("scroll", onScroll);
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
 
 	return (
 		<>
-			{/* HERO SECTION WITH PARALLAX - Full Viewport */}
-			<section
-				className="relative h-screen overflow-hidden bg-slate-950 text-white"
-				style={{ fontFamily: "'Barlow', sans-serif" }}
+			<nav
+				className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center px-6 transition-all duration-300 ${scrolled ? "bg-white shadow-[0_1px_0_#e8e8e8,0_4px_16px_rgba(15,31,61,0.06)]" : ""
+					}`}
 			>
-				{/* Fixed Background Video */}
-				<div ref={videoWrapRef} className="absolute inset-0 z-0 scale-[1.08] origin-center">
-					<video
-						ref={videoRef}
-						className="h-full w-full object-cover"
-						autoPlay
-						muted
-						loop
-						playsInline
-						onLoadedMetadata={handleLoadedMetadata}
-						aria-hidden="true"
-						src={videoSrc}
-					/>
-				</div>
-
-				<div className="pointer-events-none absolute inset-0 z-[1] bg-slate-950/48" />
-				<div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_top,rgba(99,179,129,0.16),transparent_36%),linear-gradient(180deg,rgba(15,23,42,0.18),rgba(15,23,42,0.64))]" />
-
-				{/* Header - Fixed to top */}
-				<header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-10 py-8">
+				<div className="max-w-[1200px] mx-auto w-full flex items-center justify-between">
 					<a
 						href="#"
-						className="flex items-start gap-1 text-[17px] font-semibold tracking-tight text-white"
-						aria-label="Wellforge home"
+						className="flex items-center gap-3 transition-transform duration-200 hover:scale-[1.02]"
 					>
-						<span>MANTO</span>
-						<sup className="mt-[0.15em] text-[9px] font-semibold tracking-[0.08em] text-white/80">
-							TM
-						</sup>
+
+						<span
+							className={`font-black tracking-[0.15em] text-[1.25rem] transition-colors duration-300 ${scrolled ? "text-[#0d1b2e]" : "text-white"
+								}`}
+						>
+							MANTO
+						</span>
 					</a>
 
-					<nav className="liquid-glass flex items-center gap-1 rounded-full px-2 py-2">
-						{['PLATFORM', 'BENEFITS', 'RESOURCES', 'CONTACT'].map((item) => (
+					<div className="hidden md:flex items-center gap-8">
+						{["Home", "About", "Services", "Contact"].map((item) => (
 							<a
 								key={item}
-								href="#"
-								className="rounded-full px-4 py-1.5 text-[11px] font-medium tracking-[0.14em] text-white/88 transition-colors duration-200 hover:text-white"
+								href={item === "Home" ? "#" : `#${item.toLowerCase()}`}
+								className="text-[0.9rem] font-semibold text-[#5a6a82] hover:text-[#0d1b2e] transition-colors duration-200"
 							>
 								{item}
 							</a>
 						))}
-					</nav>
+					</div>
 
 					<a
 						href="#/login"
-						className="liquid-glass rounded-full px-5 py-2.5 text-[11px] font-medium tracking-[0.14em] text-white/88 transition-colors duration-200 hover:text-white"
+						className="hidden md:inline-flex items-center gap-2 px-[22px] py-[10px] rounded-full bg-blue-600 text-white text-[0.85rem] font-bold hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
 					>
-						GET START
+						Get a Dashboard
 					</a>
-				</header>
 
-				{/* Hero Content - Centered in viewport */}
-				<div className="relative z-20 h-full flex flex-col items-center justify-center px-4 sm:px-6">
-					<div
-						className={`text-center max-w-4xl transition-all duration-1000 ${
-							mounted ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-						}`}
+					<button
+						className="md:hidden flex flex-col gap-[5px] p-1 cursor-pointer"
+						onClick={() => setMenuOpen(true)}
+						aria-label="Open menu"
 					>
-						<h1
-							data-text="Deliver wellbeing at work."
-							className="text-3d text-3d-gloss text-[clamp(32px,7vw,68px)] leading-[1.1] mb-4 sm:mb-6"
+						<span className="w-6 h-0.5 bg-[#0d1b2e] rounded-full" />
+						<span className="w-6 h-0.5 bg-[#0d1b2e] rounded-full" />
+						<span className="w-6 h-0.5 bg-[#0d1b2e] rounded-full" />
+					</button>
+				</div>
+			</nav>
+
+			{/* Mobile Menu */}
+			{menuOpen && (
+				<div className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center gap-8">
+					<button
+						className="absolute top-6 right-6 text-2xl text-[#0d1b2e]"
+						onClick={() => setMenuOpen(false)}
+					>
+						✕
+					</button>
+					{["Home", "About", "Services", "Contact"].map((item) => (
+						<a
+							key={item}
+							href={item === "Home" ? "#" : `#${item.toLowerCase()}`}
+							onClick={() => setMenuOpen(false)}
+							className="text-2xl font-bold text-[#0d1b2e]"
 						>
+							{item}
+						</a>
+					))}
+					<a
+						href="#/login"
+						onClick={() => setMenuOpen(false)}
+						className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-blue-600 text-white font-bold"
+					>
+						Get a Dashboard
+					</a>
+				</div>
+			)}
+		</>
+	);
+}
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+function Hero() {
+	return (
+		<section
+			id="home"
+			className="min-h-screen relative flex flex-col justify-center overflow-hidden"
+			style={{
+				backgroundImage: `linear-gradient(135deg, rgba(11, 20, 32, 0.85) 0%, rgba(16, 23, 36, 0.9) 40%, rgba(22, 27, 25, 0.95) 100%),
+				 url(${heroBg})`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+				backgroundRepeat: "no-repeat",
+			}}
+		>
+			{/* Grid overlay */}
+
+			{/* Glow orbs */}
+			<div
+				className="absolute w-[600px] h-[600px] rounded-full pointer-events-none"
+				style={{
+					background: "radial-gradient(circle, rgba(2, 12, 8, 0.25) 0%, transparent 70%)",
+					top: -100,
+					right: -100,
+				}}
+			/>
+			<div
+				className="absolute w-[400px] h-[400px] rounded-full pointer-events-none"
+				style={{
+					background: "radial-gradient(circle, rgba(26,60,107,0.3) 0%, transparent 70%)",
+					bottom: 100,
+					left: -50,
+				}}
+			/>
+
+			<div className="relative z-10 max-w-[1200px] mx-auto w-full px-6 pt-[140px] pb-[60px]">
+				<div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-12 items-center">
+					{/* Left */}
+					<div>
+						<div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 backdrop-blur-xl rounded-full px-4 py-2 mb-6 text-white text-[0.8rem] font-semibold">
+							<span className="text-amber-400 tracking-widest text-[0.75rem]">★★★★★</span>
+							4.9&nbsp; Stars — Loved by 2K+ Developers
+						</div>
+						<h1 className="text-white font-extrabold leading-[1.05] tracking-[-0.04em] text-[clamp(2.6rem,5vw,4.2rem)] mb-5">
 							Deliver wellbeing at work.
+							<br />
+							<span className="text-green-400">Reduce burnout with a system teams actually use.</span>
 						</h1>
-						<h2
-							data-text="Reduce burnout with a system teams actually use."
-							className="text-3d text-[clamp(18px,4vw,36px)] text-white/75 leading-[1.2] mb-8 sm:mb-10"
+						<p className="text-white/70 text-[1.05rem] max-w-[520px] leading-[1.7] mb-9">
+							Manto is an employee experience platform that makes wellbeing a part of the daily workflow — not another task on the to-do list.
+
+						</p>
+						<a
+							href="#/login"
+							className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-[1rem] hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
 						>
-							Reduce burnout with a system teams actually use.
+							Start Your Dashboard
+						</a>
+					</div>
+
+					{/* Stat Card */}
+					<div className="hidden lg:block bg-white/[0.08] border border-white/15 backdrop-blur-xl rounded-2xl p-7 text-white">
+						<div className="text-4xl font-extrabold text-green-400 leading-none">85%</div>
+						<div className="text-[0.85rem] font-semibold mt-1.5 mb-4 opacity-90">
+							Of employees feel more supported when they have simple tools for check-ins,
+							Recognition, and wellbeing.
+						</div>
+						<div className="h-px bg-white/15 my-4" />
+						<div className="text-[0.7rem] font-bold uppercase tracking-widest text-white/50 mb-1.5">
+
+						</div>
+						<div className="text-[0.8rem] text-white/70 leading-[1.5]">
+							Organizations with strong wellbeing cultures see up to 45% lower turnover and 60% higher productivity. Manto gives you a lightweight system to embed care into your daily operations.
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Process Strip */}
+			<div className="relative z-10 bg-white/[0.06] border-t border-white/10 backdrop-blur-xl px-6 py-8">
+				<div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+					{[
+						{
+							icon: (
+								<svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-green-400 fill-none stroke-2">
+									<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+									<path d="M12 6v6l4 2" />
+								</svg>
+							),
+							title: "Daily Pulse Survey",
+							desc: "Lightweight 30-second anonymous check-ins built for work",
+						},
+						{
+							icon: (
+								<svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-green-400 fill-none stroke-2">
+									<line x1="18" y1="20" x2="18" y2="10" />
+									<line x1="12" y1="20" x2="12" y2="4" />
+									<line x1="6" y1="20" x2="6" y2="14" />
+								</svg>
+							),
+							title: "Real-time Analytics",
+							desc: "Predict and address burnout risks with visual dashboards",
+						},
+						{
+							icon: (
+								<svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-green-400 fill-none stroke-2">
+									<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+								</svg>
+							),
+							title: "Active Care Activities",
+							desc: "Custom appreciation, healthy micro-habits, and feedback",
+						},
+						{
+							icon: (
+								<svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-green-400 fill-none stroke-2">
+									<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+									<polyline points="22 4 12 14.01 9 11.01" />
+								</svg>
+							),
+							title: "Continuous Experience Uplift",
+							desc: "Measure employee morale and retain top talent longer",
+						},
+					].map((step) => (
+						<div key={step.title} className="flex items-start gap-3.5">
+							<div className="w-10 h-10 rounded-[10px] bg-green-900/30 flex items-center justify-center flex-shrink-0">
+								{step.icon}
+							</div>
+							<div>
+								<div className="text-[0.82rem] font-bold text-white mb-0.5">{step.title}</div>
+								<div className="text-[0.73rem] text-white/55 leading-[1.5]">{step.desc}</div>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── About ────────────────────────────────────────────────────────────────────
+function About() {
+	return (
+		<section id="about" className="py-[100px] bg-white">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+					{/* Image column */}
+					<div className="relative">
+						<div className="w-full aspect-[4/5] rounded-[20px] bg-[#f5f6f8]" />
+
+						{/* Avatars badge */}
+						<div className="absolute top-6 -left-6 bg-white rounded-full px-4 py-2.5 shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)] border border-[#e8e8e8] flex items-center gap-2">
+							<div className="flex">
+								{[
+									{ initials: "JK", bg: "bg-blue-600" },
+									{ initials: "ML", bg: "bg-indigo-500" },
+									{ initials: "AS", bg: "bg-orange-500" },
+								].map((a, i) => (
+									<div
+										key={a.initials}
+										className={`w-[30px] h-[30px] rounded-full border-2 border-white ${a.bg} flex items-center justify-center text-[0.65rem] font-bold text-white ${i > 0 ? "-ml-2" : ""}`}
+									>
+										{a.initials}
+									</div>
+								))}
+							</div>
+							<div className="text-[0.75rem] font-bold text-[#0d1b2e] whitespace-nowrap">
+								200+{" "}
+								<span className="block text-[#5a6a82] font-normal text-[0.68rem]">
+									Projects Shipped
+								</span>
+							</div>
+							<div className="w-px h-7 bg-[#e8e8e8]" />
+							<div className="text-[0.75rem] font-bold text-[#0d1b2e] whitespace-nowrap">
+								50K+{" "}
+								<span className="block text-[#5a6a82] font-normal text-[0.68rem]">
+									Components Built
+								</span>
+							</div>
+						</div>
+
+						{/* Quality card */}
+						<div className="absolute bottom-[-24px] right-[-24px] bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)] border border-[#e8e8e8] max-w-[240px]">
+							<div className="text-[0.75rem] font-bold uppercase tracking-[0.08em] text-blue-600 mb-1">
+								Committed to Code Quality
+							</div>
+							<div className="text-[0.8rem] text-[#5a6a82] leading-[1.5]">
+								Every PR reviewed. Every type asserted. Every edge case covered.
+							</div>
+						</div>
+					</div>
+
+					{/* Text column */}
+					<div>
+						<Eyebrow>About Manto</Eyebrow>
+						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+							Your Partner in Building a Thriving Workplace Culture
+						</h2>
+						<p className="text-[#5a6a82] leading-[1.75] mt-5 mb-7">
+							Sustainable growth starts with supported employees. Manto provides a lightweight, science-backed platform designed to check employee sentiment, capture feedback, and reduce burnout.
+						</p>
+						<p className="text-[#5a6a82] leading-[1.75] mb-7">
+							By integrating daily pulse checks and automated micro-wellness steps directly into your team's chat spaces, we help managers lead with empathy and clarity.
+						</p>
+						<LinkBtn href="#services">See How It Works</LinkBtn>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Values ───────────────────────────────────────────────────────────────────
+function Values() {
+	const cards = [
+		{
+			tag: "Psychological Safety",
+			tagVariant: "primary",
+			title: "100% Anonymous Feedback",
+			desc: "Protected employee identity ensures complete honesty. Teams share their genuine challenges, enabling leaders to act with real context.",
+		},
+		{
+			tag: "Integration",
+			tagVariant: "navy",
+			title: "Zero Workflow Interruption",
+			desc: "We respect your time. Pulse checks fit seamlessly inside Slack and Microsoft Teams, taking under 30 seconds to complete.",
+		},
+		{
+			tag: "Proactive",
+			tagVariant: "primary",
+			title: "Action-Oriented Care Tips",
+			desc: "Manto doesn't just measure stress; it helps prevent it. Get science-backed activities and guides to resolve fatigue levels.",
+		},
+	];
+
+	return (
+		<section className="py-[100px] bg-[#f5f6f8]">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="text-center mb-14">
+					<Eyebrow>Our Principles</Eyebrow>
+					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+						The Engineering Standards We Hold On Every Codebase
+					</h2>
+					<p className="text-[#5a6a82] text-[1rem] max-w-[560px] mx-auto leading-[1.7] mt-3">
+						We rely on a strong foundation of integrity, clarity, and purpose to shape every
+						strategic choice we make for our clients.
+					</p>
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+					{cards.map((c) => (
+						<div
+							key={c.title}
+							className="bg-white rounded-[18px] overflow-hidden border border-[#e8e8e8] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)]"
+						>
+							<div className="w-full h-[200px] bg-[#f0f1f4]" />
+							<div className="p-6">
+								<span
+									className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] mb-2.5 ${c.tagVariant === "primary"
+										? "bg-blue-50 text-blue-600"
+										: "bg-black/[0.08] text-[#0d1b2e]"
+										}`}
+								>
+									{c.tag}
+								</span>
+								<div className="text-[1rem] font-extrabold text-[#0d1b2e] mb-2">{c.title}</div>
+								<div className="text-[0.85rem] text-[#5a6a82] leading-[1.6]">{c.desc}</div>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Why Choose Us ─────────────────────────────────────────────────────────────
+function WhyChooseUs() {
+	const [activeTab, setActiveTab] = useState(0);
+	const data = WHY_TABS[activeTab];
+
+	const tabLabels = [
+		{
+			label: "Science-Backed",
+			icon: (
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+					<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+					<path d="M12 6v6l4 2" />
+				</svg>
+			),
+		},
+		{
+			label: "Easy Integrations",
+			icon: (
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+					<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+					<circle cx="9" cy="7" r="4" />
+				</svg>
+			),
+		},
+		{
+			label: "Privacy Focus",
+			icon: (
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+					<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+					<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+				</svg>
+			),
+		},
+	];
+
+	return (
+		<section id="why" className="py-[100px] bg-white">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="text-center mb-12">
+					<Eyebrow>Why Choose Us</Eyebrow>
+					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+						Why Clients Trust Us To Move
+						<br />
+						Their Business Forward
+					</h2>
+				</div>
+
+				<div className="flex gap-3 mb-10 flex-wrap">
+					{tabLabels.map((t, i) => (
+						<button
+							key={t.label}
+							onClick={() => setActiveTab(i)}
+							className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-[0.85rem] font-bold cursor-pointer transition-all duration-200 border-2 ${activeTab === i
+								? "bg-[#0d1b2e] text-white border-[#0d1b2e]"
+								: "bg-transparent text-[#5a6a82] border-[#e8e8e8] hover:border-blue-600 hover:text-blue-600"
+								}`}
+						>
+							{t.icon} {t.label}
+						</button>
+					))}
+				</div>
+
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+					<div className="w-full aspect-square rounded-[20px] bg-[#f5f6f8]" />
+					<div>
+						<h3 className="text-2xl font-extrabold text-[#0d1b2e] mb-4 tracking-[-0.02em]">
+							{data.title}
+						</h3>
+						<p className="text-[0.95rem] text-[#5a6a82] leading-[1.75] mb-7">{data.desc}</p>
+						<div className="flex flex-col gap-4 mb-8">
+							{[
+								{ title: data.p1, desc: data.d1 },
+								{ title: data.p2, desc: data.d2 },
+							].map((pt) => (
+								<div key={pt.title} className="flex items-start gap-3">
+									<div className="w-[22px] h-[22px] rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5 text-blue-600">
+										<CheckIcon />
+									</div>
+									<div>
+										<div className="text-[0.9rem] font-bold text-[#0d1b2e]">{pt.title}</div>
+										<div className="text-[0.82rem] text-[#5a6a82] mt-0.5">{pt.desc}</div>
+									</div>
+								</div>
+							))}
+						</div>
+						<a
+							href="#/login"
+							className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-blue-600 text-white font-bold text-[0.9rem] hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
+						>
+							Get Started <ArrowRight />
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+function Stats() {
+	const stats = [
+		{ value: "35%+", label: "Burnout Risk Reduction" },
+		{ value: "85%", label: "Average Daily Response Rate" },
+		{ value: "15K+", label: "Supported Team Members" },
+		{ value: "12%", label: "Improvement in Attrition Rates" },
+	];
+	return (
+		<section className="py-20 bg-[#f5f6f8]">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="grid grid-cols-2 lg:grid-cols-4">
+					{stats.map((s, i) => (
+						<div
+							key={s.label}
+							className={`text-center py-10 px-6 relative ${i < stats.length - 1
+								? "after:content-[''] after:absolute after:right-0 after:top-[25%] after:bottom-[25%] after:w-px after:bg-[#e8e8e8] max-lg:even:after:hidden"
+								: ""
+								}`}
+						>
+							<div className="text-[clamp(2.4rem,4vw,3.5rem)] font-extrabold text-blue-600 tracking-[-0.04em] leading-none">
+								{s.value}
+							</div>
+							<div className="text-[0.85rem] text-[#5a6a82] font-medium mt-2">{s.label}</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Lead Magnet ──────────────────────────────────────────────────────────────
+function LeadMagnet() {
+	return (
+		<section
+			className="py-[100px] relative overflow-hidden"
+			style={{
+				background: "linear-gradient(135deg, #0a1628 0%, #0d1f35 50%, #061a10 100%)",
+			}}
+		>
+			<div
+				className="absolute inset-0 pointer-events-none"
+				style={{
+					backgroundImage:
+						"radial-gradient(circle at 20% 50%, rgba(26,107,69,0.2) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(26,60,107,0.2) 0%, transparent 50%)",
+				}}
+			/>
+			<div className="relative z-10 max-w-[1200px] mx-auto px-6">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+					<div>
+						<Eyebrow light>Free Resource</Eyebrow>
+						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-white">
+							Download the Burnout Prevention Blueprint
+						</h2>
+						<p className="text-white/65 mt-3 leading-[1.7] max-w-[560px]">
+							Get our science-backed survey check-in lists, manager resolution paths, and team wellness activities to keep engagement high.
+						</p>
+						<form className="mt-8 flex flex-col gap-3.5">
+							{[
+								{ label: "Full Name", id: "full_name", type: "text", placeholder: "Jane Thornton" },
+								{ label: "Business Email", id: "email", type: "email", placeholder: "jane@company.com" },
+							].map((f) => (
+								<div key={f.id} className="flex flex-col gap-1.5">
+									<label className="text-[0.78rem] font-semibold text-white/70 tracking-[0.04em]">
+										{f.label}
+									</label>
+									<input
+										type={f.type}
+										placeholder={f.placeholder}
+										className="px-4 py-3 rounded-[10px] bg-white/[0.08] border border-white/15 text-white text-[0.9rem] outline-none placeholder:text-white/35 focus:border-green-400/50 transition-colors"
+									/>
+								</div>
+							))}
+							<div className="flex flex-col gap-1.5">
+								<label className="text-[0.78rem] font-semibold text-white/70 tracking-[0.04em]">
+									Company Size
+								</label>
+								<select className="px-4 py-3 rounded-[10px] bg-white/[0.08] border border-white/15 text-white text-[0.9rem] outline-none focus:border-green-400/50 transition-colors">
+									<option value="" className="bg-[#0f1f3d]">
+										Select company size
+									</option>
+									{["1-10", "11-50", "51-200", "200+"].map((s) => (
+										<option key={s} value={s} className="bg-[#0f1f3d]">
+											{s} employees
+										</option>
+									))}
+								</select>
+							</div>
+							<button
+								type="button"
+								className="flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-blue-600 text-white font-bold text-[0.95rem] hover:bg-blue-700 transition-colors mt-1"
+							>
+								Send Me the Blueprint <ArrowRight size={16} />
+							</button>
+							<p className="text-[0.75rem] text-white/40 text-center mt-2">
+								Trusted by 5,000+ business owners. No spam, ever.
+							</p>
+						</form>
+					</div>
+
+					{/* Blueprint mockup */}
+					<div className="flex justify-center items-center">
+						<div
+							className="w-full max-w-[360px] aspect-[3/4] rounded-2xl overflow-hidden relative"
+							style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)" }}
+						>
+							<div className="absolute top-[-12px] right-[-12px] w-16 h-16 rounded-full bg-blue-600 flex flex-col items-center justify-center text-[0.6rem] font-extrabold text-white uppercase tracking-[0.05em] shadow-[0_8px_24px_rgba(26,107,69,0.4)] z-10">
+								FREE
+							</div>
+							<div className="p-8 h-full flex flex-col justify-between">
+								<div>
+									<div className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-green-400">
+										MANTO
+									</div>
+									<div className="text-[1.4rem] font-extrabold text-white leading-[1.2] my-3">
+										Burnout Prevention Blueprint
+									</div>
+									<div className="flex flex-col gap-2">
+										{["w-full", "w-4/5", "w-3/5", "w-full", "w-4/5"].map((w, i) => (
+											<div key={i} className={`h-2 rounded ${w} bg-white/10`} />
+										))}
+									</div>
+								</div>
+								<div>
+									<div className="h-20 flex items-end gap-2 mt-4">
+										{[40, 55, 45, 70, 60, 85, 90].map((h, i) => (
+											<div
+												key={i}
+												className="flex-1 rounded-t"
+												style={{
+													height: `${h}%`,
+													background: i === 6 ? "rgba(74,222,128,0.6)" : "rgba(74,222,128,0.3)",
+												}}
+											/>
+										))}
+									</div>
+									<div className="text-[0.68rem] text-white/40 mt-2">
+										Employee Turnover Rate — 3-Month Decline
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Expertise / Contact ───────────────────────────────────────────────────────
+function Expertise() {
+	return (
+		<section id="contact" className="py-[100px] bg-white">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="text-center mb-14">
+					<Eyebrow>See Manto in Action</Eyebrow>
+					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+						Start Supporting Your Team
+						<br />
+						with Actionable Dashboards
+					</h2>
+				</div>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+					<div className="w-full aspect-[4/3] rounded-[20px] bg-[#f5f6f8]" />
+					<div className="bg-[#f5f6f8] rounded-[20px] p-9 border border-[#e8e8e8]">
+						<div className="text-[1.3rem] font-extrabold text-[#0d1b2e] mb-2 tracking-[-0.02em]">
+							Book a 15-Minute Manto Demo
+						</div>
+						<div className="text-[0.87rem] text-[#5a6a82] mb-7 leading-[1.6]">
+							Let us show you how Manto collects real-time sentiment metrics, warns you of stress trends, and supports your managers to prevent attrition.
+						</div>
+						<table className="w-full border-collapse mb-7">
+							<tbody>
+								{[
+									{ day: "Monday – Thursday", hours: "08:00 – 18:00", highlight: false },
+									{ day: "Friday", hours: "09:00 – 17:00", highlight: true },
+									{ day: "Saturday", hours: "08:30 – 19:30", highlight: false },
+									{ day: "Sunday", hours: "08:30 – 19:30", highlight: false },
+								].map((row) => (
+									<tr key={row.day} className="border-b border-[#e8e8e8] last:border-0">
+										<td className="py-[11px] text-[0.85rem] text-[#5a6a82] font-medium">{row.day}</td>
+										<td
+											className={`py-[11px] text-[0.85rem] font-bold text-right ${row.highlight ? "text-blue-600" : "text-[#0d1b2e]"
+												}`}
+										>
+											{row.hours}
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+						<button className="w-full flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">
+							Book a Call
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+								<rect x="3" y="4" width="18" height="18" rx="2" />
+								<line x1="16" y1="2" x2="16" y2="6" />
+								<line x1="8" y1="2" x2="8" y2="6" />
+								<line x1="3" y1="10" x2="21" y2="10" />
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Case Studies ─────────────────────────────────────────────────────────────
+function CaseStudies() {
+	const cases = [
+		{
+			tag: "Retention Growth",
+			tagVariant: "primary",
+			title: "Scaling Engineering Engagement at Paylume",
+			kpis: [
+				{ num: "-35%", label: "Burnout Risk Reduction" },
+				{ num: "92%", label: "Survey Response Rate" },
+			],
+			desc: "How Paylume used Manto to identify sprint exhaustion and restructure their team check-in patterns with zero workflow disruption.",
+		},
+		{
+			tag: "Company Culture",
+			tagVariant: "navy",
+			title: "Boosting Morale for 300+ Remote Staff",
+			kpis: [
+				{ num: "4.8/5", label: "Satisfaction Score" },
+				{ num: "+45%", label: "Peer Appreciation Cards" },
+			],
+			desc: "Manto helped Corepath Partners build trust and connectivity across remote teams through peer praise loops and anonymous pulse surveys.",
+		},
+	];
+
+	return (
+		<section className="py-[100px] bg-[#f5f6f8]">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<Eyebrow>Case Studies</Eyebrow>
+				<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e] mb-12">
+					Real Cultural Impact — Trusted by High-Performing Teams
+				</h2>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					{cases.map((c) => (
+						<div
+							key={c.title}
+							className="bg-white rounded-[20px] overflow-hidden border border-[#e8e8e8] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)]"
+						>
+							<div className="w-full h-[240px] bg-[#f0f1f4]" />
+							<div className="p-7">
+								<span
+									className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] ${c.tagVariant === "primary" ? "bg-blue-50 text-blue-600" : "bg-black/[0.08] text-[#0d1b2e]"
+										}`}
+								>
+									{c.tag}
+								</span>
+								<div className="text-[1.1rem] font-extrabold text-[#0d1b2e] my-2.5 leading-[1.3]">
+									{c.title}
+								</div>
+								<div className="flex gap-5 my-4 items-center">
+									{c.kpis.map((k, i) => (
+										<div key={k.label} className="flex items-center gap-5">
+											{i > 0 && <div className="w-px h-8 bg-[#e8e8e8]" />}
+											<div>
+												<div className="text-2xl font-extrabold text-blue-600 tracking-[-0.03em]">
+													{k.num}
+												</div>
+												<div className="text-[0.72rem] text-[#5a6a82] font-medium">{k.label}</div>
+											</div>
+										</div>
+									))}
+								</div>
+								<div className="text-[0.85rem] text-[#5a6a82] leading-[1.65] mb-4">{c.desc}</div>
+								<LinkBtn href="#">Read Case Study</LinkBtn>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+function Services() {
+	const services = [
+		{
+			tags: [
+				{ label: "Anonymous Check-ins", variant: "primary" },
+				{ label: "Daily Pulse", variant: "navy" },
+			],
+			title: "Lightweight Pulse Surveys",
+			desc: "30-second daily surveys that collect honest feedback on workload, stress, resources, and overall team sentiment.",
+		},
+		{
+			tags: [
+				{ label: "Real-time Metrics", variant: "primary" },
+				{ label: "Exhaustion Warnings", variant: "navy" },
+			],
+			title: "Burnout Risk Analytics",
+			desc: "Track sentiment shifts, department morale, and receive early alerts when burnout risk scores begin to climb.",
+		},
+		{
+			tags: [
+				{ label: "Peer Recognition", variant: "primary" },
+				{ label: "Appreciation", variant: "navy" },
+			],
+			title: "Appreciation Loops",
+			desc: "Boost workplace morale by allowing team members to send public praise cards and positive callouts easily.",
+		},
+		{
+			tags: [
+				{ label: "Manager Training", variant: "primary" },
+				{ label: "Habits", variant: "navy" },
+			],
+			title: "Manager Action Recommendations",
+			desc: "Access custom guides, micro-habit strategies, and resolution checklists designed for modern HR and engineering leads.",
+		},
+	];
+
+	return (
+		<section id="services" className="py-[100px] bg-white">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="flex items-end justify-between mb-12 flex-wrap gap-3">
+					<div>
+						<Eyebrow>Features & Services</Eyebrow>
+						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+							Everything You Need to Build a
+							<br />
+							Healthy, High-Retaining Workplace
 						</h2>
 					</div>
-
-					<div
-						className={`flex flex-col items-center gap-6 sm:gap-8 max-w-2xl transition-all duration-1000 ${
-							mounted ? 'translate-y-0 opacity-100 delay-300' : 'translate-y-6 opacity-0'
-						}`}
-					>
-						<p className="text-center text-[14px] sm:text-[15px] leading-[1.7] text-slate-100 px-2">
-							<span>
-								Our platform adapts to your team's load, cadence, and pressure points.
-							</span>{' '}
-							<span className="text-white/60">
-								Every workflow is designed to make focus sustainable across the organization.
-							</span>
-						</p>
-
-						<button
-							type="button"
-							className="rounded-full bg-emerald-200 px-7 sm:px-8 py-3 sm:py-3.5 text-[14px] sm:text-[15px] font-semibold text-slate-950 transition duration-300 hover:scale-[1.03] hover:shadow-[0_0_28px_2px_rgba(167,243,208,0.22)] active:scale-[0.97] whitespace-nowrap"
+					<LinkBtn href="#">All Services</LinkBtn>
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					{services.map((s) => (
+						<div
+							key={s.title}
+							className="bg-white rounded-[18px] border border-[#e8e8e8] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)]"
 						>
-							Explore the wellbeing platform
-						</button>
-
-						<div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-medium tracking-[0.14em] text-white/70 px-2">
-							<Lock size={13} strokeWidth={1.5} />
-							<span>SECURE BY DESIGN. BUILT FOR HR, OPS, AND LEADERSHIP TEAMS.</span>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			{/* FEATURE/PORTFOLIO SECTION - Scrollable below hero */}
-			<section className="relative w-full bg-[#0a0a0a] text-white px-4 sm:px-6 md:px-10 lg:px-14 py-16 sm:py-20 md:py-24">
-				{/* Header Section */}
-				<div className="max-w-3xl mb-12 md:mb-16">
-					<div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:gap-8 mb-8">
-						{/* Left - Title & Description */}
-						<div className="flex-1">
-							<h1 className="text-[28px] sm:text-3xl md:text-4xl lg:text-[44px] font-normal leading-[1.15] tracking-tight text-white mb-4">
-								Hi, We are MANTO!
-							</h1>
-							<p className="text-sm md:text-[15px] leading-[1.6] text-white/60 max-w-3xl">
-								MANTO is a group of independent creators shaping sharp visual systems, web-ready products, and story-first campaigns. With a decade of craft behind us, we help ideas move with focus and intention.
-							</p>
-						</div>
-
-						{/* Right - CTA Button */}
-						<div className="mt-6 lg:mt-0">
-							<button className="liquid-glass px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-white text-sm font-medium hover:text-white transition-colors whitespace-nowrap">
-								Let's Team Up Today
-							</button>
-						</div>
-					</div>
-				</div>
-
-				{/* Grid Section */}
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-					
-					{/* Column 1 - Background Card */}
-					<div className="flex flex-col">
-						<div className="rounded-2xl bg-black relative overflow-hidden h-64 md:h-80 lg:h-96 mb-4 md:mb-5">
-							{/* Video Background */}
-							<video
-								className="absolute inset-0 w-full h-full object-cover"
-								autoPlay
-								loop
-								muted
-								playsInline
-							>
-								<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260507_150203_44a5bd32-516a-47ce-a077-8acbf9aa8991.mp4" type="video/mp4" />
-							</video>
-
-							{/* Content Overlay */}
-							<div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6 bg-gradient-to-t from-black/60 to-transparent">
-								{/* Top Label */}
-								<div className="flex items-center justify-center gap-2">
-									
+							<div className="w-full h-[200px] bg-[#f0f1f4]" />
+							<div className="p-6">
+								<div className="flex gap-2 mb-3 flex-wrap">
+									{s.tags.map((t) => (
+										<span
+											key={t.label}
+											className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] ${t.variant === "primary" ? "bg-blue-50 text-blue-600" : "bg-black/[0.08] text-[#0d1b2e]"
+												}`}
+										>
+											{t.label}
+										</span>
+									))}
 								</div>
+								<div className="text-[1rem] font-extrabold text-[#0d1b2e] mb-2">{s.title}</div>
+								<div className="text-[0.83rem] text-[#5a6a82] leading-[1.6] mb-4">{s.desc}</div>
+								<LinkBtn href="#">Learn More</LinkBtn>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
 
-								{/* Bottom Timeline Grid */}
-								<div className="grid gap-2">
-									{timeline.map((item, i) => (
-										<div key={i} className="grid grid-cols-[auto_auto_1fr_auto] gap-2 items-center text-xs text-white/80">
-											<span>{item.year}</span>
-											<Sparkle className="h-3 w-3 text-white/60" strokeWidth={1.5} />
-											<span>{item.role}</span>
-											<span className="text-white/60">{item.company}</span>
-										</div>
+// ─── Testimonials ─────────────────────────────────────────────────────────────
+function Testimonials() {
+	const [current, setCurrent] = useState(0);
+	const [visible, setVisible] = useState(true);
+
+	const navigate = (dir: number) => {
+		setVisible(false);
+		setTimeout(() => {
+			setCurrent((c) => (c + dir + TESTIMONIALS.length) % TESTIMONIALS.length);
+			setVisible(true);
+		}, 200);
+	};
+
+	const q = TESTIMONIALS[current];
+
+	return (
+		<section className="py-[100px] bg-[#f5f6f8]">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="text-center mb-14">
+					<Eyebrow>Testimonials</Eyebrow>
+					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+						What Leaders Say About Manto
+					</h2>
+				</div>
+				<div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 items-center">
+					{/* Left image */}
+					<div className="relative">
+						<div className="w-full aspect-[3/4] rounded-[20px] bg-[#e8e9ed]" />
+						<div className="lg:absolute lg:bottom-[-20px] lg:right-[-20px] mt-4 lg:mt-0 bg-white rounded-2xl p-4 pr-5 shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)] border border-[#e8e8e8]">
+							<div className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-[#8896aa] mb-2">
+								Trusted Clients
+							</div>
+							<div className="flex items-center gap-3">
+								<div className="text-[1.1rem] font-extrabold text-[#0d1b2e]">5K+</div>
+								<div className="flex gap-2">
+									{["Nexvera", "Corepath", "Lumis", "Arkon"].map((name) => (
+										<span
+											key={name}
+											className="px-2.5 py-1 rounded bg-[#f5f6f8] text-[0.65rem] font-bold text-[#5a6a82] border border-[#e8e8e8]"
+										>
+											{name}
+										</span>
 									))}
 								</div>
 							</div>
 						</div>
 					</div>
 
-					{/* Column 2 - Stacked Cards */}
-					<div className="flex flex-col md:grid md:grid-rows-[auto_1fr] gap-4 md:gap-5">
-						
-						{/* Client Voice Card */}
-						<div className="rounded-2xl bg-[#324444] p-5 md:p-6 noise-overlay relative overflow-hidden flex flex-col justify-between h-64 md:h-auto">
-							{/* Label */}
-							<div className="flex items-center gap-2 mb-4">
-								<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-								<span className="uppercase tracking-[0.22em] text-[11px] text-white/70">Client Voice</span>
-								<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-							</div>
-
-							{/* Quote */}
-							<blockquote className="text-[13px] sm:text-[13.5px] leading-[1.6] text-white/85 mb-4">
-								"MANTO's work is a masterclass in visual storytelling. They took our brand from bland to brilliant, crafting a visual identity that truly captures our essence. The team's creativity, professionalism, and dedication are unmatched. Working with MANTO was an absolute pleasure, and the results speak for themselves."
-											</blockquote>
-
-							{/* Attribution */}
-							<div className="text-xs text-white/70">
-								<p className="font-medium text-white/85">MANTO</p>
-								<p className="text-white/60">EXE201</p>
-							</div>
-						</div>
-
-						{/* 10M+ Card */}
-						<div className="rounded-2xl bg-black relative overflow-hidden h-64 md:h-80 flex flex-col items-center justify-center">
-							{/* Video Background */}
-							<video
-								className="absolute inset-0 w-full h-full object-cover"
-								autoPlay
-								loop
-								muted
-								playsInline
-							>
-								<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260507_154543_d5b83fc1-9cea-44f3-b5e8-8f325935211a.mp4" type="video/mp4" />
-							</video>
-
-							{/* Content Overlay */}
-							<div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-transparent via-transparent to-black/40">
-								<div className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-light tracking-tight drop-shadow-lg text-white">
-									10M+
+					{/* Quote */}
+					<div>
+						<div
+							className="bg-white rounded-[20px] p-9 border border-[#e8e8e8] shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)] transition-all duration-200"
+							style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(8px)" }}
+						>
+							<svg viewBox="0 0 48 48" className="w-10 h-10 fill-blue-50">
+								<path
+									d="M14 8C8.477 8 4 12.477 4 18v6c0 5.523 4.477 10 10 10h2v6l8-6h2c5.523 0 10-4.477 10-10V18c0-5.523-4.477-10-10-10H14z"
+									className="fill-blue-600"
+								/>
+							</svg>
+							<p className="text-[1.05rem] text-[#0d1b2e] leading-[1.75] italic my-4">{q.text}</p>
+							<div className="flex items-center gap-3.5">
+								<div className="w-[46px] h-[46px] rounded-full bg-blue-600 flex items-center justify-center text-[0.9rem] font-bold text-white flex-shrink-0">
+									{q.initials}
 								</div>
-								<p className="text-white/85 text-sm mt-4">Raised for startups</p>
-							</div>
-						</div>
-					</div>
-
-					{/* Column 3 - Stacked Cards */}
-					<div className="flex flex-col gap-4 md:gap-5">
-						
-						{/* Daily Software Card */}
-						<div className="rounded-2xl bg-black relative overflow-hidden h-80 md:h-96 flex flex-col items-center justify-center">
-							{/* Video Background */}
-							<video
-								className="absolute inset-0 w-full h-full object-cover"
-								autoPlay
-								loop
-								muted
-								playsInline
-							>
-								<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260507_153148_d7a3e1dd-e5d0-4ce6-8306-00d7522ecc44.mp4" type="video/mp4" />
-							</video>
-
-							{/* Content Overlay */}
-							<div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6 bg-gradient-to-t from-black/60 to-transparent">
-								{/* Top Label */}
-								<div className="flex items-center justify-center gap-2">
-									<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-									<span className="uppercase tracking-[0.22em] text-[11px] text-white/70">Daily Software</span>
-									<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-								</div>
-
-								{/* Marquee Rows */}
-								<div className="space-y-3">
-									{/* Row 1 - Left Scroll */}
-									<div className="overflow-hidden">
-										<div className="flex animate-marquee-left gap-3">
-											{[...softwareRow1, ...softwareRow1].map((Icon, i) => (
-												<SoftwareIcon key={i} icon={Icon} />
-											))}
-										</div>
-									</div>
-
-									{/* Row 2 - Right Scroll */}
-									<div className="overflow-hidden">
-										<div className="flex animate-marquee-right gap-3">
-											{[...softwareRow2, ...softwareRow2].map((Icon, i) => (
-												<SoftwareIcon key={i} icon={Icon} />
-											))}
-										</div>
-									</div>
+								<div>
+									<div className="text-[0.9rem] font-extrabold text-[#0d1b2e]">{q.name}</div>
+									<div className="text-[0.78rem] text-[#5a6a82]">{q.role}</div>
 								</div>
 							</div>
 						</div>
-
-						{/* Reach Me Card */}
-						<div className="rounded-2xl bg-[#324444] p-5 md:p-6 noise-overlay relative overflow-hidden flex flex-col justify-between h-64 md:h-auto">
-							{/* Label */}
-							<div className="flex items-center justify-between mb-6">
-								<div className="flex items-center gap-2">
-									<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-									<span className="uppercase tracking-[0.22em] text-[11px] text-white/70">Reach Me</span>
-									<Sparkle className="h-3 w-3 text-white/70" strokeWidth={1.5} />
-								</div>
-								<button className="h-9 w-9 rounded-full liquid-glass flex items-center justify-center hover:bg-white/10 transition-colors">
-									<ArrowUpRight className="h-4 w-4 text-white" strokeWidth={1.5} />
+						<div className="flex gap-2.5 mt-6">
+							{[
+								{ dir: -1, points: "15 18 9 12 15 6" },
+								{ dir: 1, points: "9 18 15 12 9 6" },
+							].map(({ dir, points }) => (
+								<button
+									key={dir}
+									onClick={() => navigate(dir)}
+									className="w-10 h-10 rounded-full border-2 border-[#e8e8e8] bg-transparent flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-blue-600 hover:bg-blue-50"
+								>
+									<svg viewBox="0 0 24 24" fill="none" stroke="#0d1b2e" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+										<polyline points={points} />
+									</svg>
 								</button>
-							</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
 
-							{/* Contact Info */}
-							<div className="space-y-4">
-								<div>
-									<p className="text-xs text-white/60 mb-1">Email</p>
-									<a href="mailto:hi@maxreed.com" className="text-sm text-white hover:text-white/80 transition-colors">
-										MANTO@gmail.com
-									</a>
-								</div>
-								<div>
-									<p className="text-xs text-white/60 mb-1">Phone</p>
-									<a href="tel:+4420781163" className="text-sm text-white hover:text-white/80 transition-colors">
-										+84 207 81 63 
-									</a>
-								</div>
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+function Blog() {
+	const posts = [
+		{
+			tag: "Wellbeing",
+			tagVariant: "primary",
+			date: "Jan 14, 2026",
+			title: "How to Build Psychological Safety in High-Stress Product Teams",
+			featured: true,
+		},
+		{
+			tag: "Leadership",
+			tagVariant: "primary",
+			date: "Jan 8, 2026",
+			title: "The Silent Cost of Burnout: A Manager's Guide to Organizational Health",
+			featured: false,
+		},
+		{
+			tag: "Retention",
+			tagVariant: "primary",
+			date: "Dec 29, 2025",
+			title: "Why Traditional Annual HR Surveys Fail — And What to Do Instead",
+			featured: false,
+		},
+	];
+
+	const extras = [
+		{
+			tag: "Culture",
+			date: "Dec 20, 2025",
+			title: "How Peer Recognition Drives Engagement in Remote Workforces",
+		},
+		{
+			tag: "Retention",
+			date: "Dec 12, 2025",
+			title: "5 Early Indicators of Employee Attrition Every HR Leader Must Monitor",
+		},
+	];
+
+	return (
+		<section className="py-[100px] bg-white">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="flex items-end justify-between mb-12 flex-wrap gap-3">
+					<div>
+						<Eyebrow>Manto Blog</Eyebrow>
+						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
+							Employee Experience &amp; Wellbeing Insights
+						</h2>
+						<p className="text-[#5a6a82] mt-3 max-w-[560px] leading-[1.7]">
+							Our strategic guidance empowers you to act with clarity and confidence.
+						</p>
+					</div>
+					<LinkBtn href="#" className="whitespace-nowrap">
+						All Articles
+					</LinkBtn>
+				</div>
+
+				<div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
+					{/* Featured */}
+					<div className="bg-white rounded-2xl border border-[#e8e8e8] overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)]">
+						<div className="w-full h-[220px] bg-[#f0f1f4]" />
+						<div className="p-5">
+							<div className="flex items-center gap-2.5 mb-2.5">
+								<span className="inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] bg-blue-50 text-blue-600">
+									{posts[0].tag}
+								</span>
+								<span className="text-[0.72rem] text-[#8896aa] font-medium">{posts[0].date}</span>
 							</div>
+							<div className="text-[1rem] font-extrabold text-[#0d1b2e] leading-[1.35] mb-3">
+								{posts[0].title}
+							</div>
+							<LinkBtn href="#" className="text-[0.83rem]">
+								Read More
+							</LinkBtn>
 						</div>
 					</div>
 
+					{/* Aside */}
+					<div className="grid grid-rows-2 gap-6">
+						{posts.slice(1).map((p) => (
+							<div
+								key={p.title}
+								className="bg-white rounded-2xl border border-[#e8e8e8] overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)]"
+							>
+								<div className="w-full h-[140px] bg-[#f0f1f4]" />
+								<div className="p-4">
+									<div className="flex items-center gap-2.5 mb-2">
+										<span className="inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] bg-blue-50 text-blue-600">
+											{p.tag}
+										</span>
+										<span className="text-[0.72rem] text-[#8896aa] font-medium">{p.date}</span>
+									</div>
+									<div className="text-[0.88rem] font-bold text-[#0d1b2e] leading-[1.3] mb-2.5">
+										{p.title}
+									</div>
+									<LinkBtn href="#" className="text-[0.8rem]">
+										Read More
+									</LinkBtn>
+								</div>
+							</div>
+						))}
+					</div>
 				</div>
-			</section>
 
-			{/* PRICING SECTION */}
-			<section className="relative w-full bg-[#0a0a0a] text-white px-4 sm:px-6 md:px-10 lg:px-14 py-16 sm:py-20 md:py-28 overflow-hidden">
-				{/* Background decoration */}
-				<div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent pointer-events-none" />
-				
-				<div className="relative z-10 max-w-6xl mx-auto">
-					{/* Header */}
-					<div className="text-center mb-12 sm:mb-16 md:mb-20">
-						<h2 className="text-[32px] sm:text-4xl md:text-5xl font-light tracking-tight mb-4">
-							Simple, Transparent <span className="text-blue-300">Pricing</span>
+				{/* Extras */}
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+					{extras.map((e) => (
+						<div
+							key={e.title}
+							className="flex gap-3.5 items-center bg-white rounded-xl border border-[#e8e8e8] p-3.5 transition-all duration-200 hover:shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)]"
+						>
+							<div className="w-[70px] h-[70px] rounded-[10px] bg-[#f0f1f4] flex-shrink-0" />
+							<div>
+								<div className="flex items-center gap-2 mb-1">
+									<span className="inline-block px-2.5 py-0.5 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] bg-blue-50 text-blue-600">
+										{e.tag}
+									</span>
+									<span className="text-[0.72rem] text-[#8896aa]">{e.date}</span>
+								</div>
+								<div className="text-[0.82rem] font-bold text-[#0d1b2e] leading-[1.3] mb-1">
+									{e.title}
+								</div>
+								<LinkBtn href="#" className="text-[0.78rem]">
+									Read More
+								</LinkBtn>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── CTA Banner ───────────────────────────────────────────────────────────────
+function CTABanner() {
+	return (
+		<section
+			className="py-[100px] relative overflow-hidden"
+			style={{
+				background: "linear-gradient(135deg, #0f1f3d 0%, #1a3050 60%, #0d2a1e 100%)",
+			}}
+		>
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+					<div>
+						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-white">
+							Ready to Prevent Burnout?
+							<br />
+							Let's Support Your Team
 						</h2>
-						<p className="text-white/60 text-sm md:text-base max-w-2xl mx-auto">
-							Choose the perfect plan for your needs. Always flexible to scale as you grow.
+						<p className="text-white/65 text-[1rem] mt-3 max-w-[560px] leading-[1.7]">
+							Schedule a demo or download our guide to learn how Manto can help you create a happier, more sustainable workplace culture.
+						</p>
+						<div className="flex gap-3 mt-8 flex-wrap">
+							<a
+								href="#/login"
+								className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-[#0d1b2e] font-bold text-[0.9rem] hover:bg-[#f5f6f8] transition-colors"
+							>
+								Get a Dashboard <ArrowRight size={16} />
+							</a>
+							<a
+								href="#"
+								className="inline-flex items-center gap-2 px-7 py-3 rounded-full text-white/70 border-2 border-white/20 font-bold text-[0.9rem] hover:border-white/40 transition-colors"
+							>
+								View Case Studies
+							</a>
+						</div>
+					</div>
+					<div className="bg-white/[0.08] border border-white/15 backdrop-blur-xl rounded-2xl p-8 text-center min-w-[180px]">
+						<div className="w-12 h-8 rounded-lg bg-white/10 flex items-center justify-center mx-auto mb-3">
+							<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth={2} strokeLinecap="round" className="w-5 h-5">
+								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+								<circle cx="9" cy="7" r="4" />
+								<path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+							</svg>
+						</div>
+						<div className="text-3xl font-extrabold text-white">500+</div>
+						<div className="text-[0.8rem] text-white/65 font-medium mt-1">
+							Businesses Transformed Worldwide
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+function Footer() {
+	return (
+		<footer className="bg-[#0d1b2e] pt-20">
+			<div className="max-w-[1200px] mx-auto px-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] gap-12 mb-16">
+					{/* Brand */}
+					<div>
+						<div className="flex items-center gap-3 font-extrabold text-[1.25rem] text-white mb-4">
+							<span className="tracking-[0.15em]">MANTO</span>
+						</div>
+						<p className="text-[0.85rem] text-white/50 leading-[1.65] max-w-[240px] mb-5">
+							Your premium employee experience &amp; wellbeing partner. We build systems that reduce burnout and elevate teams.
+						</p>
+						<p className="text-[0.8rem] text-white/40 leading-[1.6]">
+							contact@manto.io
+							<br />
+							Available globally — remote-first team
 						</p>
 					</div>
 
-					{/* Toggle Switch */}
-					<div className="flex items-center justify-center gap-4 mb-12 md:mb-16">
-						<span className="text-white/70 text-sm">Monthly</span>
-						<button className="relative inline-flex h-8 w-14 items-center rounded-full bg-white/10 transition-colors hover:bg-white/20 border border-white/20">
-							<span className="inline-block h-6 w-6 transform rounded-full bg-white transition-transform" style={{ marginLeft: '4px' }} />
-						</button>
-						<span className="text-white/70 text-sm">Yearly <span className="text-emerald-300 text-xs ml-1">Save 20%</span></span>
-					</div>
-
-					{/* Pricing Cards */}
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4 lg:gap-6">
-						{/* Free Plan */}
-						<div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 sm:p-8 flex flex-col">
-							<div className="mb-6">
-								<h3 className="text-xl sm:text-2xl font-semibold mb-2">Free</h3>
-								<p className="text-white/60 text-sm">For creators taking their first steps with focus.</p>
-							</div>
-
-							<div className="mb-6 text-white text-sm">
-								<span className="text-3xl font-light">$0</span>
-								<span className="text-white/60">/month</span>
-							</div>
-
-							<ul className="space-y-3 mb-8 flex-grow">
-								{[
-									'Up to 3 projects in the cloud',
-									'Image export up to 1080p',
-									'Basic editing tools',
-									'Free templates and icons',
-									'Access via web and mobile app'
-								].map((feature, i) => (
-									<li key={i} className="flex items-start gap-3 text-sm text-white/80">
-										<svg className="h-5 w-5 text-emerald-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-										</svg>
-										<span>{feature}</span>
-									</li>
-								))}
-							</ul>
-
-							<button className="w-full py-2.5 px-4 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/20 transition-colors border border-white/20">
-								Choose Plan
-							</button>
+					{/* Main Pages */}
+					<div>
+						<div className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-white/40 mb-5">
+							Main Pages
 						</div>
-
-						{/* Standard Plan - Featured */}
-						<div className="rounded-2xl border border-blue-400/50 bg-gradient-to-b from-blue-900/30 to-blue-950/20 p-6 sm:p-8 flex flex-col relative md:scale-105 md:-my-4">
-							<div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-semibold">
-								MOST POPULAR
-							</div>
-							
-							<div className="mb-6">
-								<h3 className="text-xl sm:text-2xl font-semibold mb-2">Standard</h3>
-								<p className="text-white/60 text-sm">For freelancers and small teams who need more freedom and flexibility.</p>
-							</div>
-
-							<div className="mb-6 text-white text-sm">
-								<span className="text-3xl sm:text-4xl font-light">$9.99</span>
-								<span className="text-white/60">/m</span>
-							</div>
-
-							<ul className="space-y-3 mb-8 flex-grow">
-								{[
-									'Up to 50 projects in the cloud',
-									'Export up to 4K',
-									'Advanced editing toolkit',
-									'Team collaboration (up to 5 members)',
-									'Access to premium template library'
-								].map((feature, i) => (
-									<li key={i} className="flex items-start gap-3 text-sm text-white/90">
-										<svg className="h-5 w-5 text-emerald-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-										</svg>
-										<span>{feature}</span>
-									</li>
-								))}
-							</ul>
-
-							<button className="w-full py-2.5 px-4 rounded-lg bg-emerald-300 text-slate-950 font-semibold text-sm hover:bg-emerald-200 transition-colors">
-								Choose Plan
-							</button>
-						</div>
-
-						{/* Pro Plan */}
-						<div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 sm:p-8 flex flex-col">
-							<div className="mb-6">
-								<h3 className="text-xl sm:text-2xl font-semibold mb-2">Pro</h3>
-								<p className="text-white/60 text-sm">For studios, agencies, and professional creators working with brands.</p>
-							</div>
-
-							<div className="mb-6 text-white text-sm">
-								<span className="text-3xl sm:text-4xl font-light">$19.99</span>
-								<span className="text-white/60">/m</span>
-							</div>
-
-							<ul className="space-y-3 mb-8 flex-grow">
-								{[
-									'Unlimited projects',
-									'Export up to 8K + animations',
-									'AI-powered content generation tools',
-									'Unlimited team members',
-									'Brand customization',
-									'White-label capabilities',
-									'Priority support'
-								].map((feature, i) => (
-									<li key={i} className="flex items-start gap-3 text-sm text-white/80">
-										<svg className="h-5 w-5 text-emerald-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-											<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-										</svg>
-										<span>{feature}</span>
-									</li>
-								))}
-							</ul>
-
-							<button className="w-full py-2.5 px-4 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/20 transition-colors border border-white/20">
-								Choose Plan
-							</button>
-						</div>
-					</div>
-
-					{/* Bottom CTA */}
-					<div className="mt-16 text-center">
-						<p className="text-white/60 text-sm mb-4">All plans include a 14-day free trial. No credit card required.</p>
-						<a href="#" className="inline-block text-emerald-300 hover:text-emerald-200 transition-colors text-sm font-medium">
-							Compare all features →
-						</a>
-					</div>
-				</div>
-			</section>
-
-			{/* CTA + FAQ SECTION */}
-			<section className="relative w-full bg-[#0a0a0a] text-white px-4 sm:px-6 md:px-10 lg:px-14 py-16 sm:py-20 md:py-28" style={{ fontFamily: "'Barlow', sans-serif" }}>
-				<div className="max-w-[1100px] w-full mx-auto">
-					<div className="grid grid-cols-[1.6fr_1fr] gap-[30px] items-stretch md:grid-cols-1 md:gap-[60px]">
-						
-						{/* Left Column - CTA Card */}
-						<div 
-							className="c5-animated-gradient rounded-3xl py-20 px-8 sm:px-12 md:px-16 text-white flex flex-col justify-center items-center text-center"
-							style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)' }}
-						>
-							<h2 
-								className="font-normal leading-[1.1] mb-4 sm:mb-6 text-[28px] sm:text-[36px] md:text-[44px] lg:text-5xl"
-								style={{ letterSpacing: '-0.02em' }}
-							>
-								Ready to Transform Your Team's Wellbeing?
-							</h2>
-							<p className="text-[14px] sm:text-[15px] md:text-base mb-8 sm:mb-10 font-normal text-white/90 max-w-2xl">
-								Start your journey to sustainable focus and lasting productivity today
-							</p>
-							<button 
-								className="rounded-full bg-[#E8F5FF] px-8 sm:px-10 py-3 sm:py-4 font-semibold text-[#06193d] text-[14px] sm:text-[15px] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_30px_2px_rgba(232,245,255,0.35)] active:scale-[0.97]"
-							>
-								Get Started Today
-							</button>
-						</div>
-
-						{/* Right Column - FAQ */}
-						<div className="flex flex-col justify-center gap-3">
-							{faqItems.map((item, index) => (
-								<div
-									key={index}
-									onClick={() => toggleFAQ(index)}
-									className="border rounded-2xl py-5 px-6 cursor-pointer transition-all duration-200 group"
-									style={{
-										backgroundColor: activeIndex === index ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
-										borderColor: activeIndex === index ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
-										boxShadow: activeIndex === index 
-											? '0 8px 24px rgba(0,0,0,0.2)' 
-											: '0 4px 12px rgba(0,0,0,0.1)'
-									}}
-								>
-									<div className="flex justify-between items-start gap-4 font-medium text-[14px] sm:text-[15px]">
-										<span 
-											className="leading-[1.45] tracking-[-0.01em] antialiased"
-											style={
-												(index === 0 || index === 2) ? {
-													color: '#f0f9ff',
-													fontWeight: 600,
-													textShadow: `
-														0 1px 0 rgba(232, 245, 255, 0.1),
-														0 2px 2px rgba(59, 0, 255, 0.15),
-														0 4px 4px rgba(0, 245, 170, 0.1),
-														0 6px 8px rgba(0, 0, 0, 0.3)
-													`,
-													letterSpacing: '-0.015em'
-												} : {
-													color: 'rgba(255, 255, 255, 0.95)'
-												}
-											}
-										>
-											{item.question}
-										</span>
-										{activeIndex === index ? (
-											<ChevronUp size={20} className="flex-shrink-0 text-[#00f5aa] transition-transform duration-300" />
-										) : (
-											<ChevronDown size={20} className="flex-shrink-0 text-white/40 group-hover:text-white/60 transition-colors duration-300" />
-										)}
-									</div>
-									{activeIndex === index && (
-										<div 
-											className="mt-4 text-[13px] sm:text-[14px] leading-[1.8] tracking-[-0.005em] antialiased"
-											style={
-												(index === 0 || index === 2) ? {
-													color: 'rgba(255, 255, 255, 0.9)',
-													textShadow: '0 2px 4px rgba(0, 245, 170, 0.08)',
-													fontWeight: 500
-												} : {
-													color: 'rgba(255, 255, 255, 0.82)'
-												}
-											}
-										>
-											{item.answer}
-										</div>
-									)}
-								</div>
+						<div className="flex flex-col gap-[11px]">
+							{["Home", "About", "Pricing", "Contact", "Services", "Blog", "Case Studies"].map((link) => (
+								<a key={link} href="#" className="text-[0.85rem] text-white/60 hover:text-white transition-colors">
+									{link}
+								</a>
 							))}
 						</div>
 					</div>
 
+					{/* Resources */}
+					<div>
+						<div className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-white/40 mb-5">
+							Resources
+						</div>
+						<div className="flex flex-col gap-[11px]">
+							{["Service Details", "Blog Details", "Case Study Details", "Privacy Policy", "Terms of Service"].map((link) => (
+								<a key={link} href="#" className="text-[0.85rem] text-white/60 hover:text-white transition-colors">
+									{link}
+								</a>
+							))}
+						</div>
+					</div>
+
+					{/* Newsletter */}
+					<div>
+						<div className="text-[1rem] font-bold text-white mb-2">Join our community</div>
+						<p className="text-[0.83rem] text-white/50 mb-5 leading-[1.55]">
+							Get strategic insights, case studies, and business growth tips — delivered to your
+							inbox.
+						</p>
+						<div className="flex">
+							<input
+								type="email"
+								placeholder="your@email.com"
+								className="flex-1 px-4 py-3 bg-white/[0.08] border border-white/15 border-r-0 rounded-l-full text-white text-[0.85rem] outline-none placeholder:text-white/35 focus:border-blue-500/50 transition-colors"
+							/>
+							<button className="px-5 py-3 bg-blue-600 border-0 rounded-r-full text-white text-[0.85rem] font-bold cursor-pointer hover:bg-blue-700 transition-colors">
+								Subscribe
+							</button>
+						</div>
+					</div>
 				</div>
-			</section>
-		</>
-	)
+
+				{/* Footer bottom */}
+				<div className="border-t border-white/[0.08] py-6 flex flex-wrap items-center justify-between gap-4">
+					<div className="text-[0.8rem] text-white/35">
+						© Copyright 2026 MANTO. All rights reserved.
+					</div>
+					<div className="flex gap-3">
+						{[
+							{ label: "Facebook", d: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" },
+							{ label: "TikTok", d: "M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" },
+							{ label: "Twitter", d: "M4 4l16 16M20 4L4 20" },
+							{ label: "Instagram", isRect: true },
+						].map((s) => (
+							<a
+								key={s.label}
+								href="#"
+								aria-label={s.label}
+								className="w-9 h-9 rounded-full bg-white/[0.08] border border-white/[0.12] flex items-center justify-center transition-all duration-200 hover:bg-blue-600 hover:border-blue-600 group"
+							>
+								<svg viewBox="0 0 24 24" className="w-4 h-4 fill-white/60 group-hover:fill-white">
+									{s.isRect ? (
+										<>
+											<rect x="2" y="2" width="20" height="20" rx="5" />
+											<circle cx="12" cy="12" r="5" />
+											<circle cx="17.5" cy="6.5" r="1.5" />
+										</>
+									) : (
+										<path d={s.d} />
+									)}
+								</svg>
+							</a>
+						))}
+					</div>
+				</div>
+			</div>
+		</footer>
+	);
 }
 
-export default Homepage
-
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function MantoLanding() {
+	return (
+		<div className="font-['Plus_Jakarta_Sans',sans-serif] text-[#0d1b2e] bg-white overflow-x-hidden">
+			<Navbar />
+			<Hero />
+			<About />
+			<Values />
+			<WhyChooseUs />
+			<Stats />
+			<LeadMagnet />
+			<Expertise />
+			<CaseStudies />
+			<Services />
+			<Testimonials />
+			<Blog />
+			<CTABanner />
+			<Footer />
+		</div>
+	);
+}

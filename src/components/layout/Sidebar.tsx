@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePermission } from "@/features/auth/usePermission";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Users,
@@ -40,6 +41,7 @@ export default function Sidebar({
   onTabChange,
 }: SidebarProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const {
     isAdmin,
     isCEO,
@@ -129,7 +131,7 @@ export default function Sidebar({
                 }`}
             >
               <LayoutDashboard size={18} />
-              <span className="text-sm font-semibold">Dashboard</span>
+              <span className="text-sm font-semibold">{t("nav.dashboard")}</span>
               <ChevronDown
                 size={16}
                 className={`ml-auto transition-transform ${expandedSections.dashboard ? "rotate-180" : ""
@@ -147,7 +149,7 @@ export default function Sidebar({
                       }`}
                   >
                     <UserRound size={17} />
-                    <span className="text-sm font-medium">Personal</span>
+                    <span className="text-sm font-medium">{t("nav.personal")}</span>
                   </button>
                 )}
                 {canViewDepartmentDashboard() && (
@@ -158,7 +160,7 @@ export default function Sidebar({
                       }`}
                   >
                     <Building2 size={17} />
-                    <span className="text-sm font-medium">Department</span>
+                    <span className="text-sm font-medium">{t("nav.department")}</span>
                   </button>
                 )}
                 {canViewCompanyDashboard() && (
@@ -169,7 +171,7 @@ export default function Sidebar({
                       }`}
                   >
                     <BarChart3 size={17} />
-                    <span className="text-sm font-medium">Company</span>
+                    <span className="text-sm font-medium">{t("nav.company")}</span>
                   </button>
                 )}
               </div>
@@ -184,7 +186,7 @@ export default function Sidebar({
                   }`}
               >
                 <Briefcase size={18} />
-                <span className="text-sm font-semibold">My Tasks</span>
+                <span className="text-sm font-semibold">{t("nav.my_tasks")}</span>
               </button>
             )}
 
@@ -192,12 +194,11 @@ export default function Sidebar({
             <button
               type="button"
               onClick={() => handleTabClick("meetings")}
-              className={`${topLevelItemClass} ${
-                activeTab === "meetings" ? activeTopLevelClass : ""
-              }`}
+              className={`${topLevelItemClass} ${activeTab === "meetings" ? activeTopLevelClass : ""
+                }`}
             >
               <CalendarDays size={18} />
-              <span className="text-sm font-semibold">Meetings</span>
+              <span className="text-sm font-semibold">{t("nav.meetings")}</span>
             </button>
 
             {/* People Section */}
@@ -209,7 +210,7 @@ export default function Sidebar({
                   className={`${topLevelItemClass} ${expandedSections.people ? activeTopLevelClass : ""}`}
                 >
                   <Users size={18} />
-                  <span className="text-sm font-semibold">People</span>
+                  <span className="text-sm font-semibold">{t("nav.people")}</span>
                   <ChevronDown
                     size={16}
                     className={`ml-auto transition-transform ${expandedSections.people ? "rotate-180" : ""}`}
@@ -226,7 +227,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "team" ? activeSubItemClass : ""}`}
                       >
                         <UserRound size={17} />
-                        <span className="text-sm font-medium">Team</span>
+                        <span className="text-sm font-medium">{t("nav.team")}</span>
                       </button>
                     )}
 
@@ -238,7 +239,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "departments" ? activeSubItemClass : ""}`}
                       >
                         <Building2 size={17} />
-                        <span className="text-sm font-medium">Departments</span>
+                        <span className="text-sm font-medium">{t("nav.departments")}</span>
                       </button>
                     )}
 
@@ -250,7 +251,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "task-types" ? activeSubItemClass : ""}`}
                       >
                         <ClipboardList size={17} />
-                        <span className="text-sm font-medium">Task Types</span>
+                        <span className="text-sm font-medium">{t("nav.task_types")}</span>
                       </button>
                     )}
 
@@ -262,7 +263,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "user-management" ? activeSubItemClass : ""}`}
                       >
                         <Users size={17} />
-                        <span className="text-sm font-medium">Users</span>
+                        <span className="text-sm font-medium">{t("nav.users")}</span>
                       </button>
                     )}
 
@@ -274,7 +275,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "performance" ? activeSubItemClass : ""}`}
                       >
                         <TrendingUp size={17} />
-                        <span className="text-sm font-medium">Performance</span>
+                        <span className="text-sm font-medium">{t("nav.performance")}</span>
                       </button>
                     )}
 
@@ -286,7 +287,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "workload" ? activeSubItemClass : ""}`}
                       >
                         <Briefcase size={17} />
-                        <span className="text-sm font-medium">Workload</span>
+                        <span className="text-sm font-medium">{t("nav.workload")}</span>
                       </button>
                     )}
 
@@ -298,7 +299,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "task-management" ? activeSubItemClass : ""}`}
                       >
                         <ClipboardList size={17} />
-                        <span className="text-sm font-medium">Quản lý Task</span>
+                        <span className="text-sm font-medium">{t("nav.task_management")}</span>
                       </button>
                     )}
 
@@ -310,7 +311,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "team-performance" ? activeSubItemClass : ""}`}
                       >
                         <TrendingUp size={17} />
-                        <span className="text-sm font-medium">Hiệu suất Nhóm</span>
+                        <span className="text-sm font-medium">{t("nav.team_performance")}</span>
                       </button>
                     )}
                   </div>
@@ -325,7 +326,7 @@ export default function Sidebar({
                   className={`${topLevelItemClass} ${activeTab === "team" ? activeTopLevelClass : ""}`}
                 >
                   <UserRound size={18} />
-                  <span className="text-sm font-semibold">Team</span>
+                  <span className="text-sm font-semibold">{t("nav.team")}</span>
                 </button>
               )
             )}
@@ -339,7 +340,7 @@ export default function Sidebar({
                   className={`${topLevelItemClass} ${expandedSections.wellbeing ? activeTopLevelClass : ""}`}
                 >
                   <Heart size={18} />
-                  <span className="text-sm font-semibold">Wellbeing</span>
+                  <span className="text-sm font-semibold">{t("nav.wellbeing")}</span>
                   <ChevronDown
                     size={16}
                     className={`ml-auto transition-transform ${expandedSections.wellbeing ? "rotate-180" : ""}`}
@@ -356,7 +357,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "burnout-risk" ? activeSubItemClass : ""}`}
                       >
                         <TriangleAlert size={17} />
-                        <span className="text-sm font-medium">Burnout Risk</span>
+                        <span className="text-sm font-medium">{t("nav.burnout_risk")}</span>
                       </button>
                     )}
 
@@ -368,7 +369,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "burnout-monitor" ? activeSubItemClass : ""}`}
                       >
                         <ShieldAlert size={17} />
-                        <span className="text-sm font-medium">Burnout Monitor</span>
+                        <span className="text-sm font-medium">{t("nav.burnout_monitor")}</span>
                       </button>
                     )}
 
@@ -381,7 +382,7 @@ export default function Sidebar({
                       >
                         <Activity size={17} />
                         <span className="text-sm font-medium">
-                          Wellbeing Analytics
+                          {t("nav.wellbeing_analytics")}
                         </span>
                       </button>
                     )}
@@ -394,7 +395,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "survey-analytics" ? activeSubItemClass : ""}`}
                       >
                         <Sparkles size={17} />
-                        <span className="text-sm font-medium">Survey Analytics</span>
+                        <span className="text-sm font-medium">{t("nav.survey_analytics")}</span>
                       </button>
                     )}
 
@@ -406,7 +407,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "custom-surveys" ? activeSubItemClass : ""}`}
                       >
                         <FileText size={17} />
-                        <span className="text-sm font-medium">Custom Surveys</span>
+                        <span className="text-sm font-medium">{t("nav.custom_surveys")}</span>
                       </button>
                     )}
 
@@ -418,7 +419,7 @@ export default function Sidebar({
                         className={`${subItemClass} ${activeTab === "survey" ? activeSubItemClass : ""}`}
                       >
                         <Sparkles size={17} />
-                        <span className="text-sm font-medium">Monthly Survey</span>
+                        <span className="text-sm font-medium">{t("nav.monthly_survey")}</span>
                       </button>
                     )}
                   </div>
@@ -433,7 +434,7 @@ export default function Sidebar({
                   className={`${topLevelItemClass} ${activeTab === "survey" ? activeTopLevelClass : ""}`}
                 >
                   <Sparkles size={18} />
-                  <span className="text-sm font-semibold">Monthly Survey</span>
+                  <span className="text-sm font-semibold">{t("nav.monthly_survey")}</span>
                 </button>
               )
             )}
@@ -446,54 +447,54 @@ export default function Sidebar({
                   className={`${topLevelItemClass} ${expandedSections.ai ? activeTopLevelClass : ""}`}
                 >
                   <Brain size={18} />
-                  <span className="text-sm font-semibold">AI Intelligence</span>
+                  <span className="text-sm font-semibold">{t("nav.ai_intelligence")}</span>
                   <ChevronDown
                     size={16}
                     className={`ml-auto transition-transform ${expandedSections.ai ? "rotate-180" : ""}`}
                   />
                 </button>
 
-            {expandedSections.ai && (
-              <div className="space-y-1 pl-4">
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("ai-insights")}
-                  className={`${subItemClass} ${activeTab === "ai-insights" ? activeSubItemClass : ""}`}
-                >
-                  <Sparkles size={17} />
-                  <span className="text-sm font-medium">AI Insights</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("ai-predictions")}
-                  className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
-                >
-                  <CornerDownRight size={17} />
-                  <span className="text-sm font-medium">AI Predictions</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTabClick("ai-recommendations")}
-                  className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
-                >
-                  <Compass size={17} />
-                  <span className="text-sm font-medium">
-                    AI Recommendations
-                  </span>
-                </button>
-                {(isCEO() || isHR() || isAdmin()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabClick("hr-report")}
-                    className={`${subItemClass} ${activeTab === "hr-report" ? activeSubItemClass : ""}`}
-                  >
-                    <Sparkles size={17} className="text-violet-500" />
-                    <span className="text-sm font-medium">HR Report</span>
-                  </button>
+                {expandedSections.ai && (
+                  <div className="space-y-1 pl-4">
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("ai-insights")}
+                      className={`${subItemClass} ${activeTab === "ai-insights" ? activeSubItemClass : ""}`}
+                    >
+                      <Sparkles size={17} />
+                      <span className="text-sm font-medium">{t("nav.ai_insights")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("ai-predictions")}
+                      className={`${subItemClass} ${activeTab === "ai-predictions" ? activeSubItemClass : ""}`}
+                    >
+                      <CornerDownRight size={17} />
+                      <span className="text-sm font-medium">{t("nav.ai_predictions")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTabClick("ai-recommendations")}
+                      className={`${subItemClass} ${activeTab === "ai-recommendations" ? activeSubItemClass : ""}`}
+                    >
+                      <Compass size={17} />
+                      <span className="text-sm font-medium">
+                        {t("nav.ai_recommendations")}
+                      </span>
+                    </button>
+                    {(isCEO() || isHR() || isAdmin()) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTabClick("hr-report")}
+                        className={`${subItemClass} ${activeTab === "hr-report" ? activeSubItemClass : ""}`}
+                      >
+                        <Sparkles size={17} className="text-violet-500" />
+                        <span className="text-sm font-medium">{t("nav.hr_report")}</span>
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-          </>
+              </>
             )}
 
             {(isAdmin() || isCEO() || isManager() || isHR()) && (
@@ -504,7 +505,7 @@ export default function Sidebar({
                   className={`${topLevelItemClass} ${expandedSections.analytics ? activeTopLevelClass : ""}`}
                 >
                   <BarChart3 size={18} />
-                  <span className="text-sm font-semibold">Analytics</span>
+                  <span className="text-sm font-semibold">{t("nav.analytics")}</span>
                   <ChevronDown
                     size={16}
                     className={`ml-auto transition-transform ${expandedSections.analytics ? "rotate-180" : ""}`}
@@ -523,7 +524,7 @@ export default function Sidebar({
                       >
                         <Building2 size={17} />
                         <span className="text-sm font-medium">
-                          Department Analytics
+                          {t("nav.department_analytics")}
                         </span>
                       </button>
                     )}
@@ -537,7 +538,7 @@ export default function Sidebar({
                       >
                         <Zap size={17} />
                         <span className="text-sm font-medium">
-                          Workforce Trends
+                          {t("nav.workforce_trends")}
                         </span>
                       </button>
                     )}
@@ -546,17 +547,7 @@ export default function Sidebar({
               </>
             )}
 
-            {/* Settings - Admin only */}
-            {isAdmin() && (
-              <button
-                type="button"
-                onClick={() => handleTabClick("settings")}
-                className={`${topLevelItemClass} ${activeTab === "settings" ? activeSubItemClass : ""}`}
-              >
-                <Settings size={18} />
-                <span className="text-sm font-semibold">Settings</span>
-              </button>
-            )}
+
           </nav>
 
           {/* User Section */}
