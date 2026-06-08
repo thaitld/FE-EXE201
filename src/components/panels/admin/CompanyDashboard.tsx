@@ -32,6 +32,12 @@ export default function CompanyDashboardView({ dashboard: initialDashboard }: { 
   }, [])
 
   useEffect(() => {
+    if (initialDashboard) {
+      setDashboard(initialDashboard)
+    }
+  }, [initialDashboard])
+
+  useEffect(() => {
     if (initialDashboard) return
     let cancelled = false
     const load = async () => {

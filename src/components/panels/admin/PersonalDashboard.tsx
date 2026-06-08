@@ -9,6 +9,12 @@ export default function PersonalDashboardView({ dashboard: initialDashboard }: {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (initialDashboard) {
+      setDashboard(initialDashboard)
+    }
+  }, [initialDashboard])
+
+  useEffect(() => {
     if (initialDashboard) return
     let cancelled = false
     const load = async () => {

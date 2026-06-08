@@ -16,6 +16,12 @@ export default function DepartmentDashboardView({ dashboard: initialDashboard, d
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
+    if (initialDashboard) {
+      setDashboard(initialDashboard)
+    }
+  }, [initialDashboard])
+
+  useEffect(() => {
     if (initialDashboard) return
     let cancelled = false
     const load = async () => {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslation } from 'react-i18next'
 import {
   Grid,
   ClipboardList,
@@ -25,6 +26,7 @@ interface ManagerSidebarProps {
 
 export default function ManagerSidebar({ isOpen = true, onClose = () => { }, activeTab, onTabChange, onOpenCreate }: ManagerSidebarProps) {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState<{ [k: string]: boolean }>({ dashboard: true, tasks: true, org: true })
 
   const toggle = (k: string) => setExpanded((s) => ({ ...s, [k]: !s[k] }))
@@ -56,7 +58,7 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => { }, act
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             <button type="button" onClick={() => toggle('dashboard')} className={`${topLevelItemClass} ${expanded.dashboard ? activeTopLevelClass : ''}`}>
               <Grid size={18} />
-              <span className="text-sm font-semibold">Dashboard</span>
+              <span className="text-sm font-semibold">{t('nav.dashboard')}</span>
               <ChevronDown size={16} className={`ml-auto transition-transform ${expanded.dashboard ? 'rotate-180' : ''}`} />
             </button>
 
@@ -64,14 +66,14 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => { }, act
               <div className="space-y-1 pl-4">
                 <button type="button" onClick={() => onTabChange('dashboard')} className={`${subItemClass} ${activeTab === 'dashboard' ? activeSubItemClass : ''}`}>
                   <Grid size={16} />
-                  <span className="text-sm font-medium">Department</span>
+                  <span className="text-sm font-medium">{t('nav.department')}</span>
                 </button>
               </div>
             )}
 
             <button type="button" onClick={() => toggle('tasks')} className={`${topLevelItemClass} ${expanded.tasks ? activeTopLevelClass : ''}`}>
               <ClipboardList size={18} />
-              <span className="text-sm font-semibold">Tasks</span>
+              <span className="text-sm font-semibold">{t('nav.tasks')}</span>
               <ChevronDown size={16} className={`ml-auto transition-transform ${expanded.tasks ? 'rotate-180' : ''}`} />
             </button>
 
@@ -79,43 +81,43 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => { }, act
               <div className="space-y-1 pl-4">
                 <button type="button" onClick={() => onTabChange('tasks')} className={`${subItemClass} ${activeTab === 'tasks' ? activeSubItemClass : ''}`}>
                   <ClipboardList size={16} />
-                  <span className="text-sm font-medium">All Tasks</span>
+                  <span className="text-sm font-medium">{t('nav.all_tasks')}</span>
                 </button>
                 <button type="button" onClick={() => onTabChange('bulk-create')} className={`${subItemClass} ${activeTab === 'bulk-create' ? activeSubItemClass : ''}`}>
                   <Archive size={16} />
-                  <span className="text-sm font-medium">Bulk Create</span>
+                  <span className="text-sm font-medium">{t('nav.bulk_create')}</span>
                 </button>
               </div>
             )}
 
             <button type="button" onClick={() => onTabChange('burnout')} className={`${topLevelItemClass} ${activeTab === 'burnout' ? activeTopLevelClass : ''}`}>
               <Activity size={18} />
-              <span className="text-sm font-semibold">Burnout Monitor</span>
+              <span className="text-sm font-semibold">{t('nav.burnout_monitor')}</span>
             </button>
 
             <button type="button" onClick={() => onTabChange('survey-analytics')} className={`${topLevelItemClass} ${activeTab === 'survey-analytics' ? activeTopLevelClass : ''}`}>
               <Sparkles size={18} />
-              <span className="text-sm font-semibold">Survey Analytics</span>
+              <span className="text-sm font-semibold">{t('nav.survey_analytics')}</span>
             </button>
 
             <button type="button" onClick={() => onTabChange('meetings')} className={`${topLevelItemClass} ${activeTab === 'meetings' ? activeTopLevelClass : ''}`}>
               <CalendarDays size={18} />
-              <span className="text-sm font-semibold">Meetings</span>
+              <span className="text-sm font-semibold">{t('nav.meetings')}</span>
             </button>
 
             <button type="button" onClick={() => onTabChange('performance')} className={`${topLevelItemClass} ${activeTab === 'performance' ? activeTopLevelClass : ''}`}>
               <BarChart2 size={18} />
-              <span className="text-sm font-semibold">Team Performance</span>
+              <span className="text-sm font-semibold">{t('nav.team_performance')}</span>
             </button>
 
             <button type="button" onClick={() => onTabChange('report')} className={`${topLevelItemClass} ${activeTab === 'report' ? activeTopLevelClass : ''}`}>
               <FileText size={18} />
-              <span className="text-sm font-semibold">Manager Report</span>
+              <span className="text-sm font-semibold">{t('nav.manager_report')}</span>
             </button>
 
             <button type="button" onClick={() => toggle('org')} className={`${topLevelItemClass} ${expanded.org ? activeTopLevelClass : ''}`}>
               <Users size={18} />
-              <span className="text-sm font-semibold">Organization</span>
+              <span className="text-sm font-semibold">{t('nav.organization')}</span>
               <ChevronDown size={16} className={`ml-auto transition-transform ${expanded.org ? 'rotate-180' : ''}`} />
             </button>
 
@@ -123,14 +125,14 @@ export default function ManagerSidebar({ isOpen = true, onClose = () => { }, act
               <div className="space-y-1 pl-4">
                 <button type="button" onClick={() => onTabChange('organization')} className={`${subItemClass} ${activeTab === 'organization' ? activeSubItemClass : ''}`}>
                   <Users size={16} />
-                  <span className="text-sm font-medium">Departments & Teams</span>
+                  <span className="text-sm font-medium">{t('nav.departments_teams')}</span>
                 </button>
               </div>
             )}
 
             <button type="button" onClick={() => onTabChange('profile')} className={`${topLevelItemClass} ${activeTab === 'profile' ? activeTopLevelClass : ''}`}>
               <Settings size={18} />
-              <span className="text-sm font-semibold">Profile</span>
+              <span className="text-sm font-semibold">{t('nav.profile')}</span>
             </button>
           </nav>
 
