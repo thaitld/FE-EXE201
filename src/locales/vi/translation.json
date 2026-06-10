@@ -42,5 +42,172 @@
     "manager_report": "Báo cáo quản lý",
     "organization": "Tổ chức",
     "departments_teams": "Phòng ban & Nhóm"
+  },
+  "homepage": {
+    "nav": {
+      "home": "Trang chủ",
+      "about": "Giới thiệu",
+      "services": "Dịch vụ",
+      "contact": "Liên hệ",
+      "get_dashboard": "Đến bảng điều khiển"
+    },
+    "hero": {
+      "stars_badge": "4.9 Sao — Được tin dùng bởi hơn 2K lập trình viên",
+      "title_main": "Chăm sóc sức khỏe tinh thần tại nơi làm việc.",
+      "title_sub": "Giảm thiểu kiệt sức với hệ thống các đội ngũ thực sự tin dùng.",
+      "desc": "Manto là nền tảng trải nghiệm nhân viên giúp việc chăm sóc sức khỏe tinh thần trở thành một phần trong quy trình làm việc hàng ngày — không phải là một nhiệm vụ khác trong danh sách việc cần làm.",
+      "btn_start": "Bắt đầu Bảng điều khiển",
+      "stat_value": "85%",
+      "stat_desc": "Nhân viên cảm thấy được hỗ trợ nhiều hơn khi họ có các công cụ đơn giản để điểm danh, ghi nhận và chăm sóc sức khỏe.",
+      "stat_detail": "Các tổ chức có văn hóa chăm sóc sức khỏe tốt giảm tới 45% tỷ lệ nghỉ việc và tăng 60% năng suất. Manto cung cấp cho bạn một hệ thống gọn nhẹ để lồng ghép sự quan tâm vào hoạt động hàng ngày.",
+      "steps": {
+        "survey_title": "Khảo sát Pulse Hàng ngày",
+        "survey_desc": "Điểm danh ẩn danh gọn nhẹ 30 giây được xây dựng cho công việc",
+        "analytics_title": "Phân tích Thời gian thực",
+        "analytics_desc": "Dự báo và giải quyết nguy cơ kiệt sức với bảng điều khiển trực quan",
+        "care_title": "Hoạt động Chăm sóc Chủ động",
+        "care_desc": "Ghi nhận tùy chỉnh, thói quen nhỏ lành mạnh và phản hồi",
+        "uplift_title": "Nâng cao Trải nghiệm Liên tục",
+        "uplift_desc": "Đo lường tinh thần nhân viên và giữ chân nhân tài lâu hơn"
+      }
+    },
+    "about": {
+      "eyebrow": "Giới thiệu về Manto",
+      "title": "Đối tác đồng hành xây dựng Văn hóa Công sở vững mạnh",
+      "desc1": "Sự tăng trưởng bền vững bắt đầu từ những nhân viên được hỗ trợ. Manto cung cấp một nền tảng gọn nhẹ, dựa trên cơ sở khoa học được thiết kế để đo lường cảm xúc nhân viên, ghi nhận phản hồi và giảm thiểu kiệt sức.",
+      "desc2": "Bằng cách tích hợp điểm danh hàng ngày và các bước chăm sóc sức khỏe tự động vào không gian trò chuyện của nhóm, chúng tôi giúp người quản lý lãnh đạo bằng sự thấu hiểu và rõ ràng.",
+      "btn": "Xem cách hoạt động",
+      "projects": "Dự án đã hoàn thành",
+      "components": "Thành phần đã xây dựng",
+      "quality_title": "Cam kết chất lượng sản phẩm",
+      "quality_desc": "Mọi yêu cầu thay đổi đều được duyệt. Mọi kiểu dữ liệu được xác thực. Mọi trường hợp đều được xử lý."
+    },
+    "values": {
+      "eyebrow": "Nguyên tắc của chúng tôi",
+      "title": "Tiêu chuẩn kỹ thuật chúng tôi áp dụng trên mọi dự án",
+      "desc": "Chúng tôi dựa trên nền tảng vững chắc của sự chính trực, rõ ràng và mục tiêu để định hình mọi lựa chọn chiến lược mà chúng tôi thực hiện cho khách hàng.",
+      "card1": {
+        "tag": "An toàn tâm lý",
+        "title": "Phản hồi ẩn danh 100%",
+        "desc": "Danh tính nhân viên được bảo vệ đảm bảo sự trung thực tuyệt đối. Đội ngũ tự do chia sẻ thách thức thực tế, giúp lãnh đạo đưa ra quyết định dựa trên bối cảnh thực tế."
+      },
+      "card2": {
+        "tag": "Tích hợp",
+        "title": "Không làm gián đoạn công việc",
+        "desc": "Chúng tôi tôn trọng thời gian của bạn. Các đợt khảo sát ngắn được tích hợp trực tiếp vào Slack và Microsoft Teams, chỉ mất chưa đầy 30 giây để hoàn thành."
+      },
+      "card3": {
+        "tag": "Chủ động",
+        "title": "Gợi ý chăm sóc thực tế",
+        "desc": "Manto không chỉ đo lường căng thẳng; nó giúp ngăn ngừa nó. Nhận các hoạt động và hướng dẫn dựa trên khoa học để cải thiện mức độ mệt mỏi."
+      }
+    },
+    "why": {
+      "eyebrow": "Tại sao chọn chúng tôi",
+      "title": "Tại sao khách hàng tin tưởng để chúng tôi đưa doanh nghiệp tiến lên",
+      "tabs": {
+        "science": "Dựa trên khoa học",
+        "integration": "Tích hợp dễ dàng",
+        "privacy": "Tập trung bảo mật"
+      },
+      "btn": "Bắt đầu ngay",
+      "tab0": {
+        "title": "Tại sao các đội ngũ chọn Manto để ngăn ngừa kiệt sức",
+        "desc": "Chúng tôi làm cho việc chăm sóc sức khỏe trở thành một phần tự nhiên trong ngày làm việc. Không thêm bài tập về nhà, không kiểm tra hộp công việc của công ty. Chỉ là những khoảnh khắc đơn giản, quan tâm có ý nghĩa đối với nhân viên của bạn.",
+        "p1": "Tích hợp chat liền mạch",
+        "d1": "Chúng tôi lồng ghép các đợt kiểm tra sức khỏe ngắn trực tiếp vào Slack và Microsoft Teams nơi nhân viên của bạn đã làm việc.",
+        "p2": "Ẩn danh & Bảo mật 100%",
+        "d2": "Nhân viên trả lời với sự tự tin tuyệt đối, cung cấp phản hồi xác thực mà không có bất kỳ nỗi sợ hãi nào về việc bị lộ."
+      },
+      "tab1": {
+        "title": "Thấu hiểu nhịp đập đội ngũ trong thời gian thực",
+        "desc": "Không còn phải chờ đợi kết quả khảo sát hàng năm. Theo dõi mức độ kiệt sức, xu hướng tình cảm và sự gắn kết giữa các phòng ban ngay lập tức.",
+        "p1": "Dự báo nguy cơ kiệt sức",
+        "d1": "Xác định các chỉ số căng thẳng và kiệt sức trước nhiều tuần khi xảy ra tình trạng nghỉ việc hàng loạt.",
+        "p2": "Phân tích chi tiết theo phòng ban",
+        "d2": "Lọc dữ liệu theo bộ phận để giải quyết các vấn đề cục bộ trong bộ phận kỹ thuật, bán hàng hoặc hỗ trợ."
+      },
+      "tab2": {
+        "title": "Đo lường ROI về tỷ lệ giữ chân & năng suất",
+        "desc": "Một văn hóa làm việc lành mạnh là động lực phát triển tốt nhất của bạn. Chúng tôi giúp bạn giảm số ngày nghỉ phép đột xuất và xây dựng một tổ chức bền vững.",
+        "p1": "Giảm chi phí nghỉ việc",
+        "d1": "Giữ chân các nhân sự chủ chốt trong đội ngũ của bạn bằng cách chủ động giải quyết các vấn đề hài lòng công việc.",
+        "p2": "Ghi nhận đồng nghiệp thúc đẩy tinh thần",
+        "d2": "Khuyến khích văn hóa đánh giá cao và ghi nhận lẫn nhau giúp phá vỡ sự cô lập của nhóm."
+      }
+    },
+    "stats": {
+      "stat1": "Giảm thiểu nguy cơ kiệt sức",
+      "stat2": "Tỷ lệ phản hồi trung bình hàng ngày",
+      "stat3": "Thành viên được hỗ trợ",
+      "stat4": "Cải thiện tỷ lệ nghỉ việc"
+    },
+    "expertise": {
+      "eyebrow": "Xem Manto hoạt động",
+      "title": "Bắt đầu hỗ trợ đội ngũ với Bảng điều khiển thực tế",
+      "demo_title": "Đặt lịch Demo Manto 15 phút",
+      "demo_desc": "Hãy để chúng tôi chỉ ra cách Manto thu thập cảm xúc thời gian thực, cảnh báo căng thẳng và hỗ trợ quản lý ngăn ngừa nghỉ việc.",
+      "btn": "Đặt lịch hẹn",
+      "days": {
+        "mon_thu": "Thứ Hai – Thứ Năm",
+        "fri": "Thứ Sáu",
+        "sat": "Thứ Bảy",
+        "sun": "Chủ Nhật"
+      }
+    },
+    "services": {
+      "eyebrow": "Tính năng & Dịch vụ",
+      "title": "Mọi thứ bạn cần để xây dựng môi trường làm việc hạnh phúc & giữ chân nhân sự",
+      "btn_all": "Tất cả dịch vụ",
+      "btn_more": "Tìm hiểu thêm",
+      "srv1": {
+        "tag1": "Phản hồi ẩn danh",
+        "tag2": "Khảo sát Pulse hàng ngày",
+        "title": "Khảo sát Pulse Gọn nhẹ",
+        "desc": "Khảo sát 30 giây hàng ngày thu thập phản hồi trung thực về khối lượng công việc, căng thẳng, tài nguyên và tinh thần chung của nhóm."
+      },
+      "srv2": {
+        "tag1": "Chỉ số thời gian thực",
+        "tag2": "Cảnh báo kiệt sức",
+        "title": "Phân tích nguy cơ kiệt sức",
+        "desc": "Theo dõi các thay đổi về cảm xúc, tinh thần của bộ phận và nhận cảnh báo sớm khi điểm số nguy cơ kiệt sức bắt đầu tăng lên."
+      },
+      "srv3": {
+        "tag1": "Ghi nhận đồng nghiệp",
+        "tag2": "Đánh giá cao",
+        "title": "Vòng lặp ghi nhận",
+        "desc": "Thúc đẩy tinh thần nơi làm việc bằng cách cho phép các thành viên trong nhóm gửi thiệp khen ngợi công khai một cách dễ dàng."
+      },
+      "srv4": {
+        "tag1": "Đào tạo quản lý",
+        "tag2": "Thói quen",
+        "title": "Khuyến nghị hành động cho quản lý",
+        "desc": "Truy cập các hướng dẫn tùy chỉnh, chiến lược thói quen nhỏ và danh sách kiểm tra giải quyết được thiết kế cho các quản lý nhân sự và kỹ thuật hiện đại."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Ý kiến khách hàng",
+      "title": "Các nhà lãnh đạo nói gì về Manto",
+      "clients": "Khách hàng tin tưởng"
+    },
+    "cta": {
+      "title_main": "Sẵn sàng ngăn ngừa kiệt sức?",
+      "title_sub": "Hãy cùng hỗ trợ đội ngũ của bạn",
+      "desc": "Đặt lịch demo hoặc tải hướng dẫn để xem cách Manto giúp xây dựng văn hóa công sở hạnh phúc và bền vững hơn.",
+      "btn_dashboard": "Đến bảng điều khiển",
+      "btn_cases": "Xem các nghiên cứu",
+      "stat": "Doanh nghiệp đã thay đổi trên toàn cầu"
+    },
+    "footer": {
+      "desc": "Đối tác cao cấp về trải nghiệm và sức khỏe tinh thần nhân viên. Chúng tôi xây dựng hệ thống giúp giảm kiệt sức và thúc đẩy đội ngũ.",
+      "email": "contact@manto.io",
+      "location": "Hoạt động toàn cầu — đội ngũ remote hoàn toàn",
+      "pages": "Trang chính",
+      "resources": "Tài nguyên",
+      "community": "Tham gia cộng đồng",
+      "community_desc": "Nhận thông tin chiến lược, nghiên cứu thực tế và mẹo tăng trưởng doanh nghiệp — gửi thẳng đến hộp thư của bạn.",
+      "subscribe": "Đăng ký",
+      "copyright": "© Copyright 2026 MANTO. All rights reserved."
+    }
   }
 }

@@ -42,5 +42,172 @@
     "manager_report": "Manager Report",
     "organization": "Organization",
     "departments_teams": "Departments & Teams"
+  },
+  "homepage": {
+    "nav": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "contact": "Contact",
+      "get_dashboard": "Get a Dashboard"
+    },
+    "hero": {
+      "stars_badge": "4.9 Stars — Loved by 2K+ Developers",
+      "title_main": "Deliver wellbeing at work.",
+      "title_sub": "Reduce burnout with a system teams actually use.",
+      "desc": "Manto is an employee experience platform that makes wellbeing a part of the daily workflow — not another task on the to-do list.",
+      "btn_start": "Start Your Dashboard",
+      "stat_value": "85%",
+      "stat_desc": "Of employees feel more supported when they have simple tools for check-ins, Recognition, and wellbeing.",
+      "stat_detail": "Organizations with strong wellbeing cultures see up to 45% lower turnover and 60% higher productivity. Manto gives you a lightweight system to embed care into your daily operations.",
+      "steps": {
+        "survey_title": "Daily Pulse Survey",
+        "survey_desc": "Lightweight 30-second anonymous check-ins built for work",
+        "analytics_title": "Real-time Analytics",
+        "analytics_desc": "Predict and address burnout risks with visual dashboards",
+        "care_title": "Active Care Activities",
+        "care_desc": "Custom appreciation, healthy micro-habits, and feedback",
+        "uplift_title": "Continuous Experience Uplift",
+        "uplift_desc": "Measure employee morale and retain top talent longer"
+      }
+    },
+    "about": {
+      "eyebrow": "About Manto",
+      "title": "Your Partner in Building a Thriving Workplace Culture",
+      "desc1": "Sustainable growth starts with supported employees. Manto provides a lightweight, science-backed platform designed to check employee sentiment, capture feedback, and reduce burnout.",
+      "desc2": "By integrating daily pulse checks and automated micro-wellness steps directly into your team's chat spaces, we help managers lead with empathy and clarity.",
+      "btn": "See How It Works",
+      "projects": "Projects Shipped",
+      "components": "Components Built",
+      "quality_title": "Committed to Code Quality",
+      "quality_desc": "Every PR reviewed. Every type asserted. Every edge case covered."
+    },
+    "values": {
+      "eyebrow": "Our Principles",
+      "title": "The Engineering Standards We Hold On Every Codebase",
+      "desc": "We rely on a strong foundation of integrity, clarity, and purpose to shape every strategic choice we make for our clients.",
+      "card1": {
+        "tag": "Psychological Safety",
+        "title": "100% Anonymous Feedback",
+        "desc": "Protected employee identity ensures complete honesty. Teams share their genuine challenges, enabling leaders to act with real context."
+      },
+      "card2": {
+        "tag": "Integration",
+        "title": "Zero Workflow Interruption",
+        "desc": "We respect your time. Pulse checks fit seamlessly inside Slack and Microsoft Teams, taking under 30 seconds to complete."
+      },
+      "card3": {
+        "tag": "Proactive",
+        "title": "Action-Oriented Care Tips",
+        "desc": "Manto doesn't just measure stress; it helps prevent it. Get science-backed activities and guides to resolve fatigue levels."
+      }
+    },
+    "why": {
+      "eyebrow": "Why Choose Us",
+      "title": "Why Clients Trust Us To Move Their Business Forward",
+      "tabs": {
+        "science": "Science-Backed",
+        "integration": "Easy Integrations",
+        "privacy": "Privacy Focus"
+      },
+      "btn": "Get Started",
+      "tab0": {
+        "title": "Why Teams Choose Manto to Prevent Burnout",
+        "desc": "We make wellbeing part of the natural work day. No extra homework, no corporate box-checking. Just simple, caring moments that matter for your employees.",
+        "p1": "Seamless Chat Integrations",
+        "d1": "We embed short wellbeing check-ins directly into Slack and Microsoft Teams where your employees already work.",
+        "p2": "100% Anonymous & Secure",
+        "d2": "Employees reply with total confidence, providing authentic feedback without any fear of exposure."
+      },
+      "tab1": {
+        "title": "Understand Your Team's Pulse in Real-Time",
+        "desc": "No more waiting for annual survey results. Track exhaustion levels, sentiment trends, and alignment across departments instantly.",
+        "p1": "Burnout Risk Forecasts",
+        "d1": "Identify stress and burnout indicators weeks before high attrition or resignation letters occur.",
+        "p2": "Siloed Team Breakdowns",
+        "d2": "Filter data by department to address localized issues in engineering, sales, or support."
+      },
+      "tab2": {
+        "title": "Proven Retention and Productivity ROI",
+        "desc": "A healthy workplace culture is your best growth driver. We help you reduce unplanned leaves and build a sustainable organization.",
+        "p1": "Lower Attrition Costs",
+        "d1": "Keep key players in your team by addressing work satisfaction issues proactively.",
+        "p2": "Peer Recognition Drives Morale",
+        "d2": "Encourage a culture of appreciation and recognition that breaks team isolation."
+      }
+    },
+    "stats": {
+      "stat1": "Burnout Risk Reduction",
+      "stat2": "Average Daily Response Rate",
+      "stat3": "Supported Team Members",
+      "stat4": "Improvement in Attrition Rates"
+    },
+    "expertise": {
+      "eyebrow": "See Manto in Action",
+      "title": "Start Supporting Your Team with Actionable Dashboards",
+      "demo_title": "Book a 15-Minute Manto Demo",
+      "demo_desc": "Let us show you how Manto collects real-time sentiment metrics, warns you of stress trends, and supports your managers to prevent attrition.",
+      "btn": "Book a Call",
+      "days": {
+        "mon_thu": "Monday – Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "services": {
+      "eyebrow": "Features & Services",
+      "title": "Everything You Need to Build a Healthy, High-Retaining Workplace",
+      "btn_all": "All Services",
+      "btn_more": "Learn More",
+      "srv1": {
+        "tag1": "Anonymous Check-ins",
+        "tag2": "Daily Pulse",
+        "title": "Lightweight Pulse Surveys",
+        "desc": "30-second daily surveys that collect honest feedback on workload, stress, resources, and overall team sentiment."
+      },
+      "srv2": {
+        "tag1": "Real-time Metrics",
+        "tag2": "Exhaustion Warnings",
+        "title": "Burnout Risk Analytics",
+        "desc": "Track sentiment shifts, department morale, and receive early alerts when burnout risk scores begin to climb."
+      },
+      "srv3": {
+        "tag1": "Peer Recognition",
+        "tag2": "Appreciation",
+        "title": "Appreciation Loops",
+        "desc": "Boost workplace morale by allowing team members to send public praise cards and positive callouts easily."
+      },
+      "srv4": {
+        "tag1": "Manager Training",
+        "tag2": "Habits",
+        "title": "Manager Action Recommendations",
+        "desc": "Access custom guides, micro-habit strategies, and resolution checklists designed for modern HR and engineering leads."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Testimonials",
+      "title": "What Leaders Say About Manto",
+      "clients": "Trusted Clients"
+    },
+    "cta": {
+      "title_main": "Ready to Prevent Burnout?",
+      "title_sub": "Let's Support Your Team",
+      "desc": "Schedule a demo or download our guide to learn how Manto can help you create a happier, more sustainable workplace culture.",
+      "btn_dashboard": "Get a Dashboard",
+      "btn_cases": "View Case Studies",
+      "stat": "Businesses Transformed Worldwide"
+    },
+    "footer": {
+      "desc": "Your premium employee experience & wellbeing partner. We build systems that reduce burnout and elevate teams.",
+      "email": "contact@manto.io",
+      "location": "Available globally — remote-first team",
+      "pages": "Main Pages",
+      "resources": "Resources",
+      "community": "Join our community",
+      "community_desc": "Get strategic insights, case studies, and business growth tips — delivered to your inbox.",
+      "subscribe": "Subscribe",
+      "copyright": "© Copyright 2026 MANTO. All rights reserved."
+    }
   }
 }
