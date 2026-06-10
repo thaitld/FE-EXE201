@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronRight, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 import heroBg from "../../assets/hero.jpg";
+import aboutImg from "../../assets/b.jpg";
+import valueImg1 from "../../assets/c.jpg";
+import valueImg2 from "../../assets/d.jpg";
+import valueImg3 from "../../assets/e.jpg";
+import whyImg from "../../assets/f.jpg";
+import contactImg from "../../assets/G.jpg";
+import testimonialImg from "../../assets/h.jpg";
+import serviceImg1 from "../../assets/i.jpg";
+import serviceImg2 from "../../assets/k.jpg";
+import serviceImg3 from "../../assets/t.jpg";
+import serviceImg4 from "../../assets/l.jpg";
 
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -146,6 +159,7 @@ function LinkBtn({
 
 // ─── Navbar ──────────────────────────────────────────────────────────────────
 function Navbar() {
+	const { t } = useTranslation();
 	const [scrolled, setScrolled] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
 
@@ -180,19 +194,22 @@ function Navbar() {
 							<a
 								key={item}
 								href={item === "Home" ? "#" : `#${item.toLowerCase()}`}
-								className="text-[0.9rem] font-semibold text-[#5a6a82] hover:text-[#0d1b2e] transition-colors duration-200"
+								className="text-[0.9rem] font-semibold text-[#5a6a82] hover:text-[#0066FF] transition-colors duration-200"
 							>
-								{item}
+								{t(`homepage.nav.${item.toLowerCase()}`)}
 							</a>
 						))}
 					</div>
 
-					<a
-						href="#/login"
-						className="hidden md:inline-flex items-center gap-2 px-[22px] py-[10px] rounded-full bg-blue-600 text-white text-[0.85rem] font-bold hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
-					>
-						Get a Dashboard
-					</a>
+					<div className="hidden md:flex items-center gap-4">
+						<a
+							href="#/login"
+							className="inline-flex items-center gap-2 px-[22px] py-[10px] rounded-full bg-blue-600 text-white text-[0.85rem] font-bold hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
+						>
+							{t("homepage.nav.get_dashboard")}
+						</a>
+						<LanguageSwitcher />
+					</div>
 
 					<button
 						className="md:hidden flex flex-col gap-[5px] p-1 cursor-pointer"
@@ -222,7 +239,7 @@ function Navbar() {
 							onClick={() => setMenuOpen(false)}
 							className="text-2xl font-bold text-[#0d1b2e]"
 						>
-							{item}
+							{t(`homepage.nav.${item.toLowerCase()}`)}
 						</a>
 					))}
 					<a
@@ -230,8 +247,9 @@ function Navbar() {
 						onClick={() => setMenuOpen(false)}
 						className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-blue-600 text-white font-bold"
 					>
-						Get a Dashboard
+						{t("homepage.nav.get_dashboard")}
 					</a>
+					<LanguageSwitcher />
 				</div>
 			)}
 		</>
@@ -240,12 +258,13 @@ function Navbar() {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero() {
+	const { t } = useTranslation();
 	return (
 		<section
 			id="home"
 			className="min-h-screen relative flex flex-col justify-center overflow-hidden"
 			style={{
-				backgroundImage: `linear-gradient(135deg, rgba(11, 20, 32, 0.85) 0%, rgba(16, 23, 36, 0.9) 40%, rgba(22, 27, 25, 0.95) 100%),
+				backgroundImage: `linear-gradient(135deg, rgba(24, 34, 48, 0.85) 0%, rgba(25, 31, 44, 0.9) 40%, rgba(29, 32, 31, 0.95) 100%),
 				 url(${heroBg})`,
 				backgroundSize: "cover",
 				backgroundPosition: "center",
@@ -278,38 +297,36 @@ function Hero() {
 					<div>
 						<div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 backdrop-blur-xl rounded-full px-4 py-2 mb-6 text-white text-[0.8rem] font-semibold">
 							<span className="text-amber-400 tracking-widest text-[0.75rem]">★★★★★</span>
-							4.9&nbsp; Stars — Loved by 2K+ Developers
+							{t("homepage.hero.stars_badge")}
 						</div>
 						<h1 className="text-white font-extrabold leading-[1.05] tracking-[-0.04em] text-[clamp(2.6rem,5vw,4.2rem)] mb-5">
-							Deliver wellbeing at work.
+							{t("homepage.hero.title_main")}
 							<br />
-							<span className="text-green-400">Reduce burnout with a system teams actually use.</span>
+							<span className="text-green-400">{t("homepage.hero.title_sub")}</span>
 						</h1>
 						<p className="text-white/70 text-[1.05rem] max-w-[520px] leading-[1.7] mb-9">
-							Manto is an employee experience platform that makes wellbeing a part of the daily workflow — not another task on the to-do list.
-
+							{t("homepage.hero.desc")}
 						</p>
 						<a
 							href="#/login"
 							className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-[1rem] hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
 						>
-							Start Your Dashboard
+							{t("homepage.hero.btn_start")}
 						</a>
 					</div>
 
 					{/* Stat Card */}
 					<div className="hidden lg:block bg-white/[0.08] border border-white/15 backdrop-blur-xl rounded-2xl p-7 text-white">
-						<div className="text-4xl font-extrabold text-green-400 leading-none">85%</div>
+						<div className="text-4xl font-extrabold text-green-400 leading-none">{t("homepage.hero.stat_value")}</div>
 						<div className="text-[0.85rem] font-semibold mt-1.5 mb-4 opacity-90">
-							Of employees feel more supported when they have simple tools for check-ins,
-							Recognition, and wellbeing.
+							{t("homepage.hero.stat_desc")}
 						</div>
 						<div className="h-px bg-white/15 my-4" />
 						<div className="text-[0.7rem] font-bold uppercase tracking-widest text-white/50 mb-1.5">
 
 						</div>
 						<div className="text-[0.8rem] text-white/70 leading-[1.5]">
-							Organizations with strong wellbeing cultures see up to 45% lower turnover and 60% higher productivity. Manto gives you a lightweight system to embed care into your daily operations.
+							{t("homepage.hero.stat_detail")}
 						</div>
 					</div>
 				</div>
@@ -326,8 +343,8 @@ function Hero() {
 									<path d="M12 6v6l4 2" />
 								</svg>
 							),
-							title: "Daily Pulse Survey",
-							desc: "Lightweight 30-second anonymous check-ins built for work",
+							title: t("homepage.hero.steps.survey_title"),
+							desc: t("homepage.hero.steps.survey_desc"),
 						},
 						{
 							icon: (
@@ -337,8 +354,8 @@ function Hero() {
 									<line x1="6" y1="20" x2="6" y2="14" />
 								</svg>
 							),
-							title: "Real-time Analytics",
-							desc: "Predict and address burnout risks with visual dashboards",
+							title: t("homepage.hero.steps.analytics_title"),
+							desc: t("homepage.hero.steps.analytics_desc"),
 						},
 						{
 							icon: (
@@ -346,8 +363,8 @@ function Hero() {
 									<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
 								</svg>
 							),
-							title: "Active Care Activities",
-							desc: "Custom appreciation, healthy micro-habits, and feedback",
+							title: t("homepage.hero.steps.care_title"),
+							desc: t("homepage.hero.steps.care_desc"),
 						},
 						{
 							icon: (
@@ -356,8 +373,8 @@ function Hero() {
 									<polyline points="22 4 12 14.01 9 11.01" />
 								</svg>
 							),
-							title: "Continuous Experience Uplift",
-							desc: "Measure employee morale and retain top talent longer",
+							title: t("homepage.hero.steps.uplift_title"),
+							desc: t("homepage.hero.steps.uplift_desc"),
 						},
 					].map((step) => (
 						<div key={step.title} className="flex items-start gap-3.5">
@@ -378,13 +395,18 @@ function Hero() {
 
 // ─── About ────────────────────────────────────────────────────────────────────
 function About() {
+	const { t } = useTranslation();
 	return (
 		<section id="about" className="py-[100px] bg-white">
 			<div className="max-w-[1200px] mx-auto px-6">
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 					{/* Image column */}
 					<div className="relative">
-						<div className="w-full aspect-[4/5] rounded-[20px] bg-[#f5f6f8]" />
+						<img
+							src={aboutImg}
+							alt="About Manto"
+							className="w-full aspect-[4/5] rounded-[20px] object-cover bg-[#f5f6f8]"
+						/>
 
 						{/* Avatars badge */}
 						<div className="absolute top-6 -left-6 bg-white rounded-full px-4 py-2.5 shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)] border border-[#e8e8e8] flex items-center gap-2">
@@ -405,14 +427,14 @@ function About() {
 							<div className="text-[0.75rem] font-bold text-[#0d1b2e] whitespace-nowrap">
 								200+{" "}
 								<span className="block text-[#5a6a82] font-normal text-[0.68rem]">
-									Projects Shipped
+									{t("homepage.about.projects")}
 								</span>
 							</div>
 							<div className="w-px h-7 bg-[#e8e8e8]" />
 							<div className="text-[0.75rem] font-bold text-[#0d1b2e] whitespace-nowrap">
 								50K+{" "}
 								<span className="block text-[#5a6a82] font-normal text-[0.68rem]">
-									Components Built
+									{t("homepage.about.components")}
 								</span>
 							</div>
 						</div>
@@ -420,27 +442,27 @@ function About() {
 						{/* Quality card */}
 						<div className="absolute bottom-[-24px] right-[-24px] bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)] border border-[#e8e8e8] max-w-[240px]">
 							<div className="text-[0.75rem] font-bold uppercase tracking-[0.08em] text-blue-600 mb-1">
-								Committed to Code Quality
+								{t("homepage.about.quality_title")}
 							</div>
 							<div className="text-[0.8rem] text-[#5a6a82] leading-[1.5]">
-								Every PR reviewed. Every type asserted. Every edge case covered.
+								{t("homepage.about.quality_desc")}
 							</div>
 						</div>
 					</div>
 
 					{/* Text column */}
 					<div>
-						<Eyebrow>About Manto</Eyebrow>
+						<Eyebrow>{t("homepage.about.eyebrow")}</Eyebrow>
 						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-							Your Partner in Building a Thriving Workplace Culture
+							{t("homepage.about.title")}
 						</h2>
 						<p className="text-[#5a6a82] leading-[1.75] mt-5 mb-7">
-							Sustainable growth starts with supported employees. Manto provides a lightweight, science-backed platform designed to check employee sentiment, capture feedback, and reduce burnout.
+							{t("homepage.about.desc1")}
 						</p>
 						<p className="text-[#5a6a82] leading-[1.75] mb-7">
-							By integrating daily pulse checks and automated micro-wellness steps directly into your team's chat spaces, we help managers lead with empathy and clarity.
+							{t("homepage.about.desc2")}
 						</p>
-						<LinkBtn href="#services">See How It Works</LinkBtn>
+						<LinkBtn href="#services">{t("homepage.about.btn")}</LinkBtn>
 					</div>
 				</div>
 			</div>
@@ -450,24 +472,28 @@ function About() {
 
 // ─── Values ───────────────────────────────────────────────────────────────────
 function Values() {
+	const { t } = useTranslation();
 	const cards = [
 		{
-			tag: "Psychological Safety",
+			tag: t("homepage.values.card1.tag"),
 			tagVariant: "primary",
-			title: "100% Anonymous Feedback",
-			desc: "Protected employee identity ensures complete honesty. Teams share their genuine challenges, enabling leaders to act with real context.",
+			title: t("homepage.values.card1.title"),
+			desc: t("homepage.values.card1.desc"),
+			image: valueImg1,
 		},
 		{
-			tag: "Integration",
+			tag: t("homepage.values.card2.tag"),
 			tagVariant: "navy",
-			title: "Zero Workflow Interruption",
-			desc: "We respect your time. Pulse checks fit seamlessly inside Slack and Microsoft Teams, taking under 30 seconds to complete.",
+			title: t("homepage.values.card2.title"),
+			desc: t("homepage.values.card2.desc"),
+			image: valueImg2,
 		},
 		{
-			tag: "Proactive",
+			tag: t("homepage.values.card3.tag"),
 			tagVariant: "primary",
-			title: "Action-Oriented Care Tips",
-			desc: "Manto doesn't just measure stress; it helps prevent it. Get science-backed activities and guides to resolve fatigue levels.",
+			title: t("homepage.values.card3.title"),
+			desc: t("homepage.values.card3.desc"),
+			image: valueImg3,
 		},
 	];
 
@@ -475,13 +501,12 @@ function Values() {
 		<section className="py-[100px] bg-[#f5f6f8]">
 			<div className="max-w-[1200px] mx-auto px-6">
 				<div className="text-center mb-14">
-					<Eyebrow>Our Principles</Eyebrow>
+					<Eyebrow>{t("homepage.values.eyebrow")}</Eyebrow>
 					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-						The Engineering Standards We Hold On Every Codebase
+						{t("homepage.values.title")}
 					</h2>
 					<p className="text-[#5a6a82] text-[1rem] max-w-[560px] mx-auto leading-[1.7] mt-3">
-						We rely on a strong foundation of integrity, clarity, and purpose to shape every
-						strategic choice we make for our clients.
+						{t("homepage.values.desc")}
 					</p>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -490,7 +515,15 @@ function Values() {
 							key={c.title}
 							className="bg-white rounded-[18px] overflow-hidden border border-[#e8e8e8] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)]"
 						>
-							<div className="w-full h-[200px] bg-[#f0f1f4]" />
+							{c.image ? (
+								<img
+									src={c.image}
+									alt={c.title}
+									className="w-full h-[200px] object-cover bg-[#f0f1f4]"
+								/>
+							) : (
+								<div className="w-full h-[200px] bg-[#f0f1f4]" />
+							)}
 							<div className="p-6">
 								<span
 									className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] mb-2.5 ${c.tagVariant === "primary"
@@ -513,12 +546,13 @@ function Values() {
 
 // ─── Why Choose Us ─────────────────────────────────────────────────────────────
 function WhyChooseUs() {
+	const { t } = useTranslation();
 	const [activeTab, setActiveTab] = useState(0);
 	const data = WHY_TABS[activeTab];
 
 	const tabLabels = [
 		{
-			label: "Science-Backed",
+			label: t("homepage.why.tabs.science"),
 			icon: (
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
 					<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
@@ -527,7 +561,7 @@ function WhyChooseUs() {
 			),
 		},
 		{
-			label: "Easy Integrations",
+			label: t("homepage.why.tabs.integration"),
 			icon: (
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
 					<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -536,7 +570,7 @@ function WhyChooseUs() {
 			),
 		},
 		{
-			label: "Privacy Focus",
+			label: t("homepage.why.tabs.privacy"),
 			icon: (
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
 					<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -550,11 +584,9 @@ function WhyChooseUs() {
 		<section id="why" className="py-[100px] bg-white">
 			<div className="max-w-[1200px] mx-auto px-6">
 				<div className="text-center mb-12">
-					<Eyebrow>Why Choose Us</Eyebrow>
+					<Eyebrow>{t("homepage.why.eyebrow")}</Eyebrow>
 					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-						Why Clients Trust Us To Move
-						<br />
-						Their Business Forward
+						{t("homepage.why.title")}
 					</h2>
 				</div>
 
@@ -574,24 +606,34 @@ function WhyChooseUs() {
 				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-					<div className="w-full aspect-square rounded-[20px] bg-[#f5f6f8]" />
+					<img
+						src={whyImg}
+						alt="Why Choose Us"
+						className="w-full aspect-square rounded-[20px] object-cover bg-[#f5f6f8]"
+					/>
 					<div>
 						<h3 className="text-2xl font-extrabold text-[#0d1b2e] mb-4 tracking-[-0.02em]">
-							{data.title}
+							{t(`homepage.why.tab${activeTab}.title`)}
 						</h3>
-						<p className="text-[0.95rem] text-[#5a6a82] leading-[1.75] mb-7">{data.desc}</p>
+						<p className="text-[0.95rem] text-[#5a6a82] leading-[1.75] mb-7">
+							{t(`homepage.why.tab${activeTab}.desc`)}
+						</p>
 						<div className="flex flex-col gap-4 mb-8">
 							{[
-								{ title: data.p1, desc: data.d1 },
-								{ title: data.p2, desc: data.d2 },
+								{ num: "1", title: data.p1, desc: data.d1 },
+								{ num: "2", title: data.p2, desc: data.d2 },
 							].map((pt) => (
-								<div key={pt.title} className="flex items-start gap-3">
+								<div key={pt.num} className="flex items-start gap-3">
 									<div className="w-[22px] h-[22px] rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5 text-blue-600">
 										<CheckIcon />
 									</div>
 									<div>
-										<div className="text-[0.9rem] font-bold text-[#0d1b2e]">{pt.title}</div>
-										<div className="text-[0.82rem] text-[#5a6a82] mt-0.5">{pt.desc}</div>
+										<div className="text-[0.9rem] font-bold text-[#0d1b2e]">
+											{t(`homepage.why.tab${activeTab}.p${pt.num}`)}
+										</div>
+										<div className="text-[0.82rem] text-[#5a6a82] mt-0.5">
+											{t(`homepage.why.tab${activeTab}.d${pt.num}`)}
+										</div>
 									</div>
 								</div>
 							))}
@@ -600,7 +642,7 @@ function WhyChooseUs() {
 							href="#/login"
 							className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-blue-600 text-white font-bold text-[0.9rem] hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
 						>
-							Get Started <ArrowRight />
+							{t("homepage.why.btn")} <ArrowRight />
 						</a>
 					</div>
 				</div>
@@ -611,11 +653,12 @@ function WhyChooseUs() {
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 function Stats() {
+	const { t } = useTranslation();
 	const stats = [
-		{ value: "35%+", label: "Burnout Risk Reduction" },
-		{ value: "85%", label: "Average Daily Response Rate" },
-		{ value: "15K+", label: "Supported Team Members" },
-		{ value: "12%", label: "Improvement in Attrition Rates" },
+		{ value: "35%+", label: t("homepage.stats.stat1") },
+		{ value: "85%", label: t("homepage.stats.stat2") },
+		{ value: "15K+", label: t("homepage.stats.stat3") },
+		{ value: "12%", label: t("homepage.stats.stat4") },
 	];
 	return (
 		<section className="py-20 bg-[#f5f6f8]">
@@ -641,156 +684,44 @@ function Stats() {
 	);
 }
 
-// ─── Lead Magnet ──────────────────────────────────────────────────────────────
-function LeadMagnet() {
-	return (
-		<section
-			className="py-[100px] relative overflow-hidden"
-			style={{
-				background: "linear-gradient(135deg, #0a1628 0%, #0d1f35 50%, #061a10 100%)",
-			}}
-		>
-			<div
-				className="absolute inset-0 pointer-events-none"
-				style={{
-					backgroundImage:
-						"radial-gradient(circle at 20% 50%, rgba(26,107,69,0.2) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(26,60,107,0.2) 0%, transparent 50%)",
-				}}
-			/>
-			<div className="relative z-10 max-w-[1200px] mx-auto px-6">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-					<div>
-						<Eyebrow light>Free Resource</Eyebrow>
-						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-white">
-							Download the Burnout Prevention Blueprint
-						</h2>
-						<p className="text-white/65 mt-3 leading-[1.7] max-w-[560px]">
-							Get our science-backed survey check-in lists, manager resolution paths, and team wellness activities to keep engagement high.
-						</p>
-						<form className="mt-8 flex flex-col gap-3.5">
-							{[
-								{ label: "Full Name", id: "full_name", type: "text", placeholder: "Jane Thornton" },
-								{ label: "Business Email", id: "email", type: "email", placeholder: "jane@company.com" },
-							].map((f) => (
-								<div key={f.id} className="flex flex-col gap-1.5">
-									<label className="text-[0.78rem] font-semibold text-white/70 tracking-[0.04em]">
-										{f.label}
-									</label>
-									<input
-										type={f.type}
-										placeholder={f.placeholder}
-										className="px-4 py-3 rounded-[10px] bg-white/[0.08] border border-white/15 text-white text-[0.9rem] outline-none placeholder:text-white/35 focus:border-green-400/50 transition-colors"
-									/>
-								</div>
-							))}
-							<div className="flex flex-col gap-1.5">
-								<label className="text-[0.78rem] font-semibold text-white/70 tracking-[0.04em]">
-									Company Size
-								</label>
-								<select className="px-4 py-3 rounded-[10px] bg-white/[0.08] border border-white/15 text-white text-[0.9rem] outline-none focus:border-green-400/50 transition-colors">
-									<option value="" className="bg-[#0f1f3d]">
-										Select company size
-									</option>
-									{["1-10", "11-50", "51-200", "200+"].map((s) => (
-										<option key={s} value={s} className="bg-[#0f1f3d]">
-											{s} employees
-										</option>
-									))}
-								</select>
-							</div>
-							<button
-								type="button"
-								className="flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-blue-600 text-white font-bold text-[0.95rem] hover:bg-blue-700 transition-colors mt-1"
-							>
-								Send Me the Blueprint <ArrowRight size={16} />
-							</button>
-							<p className="text-[0.75rem] text-white/40 text-center mt-2">
-								Trusted by 5,000+ business owners. No spam, ever.
-							</p>
-						</form>
-					</div>
-
-					{/* Blueprint mockup */}
-					<div className="flex justify-center items-center">
-						<div
-							className="w-full max-w-[360px] aspect-[3/4] rounded-2xl overflow-hidden relative"
-							style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)" }}
-						>
-							<div className="absolute top-[-12px] right-[-12px] w-16 h-16 rounded-full bg-blue-600 flex flex-col items-center justify-center text-[0.6rem] font-extrabold text-white uppercase tracking-[0.05em] shadow-[0_8px_24px_rgba(26,107,69,0.4)] z-10">
-								FREE
-							</div>
-							<div className="p-8 h-full flex flex-col justify-between">
-								<div>
-									<div className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-green-400">
-										MANTO
-									</div>
-									<div className="text-[1.4rem] font-extrabold text-white leading-[1.2] my-3">
-										Burnout Prevention Blueprint
-									</div>
-									<div className="flex flex-col gap-2">
-										{["w-full", "w-4/5", "w-3/5", "w-full", "w-4/5"].map((w, i) => (
-											<div key={i} className={`h-2 rounded ${w} bg-white/10`} />
-										))}
-									</div>
-								</div>
-								<div>
-									<div className="h-20 flex items-end gap-2 mt-4">
-										{[40, 55, 45, 70, 60, 85, 90].map((h, i) => (
-											<div
-												key={i}
-												className="flex-1 rounded-t"
-												style={{
-													height: `${h}%`,
-													background: i === 6 ? "rgba(74,222,128,0.6)" : "rgba(74,222,128,0.3)",
-												}}
-											/>
-										))}
-									</div>
-									<div className="text-[0.68rem] text-white/40 mt-2">
-										Employee Turnover Rate — 3-Month Decline
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-	);
-}
 
 // ─── Expertise / Contact ───────────────────────────────────────────────────────
 function Expertise() {
+	const { t } = useTranslation();
 	return (
 		<section id="contact" className="py-[100px] bg-white">
 			<div className="max-w-[1200px] mx-auto px-6">
 				<div className="text-center mb-14">
-					<Eyebrow>See Manto in Action</Eyebrow>
+					<Eyebrow>{t("homepage.expertise.eyebrow")}</Eyebrow>
 					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-						Start Supporting Your Team
-						<br />
-						with Actionable Dashboards
+						{t("homepage.expertise.title")}
 					</h2>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-					<div className="w-full aspect-[4/3] rounded-[20px] bg-[#f5f6f8]" />
+					<img
+						src={contactImg}
+						alt="See Manto in Action"
+						className="w-full aspect-[4/3] rounded-[20px] object-cover bg-[#f5f6f8]"
+					/>
 					<div className="bg-[#f5f6f8] rounded-[20px] p-9 border border-[#e8e8e8]">
 						<div className="text-[1.3rem] font-extrabold text-[#0d1b2e] mb-2 tracking-[-0.02em]">
-							Book a 15-Minute Manto Demo
+							{t("homepage.expertise.demo_title")}
 						</div>
 						<div className="text-[0.87rem] text-[#5a6a82] mb-7 leading-[1.6]">
-							Let us show you how Manto collects real-time sentiment metrics, warns you of stress trends, and supports your managers to prevent attrition.
+							{t("homepage.expertise.demo_desc")}
 						</div>
 						<table className="w-full border-collapse mb-7">
 							<tbody>
 								{[
-									{ day: "Monday – Thursday", hours: "08:00 – 18:00", highlight: false },
-									{ day: "Friday", hours: "09:00 – 17:00", highlight: true },
-									{ day: "Saturday", hours: "08:30 – 19:30", highlight: false },
-									{ day: "Sunday", hours: "08:30 – 19:30", highlight: false },
+									{ key: "mon_thu", hours: "08:00 – 18:00", highlight: false },
+									{ key: "fri", hours: "09:00 – 17:00", highlight: true },
+									{ key: "sat", hours: "08:30 – 19:30", highlight: false },
+									{ key: "sun", hours: "08:30 – 19:30", highlight: false },
 								].map((row) => (
-									<tr key={row.day} className="border-b border-[#e8e8e8] last:border-0">
-										<td className="py-[11px] text-[0.85rem] text-[#5a6a82] font-medium">{row.day}</td>
+									<tr key={row.key} className="border-b border-[#e8e8e8] last:border-0">
+										<td className="py-[11px] text-[0.85rem] text-[#5a6a82] font-medium">
+											{t(`homepage.expertise.days.${row.key}`)}
+										</td>
 										<td
 											className={`py-[11px] text-[0.85rem] font-bold text-right ${row.highlight ? "text-blue-600" : "text-[#0d1b2e]"
 												}`}
@@ -802,7 +733,7 @@ function Expertise() {
 							</tbody>
 						</table>
 						<button className="w-full flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">
-							Book a Call
+							{t("homepage.expertise.btn")}
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
 								<rect x="3" y="4" width="18" height="18" rx="2" />
 								<line x1="16" y1="2" x2="16" y2="6" />
@@ -817,113 +748,42 @@ function Expertise() {
 	);
 }
 
-// ─── Case Studies ─────────────────────────────────────────────────────────────
-function CaseStudies() {
-	const cases = [
-		{
-			tag: "Retention Growth",
-			tagVariant: "primary",
-			title: "Scaling Engineering Engagement at Paylume",
-			kpis: [
-				{ num: "-35%", label: "Burnout Risk Reduction" },
-				{ num: "92%", label: "Survey Response Rate" },
-			],
-			desc: "How Paylume used Manto to identify sprint exhaustion and restructure their team check-in patterns with zero workflow disruption.",
-		},
-		{
-			tag: "Company Culture",
-			tagVariant: "navy",
-			title: "Boosting Morale for 300+ Remote Staff",
-			kpis: [
-				{ num: "4.8/5", label: "Satisfaction Score" },
-				{ num: "+45%", label: "Peer Appreciation Cards" },
-			],
-			desc: "Manto helped Corepath Partners build trust and connectivity across remote teams through peer praise loops and anonymous pulse surveys.",
-		},
-	];
-
-	return (
-		<section className="py-[100px] bg-[#f5f6f8]">
-			<div className="max-w-[1200px] mx-auto px-6">
-				<Eyebrow>Case Studies</Eyebrow>
-				<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e] mb-12">
-					Real Cultural Impact — Trusted by High-Performing Teams
-				</h2>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					{cases.map((c) => (
-						<div
-							key={c.title}
-							className="bg-white rounded-[20px] overflow-hidden border border-[#e8e8e8] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)]"
-						>
-							<div className="w-full h-[240px] bg-[#f0f1f4]" />
-							<div className="p-7">
-								<span
-									className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] ${c.tagVariant === "primary" ? "bg-blue-50 text-blue-600" : "bg-black/[0.08] text-[#0d1b2e]"
-										}`}
-								>
-									{c.tag}
-								</span>
-								<div className="text-[1.1rem] font-extrabold text-[#0d1b2e] my-2.5 leading-[1.3]">
-									{c.title}
-								</div>
-								<div className="flex gap-5 my-4 items-center">
-									{c.kpis.map((k, i) => (
-										<div key={k.label} className="flex items-center gap-5">
-											{i > 0 && <div className="w-px h-8 bg-[#e8e8e8]" />}
-											<div>
-												<div className="text-2xl font-extrabold text-blue-600 tracking-[-0.03em]">
-													{k.num}
-												</div>
-												<div className="text-[0.72rem] text-[#5a6a82] font-medium">{k.label}</div>
-											</div>
-										</div>
-									))}
-								</div>
-								<div className="text-[0.85rem] text-[#5a6a82] leading-[1.65] mb-4">{c.desc}</div>
-								<LinkBtn href="#">Read Case Study</LinkBtn>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
-		</section>
-	);
-}
 
 // ─── Services ─────────────────────────────────────────────────────────────────
 function Services() {
+	const { t } = useTranslation();
 	const services = [
 		{
+			id: "srv1",
 			tags: [
-				{ label: "Anonymous Check-ins", variant: "primary" },
-				{ label: "Daily Pulse", variant: "navy" },
+				{ labelKey: "tag1", variant: "primary" },
+				{ labelKey: "tag2", variant: "navy" },
 			],
-			title: "Lightweight Pulse Surveys",
-			desc: "30-second daily surveys that collect honest feedback on workload, stress, resources, and overall team sentiment.",
+			image: serviceImg1,
 		},
 		{
+			id: "srv2",
 			tags: [
-				{ label: "Real-time Metrics", variant: "primary" },
-				{ label: "Exhaustion Warnings", variant: "navy" },
+				{ labelKey: "tag1", variant: "primary" },
+				{ labelKey: "tag2", variant: "navy" },
 			],
-			title: "Burnout Risk Analytics",
-			desc: "Track sentiment shifts, department morale, and receive early alerts when burnout risk scores begin to climb.",
+			image: serviceImg2,
 		},
 		{
+			id: "srv3",
 			tags: [
-				{ label: "Peer Recognition", variant: "primary" },
-				{ label: "Appreciation", variant: "navy" },
+				{ labelKey: "tag1", variant: "primary" },
+				{ labelKey: "tag2", variant: "navy" },
 			],
-			title: "Appreciation Loops",
-			desc: "Boost workplace morale by allowing team members to send public praise cards and positive callouts easily.",
+			image: serviceImg3,
 		},
 		{
+			id: "srv4",
 			tags: [
-				{ label: "Manager Training", variant: "primary" },
-				{ label: "Habits", variant: "navy" },
+				{ labelKey: "tag1", variant: "primary" },
+				{ labelKey: "tag2", variant: "navy" },
 			],
-			title: "Manager Action Recommendations",
-			desc: "Access custom guides, micro-habit strategies, and resolution checklists designed for modern HR and engineering leads.",
+			image: serviceImg4,
 		},
 	];
 
@@ -932,37 +792,47 @@ function Services() {
 			<div className="max-w-[1200px] mx-auto px-6">
 				<div className="flex items-end justify-between mb-12 flex-wrap gap-3">
 					<div>
-						<Eyebrow>Features & Services</Eyebrow>
+						<Eyebrow>{t("homepage.services.eyebrow")}</Eyebrow>
 						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-							Everything You Need to Build a
-							<br />
-							Healthy, High-Retaining Workplace
+							{t("homepage.services.title")}
 						</h2>
 					</div>
-					<LinkBtn href="#">All Services</LinkBtn>
+					<LinkBtn href="#">{t("homepage.services.btn_all")}</LinkBtn>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{services.map((s) => (
 						<div
-							key={s.title}
+							key={s.id}
 							className="bg-white rounded-[18px] border border-[#e8e8e8] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)]"
 						>
-							<div className="w-full h-[200px] bg-[#f0f1f4]" />
+							{s.image ? (
+								<img
+									src={s.image}
+									alt={t(`homepage.services.${s.id}.title`)}
+									className="w-full h-[200px] object-cover bg-[#f0f1f4]"
+								/>
+							) : (
+								<div className="w-full h-[200px] bg-[#f0f1f4]" />
+							)}
 							<div className="p-6">
 								<div className="flex gap-2 mb-3 flex-wrap">
-									{s.tags.map((t) => (
+									{s.tags.map((tItem) => (
 										<span
-											key={t.label}
-											className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] ${t.variant === "primary" ? "bg-blue-50 text-blue-600" : "bg-black/[0.08] text-[#0d1b2e]"
+											key={tItem.labelKey}
+											className={`inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] ${tItem.variant === "primary" ? "bg-blue-50 text-blue-600" : "bg-black/[0.08] text-[#0d1b2e]"
 												}`}
 										>
-											{t.label}
+											{t(`homepage.services.${s.id}.${tItem.labelKey}`)}
 										</span>
 									))}
 								</div>
-								<div className="text-[1rem] font-extrabold text-[#0d1b2e] mb-2">{s.title}</div>
-								<div className="text-[0.83rem] text-[#5a6a82] leading-[1.6] mb-4">{s.desc}</div>
-								<LinkBtn href="#">Learn More</LinkBtn>
+								<div className="text-[1rem] font-extrabold text-[#0d1b2e] mb-2">
+									{t(`homepage.services.${s.id}.title`)}
+								</div>
+								<div className="text-[0.83rem] text-[#5a6a82] leading-[1.6] mb-4">
+									{t(`homepage.services.${s.id}.desc`)}
+								</div>
+								<LinkBtn href="#">{t("homepage.services.btn_more")}</LinkBtn>
 							</div>
 						</div>
 					))}
@@ -974,6 +844,7 @@ function Services() {
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 function Testimonials() {
+	const { t } = useTranslation();
 	const [current, setCurrent] = useState(0);
 	const [visible, setVisible] = useState(true);
 
@@ -991,18 +862,22 @@ function Testimonials() {
 		<section className="py-[100px] bg-[#f5f6f8]">
 			<div className="max-w-[1200px] mx-auto px-6">
 				<div className="text-center mb-14">
-					<Eyebrow>Testimonials</Eyebrow>
+					<Eyebrow>{t("homepage.testimonials.eyebrow")}</Eyebrow>
 					<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-						What Leaders Say About Manto
+						{t("homepage.testimonials.title")}
 					</h2>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 items-center">
 					{/* Left image */}
 					<div className="relative">
-						<div className="w-full aspect-[3/4] rounded-[20px] bg-[#e8e9ed]" />
+						<img
+							src={testimonialImg}
+							alt="What Leaders Say"
+							className="w-full aspect-[3/4] rounded-[20px] object-cover bg-[#e8e9ed]"
+						/>
 						<div className="lg:absolute lg:bottom-[-20px] lg:right-[-20px] mt-4 lg:mt-0 bg-white rounded-2xl p-4 pr-5 shadow-[0_4px_16px_rgba(15,31,61,0.08),0_20px_48px_rgba(15,31,61,0.12)] border border-[#e8e8e8]">
 							<div className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-[#8896aa] mb-2">
-								Trusted Clients
+								{t("homepage.testimonials.clients")}
 							</div>
 							<div className="flex items-center gap-3">
 								<div className="text-[1.1rem] font-extrabold text-[#0d1b2e]">5K+</div>
@@ -1066,142 +941,10 @@ function Testimonials() {
 	);
 }
 
-// ─── Blog ─────────────────────────────────────────────────────────────────────
-function Blog() {
-	const posts = [
-		{
-			tag: "Wellbeing",
-			tagVariant: "primary",
-			date: "Jan 14, 2026",
-			title: "How to Build Psychological Safety in High-Stress Product Teams",
-			featured: true,
-		},
-		{
-			tag: "Leadership",
-			tagVariant: "primary",
-			date: "Jan 8, 2026",
-			title: "The Silent Cost of Burnout: A Manager's Guide to Organizational Health",
-			featured: false,
-		},
-		{
-			tag: "Retention",
-			tagVariant: "primary",
-			date: "Dec 29, 2025",
-			title: "Why Traditional Annual HR Surveys Fail — And What to Do Instead",
-			featured: false,
-		},
-	];
-
-	const extras = [
-		{
-			tag: "Culture",
-			date: "Dec 20, 2025",
-			title: "How Peer Recognition Drives Engagement in Remote Workforces",
-		},
-		{
-			tag: "Retention",
-			date: "Dec 12, 2025",
-			title: "5 Early Indicators of Employee Attrition Every HR Leader Must Monitor",
-		},
-	];
-
-	return (
-		<section className="py-[100px] bg-white">
-			<div className="max-w-[1200px] mx-auto px-6">
-				<div className="flex items-end justify-between mb-12 flex-wrap gap-3">
-					<div>
-						<Eyebrow>Manto Blog</Eyebrow>
-						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#0d1b2e]">
-							Employee Experience &amp; Wellbeing Insights
-						</h2>
-						<p className="text-[#5a6a82] mt-3 max-w-[560px] leading-[1.7]">
-							Our strategic guidance empowers you to act with clarity and confidence.
-						</p>
-					</div>
-					<LinkBtn href="#" className="whitespace-nowrap">
-						All Articles
-					</LinkBtn>
-				</div>
-
-				<div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
-					{/* Featured */}
-					<div className="bg-white rounded-2xl border border-[#e8e8e8] overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)]">
-						<div className="w-full h-[220px] bg-[#f0f1f4]" />
-						<div className="p-5">
-							<div className="flex items-center gap-2.5 mb-2.5">
-								<span className="inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] bg-blue-50 text-blue-600">
-									{posts[0].tag}
-								</span>
-								<span className="text-[0.72rem] text-[#8896aa] font-medium">{posts[0].date}</span>
-							</div>
-							<div className="text-[1rem] font-extrabold text-[#0d1b2e] leading-[1.35] mb-3">
-								{posts[0].title}
-							</div>
-							<LinkBtn href="#" className="text-[0.83rem]">
-								Read More
-							</LinkBtn>
-						</div>
-					</div>
-
-					{/* Aside */}
-					<div className="grid grid-rows-2 gap-6">
-						{posts.slice(1).map((p) => (
-							<div
-								key={p.title}
-								className="bg-white rounded-2xl border border-[#e8e8e8] overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)]"
-							>
-								<div className="w-full h-[140px] bg-[#f0f1f4]" />
-								<div className="p-4">
-									<div className="flex items-center gap-2.5 mb-2">
-										<span className="inline-block px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] bg-blue-50 text-blue-600">
-											{p.tag}
-										</span>
-										<span className="text-[0.72rem] text-[#8896aa] font-medium">{p.date}</span>
-									</div>
-									<div className="text-[0.88rem] font-bold text-[#0d1b2e] leading-[1.3] mb-2.5">
-										{p.title}
-									</div>
-									<LinkBtn href="#" className="text-[0.8rem]">
-										Read More
-									</LinkBtn>
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
-
-				{/* Extras */}
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-					{extras.map((e) => (
-						<div
-							key={e.title}
-							className="flex gap-3.5 items-center bg-white rounded-xl border border-[#e8e8e8] p-3.5 transition-all duration-200 hover:shadow-[0_2px_8px_rgba(15,31,61,0.06),0_8px_24px_rgba(15,31,61,0.08)]"
-						>
-							<div className="w-[70px] h-[70px] rounded-[10px] bg-[#f0f1f4] flex-shrink-0" />
-							<div>
-								<div className="flex items-center gap-2 mb-1">
-									<span className="inline-block px-2.5 py-0.5 rounded-full text-[0.7rem] font-bold uppercase tracking-[0.06em] bg-blue-50 text-blue-600">
-										{e.tag}
-									</span>
-									<span className="text-[0.72rem] text-[#8896aa]">{e.date}</span>
-								</div>
-								<div className="text-[0.82rem] font-bold text-[#0d1b2e] leading-[1.3] mb-1">
-									{e.title}
-								</div>
-								<LinkBtn href="#" className="text-[0.78rem]">
-									Read More
-								</LinkBtn>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
-		</section>
-	);
-}
 
 // ─── CTA Banner ───────────────────────────────────────────────────────────────
 function CTABanner() {
+	const { t } = useTranslation();
 	return (
 		<section
 			className="py-[100px] relative overflow-hidden"
@@ -1213,25 +956,25 @@ function CTABanner() {
 				<div className="flex flex-col lg:flex-row items-center justify-between gap-12">
 					<div>
 						<h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] font-extrabold leading-[1.1] tracking-[-0.03em] text-white">
-							Ready to Prevent Burnout?
+							{t("homepage.cta.title_main")}
 							<br />
-							Let's Support Your Team
+							{t("homepage.cta.title_sub")}
 						</h2>
 						<p className="text-white/65 text-[1rem] mt-3 max-w-[560px] leading-[1.7]">
-							Schedule a demo or download our guide to learn how Manto can help you create a happier, more sustainable workplace culture.
+							{t("homepage.cta.desc")}
 						</p>
 						<div className="flex gap-3 mt-8 flex-wrap">
 							<a
 								href="#/login"
 								className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-[#0d1b2e] font-bold text-[0.9rem] hover:bg-[#f5f6f8] transition-colors"
 							>
-								Get a Dashboard <ArrowRight size={16} />
+								{t("homepage.cta.btn_dashboard")} <ArrowRight size={16} />
 							</a>
 							<a
 								href="#"
 								className="inline-flex items-center gap-2 px-7 py-3 rounded-full text-white/70 border-2 border-white/20 font-bold text-[0.9rem] hover:border-white/40 transition-colors"
 							>
-								View Case Studies
+								{t("homepage.cta.btn_cases")}
 							</a>
 						</div>
 					</div>
@@ -1245,7 +988,7 @@ function CTABanner() {
 						</div>
 						<div className="text-3xl font-extrabold text-white">500+</div>
 						<div className="text-[0.8rem] text-white/65 font-medium mt-1">
-							Businesses Transformed Worldwide
+							{t("homepage.cta.stat")}
 						</div>
 					</div>
 				</div>
@@ -1256,6 +999,7 @@ function CTABanner() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
+	const { t } = useTranslation();
 	return (
 		<footer className="bg-[#0d1b2e] pt-20">
 			<div className="max-w-[1200px] mx-auto px-6">
@@ -1266,19 +1010,19 @@ function Footer() {
 							<span className="tracking-[0.15em]">MANTO</span>
 						</div>
 						<p className="text-[0.85rem] text-white/50 leading-[1.65] max-w-[240px] mb-5">
-							Your premium employee experience &amp; wellbeing partner. We build systems that reduce burnout and elevate teams.
+							{t("homepage.footer.desc")}
 						</p>
 						<p className="text-[0.8rem] text-white/40 leading-[1.6]">
-							contact@manto.io
+							{t("homepage.footer.email")}
 							<br />
-							Available globally — remote-first team
+							{t("homepage.footer.location")}
 						</p>
 					</div>
 
 					{/* Main Pages */}
 					<div>
 						<div className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-white/40 mb-5">
-							Main Pages
+							{t("homepage.footer.pages")}
 						</div>
 						<div className="flex flex-col gap-[11px]">
 							{["Home", "About", "Pricing", "Contact", "Services", "Blog", "Case Studies"].map((link) => (
@@ -1292,7 +1036,7 @@ function Footer() {
 					{/* Resources */}
 					<div>
 						<div className="text-[0.75rem] font-bold uppercase tracking-[0.1em] text-white/40 mb-5">
-							Resources
+							{t("homepage.footer.resources")}
 						</div>
 						<div className="flex flex-col gap-[11px]">
 							{["Service Details", "Blog Details", "Case Study Details", "Privacy Policy", "Terms of Service"].map((link) => (
@@ -1305,10 +1049,9 @@ function Footer() {
 
 					{/* Newsletter */}
 					<div>
-						<div className="text-[1rem] font-bold text-white mb-2">Join our community</div>
+						<div className="text-[1rem] font-bold text-white mb-2">{t("homepage.footer.community")}</div>
 						<p className="text-[0.83rem] text-white/50 mb-5 leading-[1.55]">
-							Get strategic insights, case studies, and business growth tips — delivered to your
-							inbox.
+							{t("homepage.footer.community_desc")}
 						</p>
 						<div className="flex">
 							<input
@@ -1317,7 +1060,7 @@ function Footer() {
 								className="flex-1 px-4 py-3 bg-white/[0.08] border border-white/15 border-r-0 rounded-l-full text-white text-[0.85rem] outline-none placeholder:text-white/35 focus:border-blue-500/50 transition-colors"
 							/>
 							<button className="px-5 py-3 bg-blue-600 border-0 rounded-r-full text-white text-[0.85rem] font-bold cursor-pointer hover:bg-blue-700 transition-colors">
-								Subscribe
+								{t("homepage.footer.subscribe")}
 							</button>
 						</div>
 					</div>
@@ -1326,7 +1069,7 @@ function Footer() {
 				{/* Footer bottom */}
 				<div className="border-t border-white/[0.08] py-6 flex flex-wrap items-center justify-between gap-4">
 					<div className="text-[0.8rem] text-white/35">
-						© Copyright 2026 MANTO. All rights reserved.
+						{t("homepage.footer.copyright")}
 					</div>
 					<div className="flex gap-3">
 						{[
@@ -1371,12 +1114,9 @@ export default function MantoLanding() {
 			<Values />
 			<WhyChooseUs />
 			<Stats />
-			<LeadMagnet />
 			<Expertise />
-			<CaseStudies />
 			<Services />
 			<Testimonials />
-			<Blog />
 			<CTABanner />
 			<Footer />
 		</div>
