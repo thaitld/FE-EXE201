@@ -199,6 +199,12 @@ function Navbar() {
 								{t(`homepage.nav.${item.toLowerCase()}`)}
 							</a>
 						))}
+						<a
+							href="#/pricing"
+							className="text-[0.9rem] font-semibold text-[#5a6a82] hover:text-[#0066FF] transition-colors duration-200"
+						>
+							{t("homepage.nav.pricing")}
+						</a>
 					</div>
 
 					<div className="hidden md:flex items-center gap-4">
@@ -242,6 +248,13 @@ function Navbar() {
 							{t(`homepage.nav.${item.toLowerCase()}`)}
 						</a>
 					))}
+					<a
+						href="#/pricing"
+						onClick={() => setMenuOpen(false)}
+						className="text-2xl font-bold text-[#0d1b2e]"
+					>
+						{t("homepage.nav.pricing")}
+					</a>
 					<a
 						href="#/login"
 						onClick={() => setMenuOpen(false)}
@@ -307,12 +320,20 @@ function Hero() {
 						<p className="text-white/70 text-[1.05rem] max-w-[520px] leading-[1.7] mb-9">
 							{t("homepage.hero.desc")}
 						</p>
-						<a
-							href="#/login"
-							className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-[1rem] hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
-						>
-							{t("homepage.hero.btn_start")}
-						</a>
+						<div className="flex flex-wrap gap-4 items-center">
+							<a
+								href="#/login"
+								className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-[1rem] hover:bg-blue-700 transition-all duration-200 hover:-translate-y-px"
+							>
+								{t("homepage.hero.btn_start")}
+							</a>
+							<a
+								href="#/pricing"
+								className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold text-[1rem] hover:bg-white/20 transition-all duration-200 hover:-translate-y-px"
+							>
+								{t("homepage.hero.view_pricing")}
+							</a>
+						</div>
 					</div>
 
 					{/* Stat Card */}
@@ -1107,7 +1128,7 @@ function Footer() {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function MantoLanding() {
 	return (
-		<div className="font-['Plus_Jakarta_Sans',sans-serif] text-[#0d1b2e] bg-white overflow-x-hidden">
+		<div className="landing-page font-sans text-[#0d1b2e] bg-white overflow-x-hidden">
 			<Navbar />
 			<Hero />
 			<About />

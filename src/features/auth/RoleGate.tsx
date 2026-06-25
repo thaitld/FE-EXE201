@@ -29,9 +29,12 @@ export default function RoleGate({
   }
 
   // Check if user's role is in allowed roles (case-insensitive)
-  const hasAccess = allowedRoles.some(
-    (allowedRole) => allowedRole.toLowerCase() === role.toLowerCase(),
-  );
+  const hasAccess = allowedRoles.some((allowedRole) => {
+    if (Array.isArray(role)) {
+      return role.some((r) => typeof r === "string" && r.toLowerCase() === allowedRole.toLowerCase());
+    }
+    return typeof role === "string" && role.toLowerCase() === allowedRole.toLowerCase();
+  });
 
   return <>{hasAccess ? children : fallback}</>;
 }

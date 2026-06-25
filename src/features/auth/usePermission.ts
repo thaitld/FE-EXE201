@@ -9,7 +9,12 @@ export function usePermission() {
 
   const hasRole = (...roles: string[]) => {
     if (!role) return false;
-    return roles.some((r) => r.toLowerCase() === role.toLowerCase());
+    return roles.some((r) => {
+      if (Array.isArray(role)) {
+        return role.some((userRole) => typeof userRole === 'string' && userRole.toLowerCase() === r.toLowerCase());
+      }
+      return typeof role === 'string' && role.toLowerCase() === r.toLowerCase();
+    });
   };
 
   const isAdmin = () => hasRole("Admin");

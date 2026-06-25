@@ -13,12 +13,28 @@ import RoleGate from "@/features/auth/RoleGate";
 import ProfilePage from "@/pages/shared/Profile";
 import Survey from "@/components/panels/employee/Survey";
 import Manager from "@/pages/roles/Manager";
+import SuperAdminWorkspace from "@/features/superadmin/pages/SuperAdminWorkspace";
+import PricingPage from "@/features/customer/pages/PricingPage";
+import CustomerRegisterPage from "@/features/customer/pages/CustomerRegisterPage";
+import CustomerLoginPage from "@/features/customer/pages/CustomerLoginPage";
+import CreateOrderPage from "@/features/customer/pages/CreateOrderPage";
+import OrdersPage from "@/features/customer/pages/OrdersPage";
+import OrderDetailPage from "@/features/customer/pages/OrderDetailPage";
+
 function isAdminRoute(route: string) {
   return route.startsWith("#/admin");
 }
 
 function isRoleManagerRoute(route: string) {
   return route.startsWith("#/roles/manager") || route.startsWith("#/manager");
+}
+
+function isSuperAdminRoute(route: string) {
+  return route.startsWith("#/super") || route.startsWith("#/roles/superadmin");
+}
+
+function isCustomerRoute(route: string) {
+  return route.startsWith("#/orders");
 }
 
 function AdminRoute({ route }: { route: string }) {
@@ -85,6 +101,64 @@ export default function AppRouter() {
   if (pathname.startsWith("/settings/integrations")) {
     window.location.href = `/#/admin/meetings${window.location.search}`;
     return null;
+  }
+
+  // Public pricing and customer registration/login paths
+  if (route.startsWith("#/pricing")) {
+    return <PricingPage />;
+  }
+
+  if (route.startsWith("#/customer/register")) {
+    if (isAuthenticated) {
+      window.location.hash = "#/orders";
+      return null;
+    }
+    return <CustomerRegisterPage />;
+  }
+
+  if (route.startsWith("#/customer/login")) {
+    if (isAuthenticated) {
+      const params = new URLSearchParams(route.includes("?") ? route.split("?")[1] : "");
+      const redirect = params.get("redirect");
+      window.location.hash = redirect ? `#${decodeURIComponent(redirect)}` : "#/orders";
+      return null;
+    }
+    return <CustomerLoginPage />;
+  }
+
+  // Customer secure routes
+  if (isCustomerRoute(route)) {
+    if (!isAuthenticated) {
+      const redirectPath = encodeURIComponent(route.substring(2));
+      window.location.hash = `#/customer/login?redirect=${redirectPath}`;
+      return null;
+    }
+
+    const hasCustomerRole = Array.isArray(role)
+      ? role.some((r) => typeof r === "string" && r.toLowerCase() === "customer")
+      : typeof role === "string" && role.toLowerCase() === "customer";
+
+    if (!hasCustomerRole) {
+      return <NotAuthorized />;
+    }
+
+    // Customer route sub-mappings
+    if (route.startsWith("#/orders/new")) {
+      return <CreateOrderPage />;
+    }
+    const matchDetail = route.match(/#\/orders\/(\d+)/);
+    if (matchDetail) {
+      return <OrderDetailPage />;
+    }
+    return <OrdersPage />;
+  }
+
+  if (isSuperAdminRoute(route)) {
+    if (!isAuthenticated) {
+      window.location.hash = "#/login";
+      return null;
+    }
+    return <SuperAdminWorkspace />;
   }
 
   if (isAdminRoute(route)) {

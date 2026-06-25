@@ -56,7 +56,7 @@ export default function TeamPerformancePage() {
   return (
     <div className="min-h-screen bg-gray-50/60 px-6 py-6">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&display=swap');
         * { font-family: 'Geist', sans-serif; }
 
         .card {

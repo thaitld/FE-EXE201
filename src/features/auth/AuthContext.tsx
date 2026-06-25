@@ -6,6 +6,8 @@ import {
   type UserDto,
   type AlertCountDto,
   getRoleFromJwt,
+  isTokenExpired,
+  AUTH_SESSION_EXPIRED_EVENT,
 } from "@/lib/api";
 import {
   createSignalRConnection,
@@ -35,16 +37,26 @@ const authTokenKey = "auth_token";
 const userEmailKey = "user_email";
 const userProfileKey = "user_profile";
 
+/**
+ * Returns true if there is a token in localStorage AND it has not expired.
+ * Used both for initial state and whenever we need to re-validate the session.
+ */
+function hasValidStoredSession(): boolean {
+  const token = localStorage.getItem(authTokenKey);
+  if (!token) return false;
+  return !isTokenExpired(token);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
-    Boolean(localStorage.getItem(authTokenKey)),
+    hasValidStoredSession(),
   );
   const [userEmail, setUserEmail] = useState<string | null>(() =>
     localStorage.getItem(userEmailKey),
   );
   const [role, setRole] = useState<string | null>(() => {
     const token = localStorage.getItem(authTokenKey);
-    return token ? getRoleFromJwt(token) : null;
+    return token && !isTokenExpired(token) ? getRoleFromJwt(token) : null;
   });
   const [user, setUser] = useState<UserDto | null>(() => {
     try {
@@ -55,11 +67,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  // On mount: if a token exists but is expired/invalid, immediately clear it
+  // so the app never fires authenticated requests with a stale token.
+  useEffect(() => {
+    const token = localStorage.getItem(authTokenKey);
+    if (token && isTokenExpired(token)) {
+      logout();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Listen for global "session expired" events dispatched by the API
+  // response interceptor (401/403 responses). When received, clear local
+  // auth state so the router redirects to /login.
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setIsAuthenticated(false);
+      setUserEmail(null);
+      setRole(null);
+      setUser(null);
+      useNotificationStore.getState().clearAll();
+    };
+
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => {
+      window.removeEventListener(
+        AUTH_SESSION_EXPIRED_EVENT,
+        handleSessionExpired,
+      );
+    };
+  }, []);
+
   // Initialize SignalR when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       const token = localStorage.getItem(authTokenKey);
-      if (token) {
+      if (token && !isTokenExpired(token)) {
         try {
           createSignalRConnection(token);
 
@@ -96,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isAuthenticated) {
       refreshUser();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const refreshUser = async () => {
@@ -105,8 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(resp.data.data);
         localStorage.setItem(userProfileKey, JSON.stringify(resp.data.data));
       } else {
-        setUser(null);
-        localStorage.removeItem(userProfileKey);
+        // Backend returned a non-success ApiResponse (e.g. account
+        // deactivated, user not found). Treat as an invalid session.
+        logout();
+        return;
       }
 
       // Load alerts count for badge
@@ -162,7 +208,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.warn("Failed to load combined notifications:", err);
       }
-    } catch {
+    } catch (err: any) {
+      const status = err?.response?.status;
+
+      // 401/403 already triggers AUTH_SESSION_EXPIRED_EVENT via the API
+      // interceptor (which clears state). For any other error, just clear
+      // the cached profile but keep the session as-is.
+      if (status === 401 || status === 403) {
+        return;
+      }
+
       setUser(null);
       localStorage.removeItem(userProfileKey);
     }

@@ -59,9 +59,15 @@ export default function ManagerWorkspace() {
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(window.location.hash || '#/roles/manager'))
 
   const allowed = useMemo(() => {
-    const r = (authRole || user?.roleName || user?.role)?.toUpperCase()
-    console.log("[ManagerWorkspace Debug] authRole:", authRole, "user.role:", user?.role, "user.roleName:", user?.roleName, "resolved:", r, "allowed:", r === 'MANAGER' || r === 'ADMIN');
-    return r === 'MANAGER' || r === 'ADMIN'
+    const rawRole = authRole || user?.roleName || user?.role;
+    if (!rawRole) return false;
+    const check = (target: string) => {
+      if (Array.isArray(rawRole)) {
+        return rawRole.some((x) => typeof x === 'string' && x.toUpperCase() === target.toUpperCase());
+      }
+      return typeof rawRole === 'string' && rawRole.toUpperCase() === target.toUpperCase();
+    };
+    return check('MANAGER') || check('ADMIN');
   }, [user, authRole])
 
   useEffect(() => {

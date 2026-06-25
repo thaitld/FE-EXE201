@@ -30,7 +30,15 @@ export default function GoogleAuthCallback() {
 
       console.log("[GoogleAuthCallback] Scheduling redirect timer in 800ms...");
       const redirectTimer = window.setTimeout(() => {
-        const targetHash = userRole?.toLowerCase() === "manager" ? "#/roles/manager" : "#/admin";
+        const lowerRole = userRole?.toLowerCase() || "";
+        const targetHash =
+          lowerRole === "manager"
+            ? "#/roles/manager"
+            : lowerRole === "customer"
+            ? "#/orders"
+            : lowerRole === "superadmin"
+            ? "#/super"
+            : "#/admin";
         console.log("[GoogleAuthCallback] Timer fired! Redirecting via history API to:", targetHash);
         
         // Use HTML5 History API to change pathname to / and set the hash, removing the token query param
