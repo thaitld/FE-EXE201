@@ -304,4 +304,14 @@ select {
   font-family: 'Playfair Display', 'Georgia', serif;
 }
 
+@keyframes border-beam-svg-anim {
+  0% {
+    stroke-dashoffset: 550;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+
 

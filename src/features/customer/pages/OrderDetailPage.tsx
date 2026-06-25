@@ -36,7 +36,7 @@ export default function OrderDetailPage() {
 
   const loadOrderDetail = async () => {
     if (!orderId) {
-      setError('Đơn hàng không hợp lệ.');
+      setError('Invalid order ID.');
       setLoading(false);
       return;
     }
@@ -46,7 +46,7 @@ export default function OrderDetailPage() {
       setOrder(data);
     } catch (err: any) {
       console.warn('Failed to load order details:', err);
-      setError(err.message || 'Không thể tải thông tin chi tiết đơn hàng.');
+      setError(err.message || 'Unable to load order details.');
     } finally {
       setLoading(false);
     }
@@ -69,10 +69,10 @@ export default function OrderDetailPage() {
       if (data && data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {
-        throw new Error('Không nhận được link thanh toán từ hệ thống.');
+        throw new Error('Could not retrieve new payment link.');
       }
     } catch (err: any) {
-      showToast(err.message || 'Lấy link thanh toán thất bại.', 'error');
+      showToast(err.message || 'Failed to get payment link.', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -83,11 +83,11 @@ export default function OrderDetailPage() {
     try {
       setActionLoading(true);
       await cancelOrder(orderId);
-      showToast('Đã hủy đơn hàng thành công.');
+      showToast('Order cancelled successfully.');
       setShowCancelConfirm(false);
       loadOrderDetail();
     } catch (err: any) {
-      showToast(err.message || 'Hủy đơn hàng thất bại.', 'error');
+      showToast(err.message || 'Failed to cancel order.', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -98,9 +98,9 @@ export default function OrderDetailPage() {
     try {
       setActionLoading(true);
       await downloadInvoice(orderId);
-      showToast('Đang tải hóa đơn...');
+      showToast('Downloading invoice...');
     } catch (err: any) {
-      showToast(err.message || 'Tải hóa đơn thất bại.', 'error');
+      showToast(err.message || 'Failed to download invoice.', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -114,28 +114,28 @@ export default function OrderDetailPage() {
     const s = status.toUpperCase();
     if (s === 'PAID') {
       return (
-        <span className="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full font-bold border border-emerald-500/10">
-          ĐÃ THANH TOÁN
+        <span className="bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200">
+          PAID
         </span>
       );
     }
     if (s === 'PENDING_PAYMENT') {
       return (
-        <span className="bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full font-bold border border-amber-500/10 animate-pulse">
-          CHỜ THANH TOÁN
+        <span className="bg-amber-50 text-amber-700 text-xs px-3 py-1 rounded-full font-bold border border-amber-200 animate-pulse">
+          PENDING PAYMENT
         </span>
       );
     }
     if (s === 'CANCELLED') {
       return (
-        <span className="bg-slate-800 text-slate-400 text-xs px-3 py-1 rounded-full font-bold border border-slate-700/50">
-          ĐÃ HỦY
+        <span className="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full font-bold border border-slate-200">
+          CANCELLED
         </span>
       );
     }
     return (
-      <span className="bg-rose-500/20 text-rose-400 text-xs px-3 py-1 rounded-full font-bold border border-rose-500/10">
-        THẤT BẠI
+      <span className="bg-rose-50 text-rose-700 text-xs px-3 py-1 rounded-full font-bold border border-rose-200">
+        FAILED
       </span>
     );
   };
@@ -145,12 +145,12 @@ export default function OrderDetailPage() {
       {/* Toast Alert */}
       {toast && (
         <div className="fixed bottom-5 right-5 z-50 animate-bounce">
-          <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border shadow-xl ${
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border shadow-xl bg-white text-slate-800 ${
             toast.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/30 text-rose-200'
-              : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
+              ? 'border-rose-200'
+              : 'border-emerald-200'
           }`}>
-            <AlertCircle size={18} />
+            <AlertCircle size={18} className={toast.type === 'error' ? 'text-rose-500' : 'text-emerald-500'} />
             <span className="text-sm font-semibold">{toast.message}</span>
           </div>
         </div>
@@ -158,26 +158,26 @@ export default function OrderDetailPage() {
 
       {/* Cancel Confirm Dialog */}
       {showCancelConfirm && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-2">Hủy Đơn Hàng?</h3>
-            <p className="text-sm text-slate-400 mb-6">
-              Bạn có chắc chắn muốn hủy đơn hàng #{orderId} không? Hành động này không thể hoàn tác.
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Cancel Order?</h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Are you sure you want to cancel order #{orderId}? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowCancelConfirm(false)}
-                className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 text-sm font-semibold rounded-xl transition"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition"
               >
-                Hủy bỏ
+                No, Keep it
               </button>
               <button
                 onClick={handleCancel}
                 disabled={actionLoading}
-                className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5"
+                className="px-4 py-2 bg-rose-650 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5"
               >
                 {actionLoading && <Loader2 size={14} className="animate-spin" />}
-                Xác nhận hủy
+                Confirm Cancel
               </button>
             </div>
           </div>
@@ -188,40 +188,40 @@ export default function OrderDetailPage() {
       <div className="mb-6">
         <a
           href="#/orders"
-          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition"
         >
-          <ChevronLeft size={16} /> Quay lại danh sách đơn hàng
+          <ChevronLeft size={16} /> Back to order list
         </a>
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <Loader2 size={40} className="text-emerald-400 animate-spin" />
-          <p className="text-slate-400">Đang tải thông tin đơn hàng...</p>
+        <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white border border-slate-200 rounded-3xl">
+          <Loader2 size={40} className="text-blue-600 animate-spin" />
+          <p className="text-slate-500 font-medium">Loading order details...</p>
         </div>
       ) : error || !order ? (
-        <div className="max-w-md mx-auto text-center py-16 bg-slate-950/50 rounded-2xl border border-slate-800 p-8">
-          <AlertCircle size={40} className="text-rose-400 mx-auto mb-4" />
-          <p className="text-rose-200 font-semibold mb-4">{error || 'Không tìm thấy đơn hàng.'}</p>
+        <div className="max-w-md mx-auto text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <AlertCircle size={40} className="text-rose-500 mx-auto mb-4" />
+          <p className="text-rose-800 font-semibold mb-4">{error || 'Order not found.'}</p>
           <a
             href="#/orders"
-            className="px-5 py-2.5 bg-slate-850 hover:bg-slate-800 text-white rounded-xl font-medium transition inline-block"
+            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition inline-block"
           >
-            Quay lại danh sách
+            Back to List
           </a>
         </div>
       ) : (
         <div className="space-y-8">
           {/* Main header block */}
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
             <div>
               <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h2 className="text-2xl font-bold text-white">Đơn hàng #{order.id}</h2>
+                <h2 className="text-2xl font-bold text-slate-900">Order #{order.id}</h2>
                 {getStatusBadge(order.status)}
               </div>
-              <p className="text-xs text-slate-400 flex items-center gap-1">
+              <p className="text-xs text-slate-500 flex items-center gap-1">
                 <Calendar size={13} />
-                Được tạo ngày: {new Date(order.createdAt).toLocaleString('vi-VN')}
+                Created on: {new Date(order.createdAt).toLocaleString('en-US')}
               </p>
             </div>
 
@@ -232,18 +232,18 @@ export default function OrderDetailPage() {
                   <button
                     onClick={handleRepay}
                     disabled={actionLoading}
-                    className="bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:brightness-110 active:scale-[0.99] transition-all flex items-center gap-1.5"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md transition active:scale-[0.99] flex items-center gap-1.5"
                   >
                     {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />}
-                    Thanh toán ngay
+                    Pay Now
                   </button>
                   <button
                     onClick={() => setShowCancelConfirm(true)}
                     disabled={actionLoading}
-                    className="bg-slate-850 hover:bg-slate-800 text-rose-400 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
+                    className="bg-slate-100 hover:bg-slate-200 text-rose-600 border border-slate-200 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
                   >
                     <Trash2 size={15} />
-                    Hủy đơn hàng
+                    Cancel Order
                   </button>
                 </>
               )}
@@ -252,10 +252,10 @@ export default function OrderDetailPage() {
                 <button
                   onClick={handleDownloadInvoice}
                   disabled={actionLoading}
-                  className="bg-slate-850 hover:bg-slate-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
                 >
                   {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
-                  Tải hóa đơn (HTML)
+                  Download Invoice (HTML)
                 </button>
               )}
             </div>
@@ -265,33 +265,33 @@ export default function OrderDetailPage() {
             {/* Left panels: profiles */}
             <div className="lg:col-span-2 space-y-6">
               {/* Profile card */}
-              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
                 <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2 pb-2 border-b border-slate-800 mb-4">
-                    <Building size={18} className="text-emerald-400" />
-                    Thông Tin Doanh Nghiệp & Tổ Chức
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-100 mb-4">
+                    <Building size={18} className="text-blue-600" />
+                    Company & Organization Profile
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                     <div className="space-y-1">
-                      <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Tên doanh nghiệp</span>
-                      <p className="text-white font-medium text-base">{order.companyName}</p>
+                      <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Company Name</span>
+                      <p className="text-slate-900 font-semibold text-base">{order.companyName}</p>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Email liên hệ</span>
-                      <p className="text-white font-medium text-base flex items-center gap-1.5">
-                        <Mail size={14} className="text-slate-400" /> {order.companyEmail}
+                      <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Contact Email</span>
+                      <p className="text-slate-700 font-medium text-base flex items-center gap-1.5">
+                        <Mail size={14} className="text-slate-450" /> {order.companyEmail}
                       </p>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Số điện thoại</span>
-                      <p className="text-white font-medium text-base flex items-center gap-1.5">
-                        <Phone size={14} className="text-slate-400" /> {order.companyPhone || 'Chưa cung cấp'}
+                      <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Phone Number</span>
+                      <p className="text-slate-700 font-medium text-base flex items-center gap-1.5">
+                        <Phone size={14} className="text-slate-450" /> {order.companyPhone || 'Not provided'}
                       </p>
                     </div>
                     {order.organizationId && (
                       <div className="space-y-1">
-                        <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Mã tổ chức (Workspace ID)</span>
-                        <p className="text-emerald-400 font-bold text-base flex items-center gap-1.5">
+                        <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Workspace ID</span>
+                        <p className="text-blue-600 font-bold text-base flex items-center gap-1.5">
                           <CheckCircle2 size={14} /> Org #{order.organizationId}
                         </p>
                       </div>
@@ -300,31 +300,31 @@ export default function OrderDetailPage() {
                 </div>
 
                 <div className="pt-2">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2 pb-2 border-b border-slate-800 mb-4">
-                    <User size={18} className="text-emerald-400" />
-                    Tài Khoản Quản Trị Viên (Admin)
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-100 mb-4">
+                    <User size={18} className="text-blue-600" />
+                    Administrator Account (Admin)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                     <div className="space-y-1">
-                      <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Họ và tên Admin</span>
-                      <p className="text-white font-medium text-base">{order.adminLastName} {order.adminFirstName}</p>
+                      <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Admin Full Name</span>
+                      <p className="text-slate-900 font-semibold text-base">{order.adminLastName} {order.adminFirstName}</p>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Email đăng nhập quản trị</span>
-                      <p className="text-white font-medium text-base flex items-center gap-1.5">
-                        <Mail size={14} className="text-slate-400" /> {order.adminEmail}
+                      <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Login Email</span>
+                      <p className="text-slate-700 font-medium text-base flex items-center gap-1.5">
+                        <Mail size={14} className="text-slate-450" /> {order.adminEmail}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {order.status === 'PAID' && (
-                  <div className="bg-slate-900/50 p-4 border border-slate-850 rounded-2xl flex items-start gap-3">
-                    <Shield size={20} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="bg-blue-50/50 p-4 border border-blue-200/50 rounded-2xl flex items-start gap-3">
+                    <Shield size={20} className="text-blue-600 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-bold text-white text-sm mb-0.5">Tài khoản quản trị đã được phân quyền</h4>
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        Tài khoản Admin đã được tạo cho email <strong>{order.adminEmail}</strong>. Vui lòng kiểm tra email của bạn để lấy mật khẩu tạm thời đăng nhập.
+                      <h4 className="font-bold text-slate-900 text-sm mb-0.5">Admin Account Authorized</h4>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        An administrator account has been provisioned for <strong>{order.adminEmail}</strong>. Please check your inbox for the temporary password to log in.
                       </p>
                     </div>
                   </div>
@@ -335,38 +335,38 @@ export default function OrderDetailPage() {
             {/* Right panels: Plan Limits & Total Cost */}
             <div className="space-y-6">
               {/* Cost card */}
-              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                <h3 className="text-lg font-bold text-white pb-2 border-b border-slate-800">
-                  Chi tiết thanh toán
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="text-lg font-bold text-slate-900 pb-2 border-b border-slate-100">
+                  Payment Summary
                 </h3>
                 <div className="space-y-2.5 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Gói đăng ký:</span>
-                    <span className="font-bold text-white">{order.planName}</span>
+                    <span className="text-slate-500">Subscription:</span>
+                    <span className="font-bold text-slate-900">{order.planName}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Chu kỳ thanh toán:</span>
-                    <span className="text-slate-200">
-                      {order.billingCycle === 'MONTHLY' ? 'Tháng' : 'Năm'}
+                    <span className="text-slate-500">Billing Cycle:</span>
+                    <span className="text-slate-800 font-semibold">
+                      {order.billingCycle === 'MONTHLY' ? 'Monthly' : 'Yearly'}
                     </span>
                   </div>
                   {order.paidAt && (
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Ngày thanh toán:</span>
-                      <span className="text-slate-300">
-                        {new Date(order.paidAt).toLocaleDateString('vi-VN')}
+                      <span className="text-slate-500">Payment Date:</span>
+                      <span className="text-slate-700 font-medium">
+                        {new Date(order.paidAt).toLocaleDateString('en-US')}
                       </span>
                     </div>
                   )}
                   {order.vnpayTxnRef && (
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Mã giao dịch VNPay:</span>
-                      <span className="text-slate-400 font-mono text-xs">{order.vnpayTxnRef}</span>
+                      <span className="text-slate-500">VNPay Transaction:</span>
+                      <span className="text-slate-600 font-mono text-xs">{order.vnpayTxnRef}</span>
                     </div>
                   )}
-                  <div className="border-t border-slate-800 pt-3 flex justify-between items-baseline">
-                    <span className="font-bold text-white">Số tiền:</span>
-                    <span className="text-xl font-extrabold text-emerald-400">
+                  <div className="border-t border-slate-100 pt-3 flex justify-between items-baseline">
+                    <span className="font-bold text-slate-900">Total Price:</span>
+                    <span className="text-2xl font-extrabold text-blue-650 text-blue-600">
                       {formatVND(order.amount)}
                     </span>
                   </div>
@@ -375,10 +375,10 @@ export default function OrderDetailPage() {
 
               {/* Status details help */}
               {order.status === 'PENDING_PAYMENT' && (
-                <div className="bg-amber-950/20 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200/90 leading-relaxed flex items-start gap-2.5">
-                  <HelpCircle size={16} className="shrink-0 text-amber-400 mt-0.5" />
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
+                  <HelpCircle size={16} className="shrink-0 text-amber-600 mt-0.5" />
                   <p>
-                    Đơn hàng đang chờ thanh toán qua cổng VNPay. Giao dịch sẽ tự động hết hạn sau 15 phút. Bạn có thể nhấn <strong>"Thanh toán ngay"</strong> ở góc trên để tiếp tục.
+                    This order is currently pending payment. Transactions automatically expire after 15 minutes. You can click <strong>"Pay Now"</strong> at the top to complete payment.
                   </p>
                 </div>
               )}

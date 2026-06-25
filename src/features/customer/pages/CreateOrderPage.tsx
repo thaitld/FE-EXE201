@@ -26,9 +26,9 @@ export default function CreateOrderPage() {
     const hashQuestionIndex = hash.indexOf('?');
     if (hashQuestionIndex !== -1) {
       const hashParams = new URLSearchParams(hash.substring(hashQuestionIndex + 1));
-      for (const [key, value] of hashParams.entries()) {
+      hashParams.forEach((value, key) => {
         params.set(key, value);
-      }
+      });
     }
     return params;
   }, []);
@@ -51,7 +51,7 @@ export default function CreateOrderPage() {
         setPlans(data);
       } catch (err: any) {
         console.warn('Failed to load plans:', err);
-        setError('Không thể tải thông tin gói dịch vụ.');
+        setError('Unable to load plan details.');
       } finally {
         setLoadingPlans(false);
       }
@@ -112,10 +112,10 @@ export default function CreateOrderPage() {
       if (response && response.paymentUrl) {
         window.location.href = response.paymentUrl;
       } else {
-        throw new Error('Không nhận được link thanh toán từ hệ thống.');
+        throw new Error('Could not retrieve payment link from system.');
       }
     } catch (err: any) {
-      const errMsg = err.message || 'Tạo đơn hàng thất bại. Vui lòng kiểm tra lại thông tin.';
+      const errMsg = err.message || 'Order creation failed. Please verify your details.';
       setError(errMsg);
 
       // Check if error is related to pending orders
@@ -132,77 +132,77 @@ export default function CreateOrderPage() {
   };
 
   return (
-    <CustomerLayout pageTitle="Thanh Toán Đăng Ký Gói">
+    <CustomerLayout pageTitle="Checkout & Subscriptions">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-12">
         {/* Left: Input Form */}
         <div className="lg:col-span-2 space-y-6">
           {error && (
             <div className={`p-4 rounded-xl border flex flex-col gap-2 ${
               hasPendingOrderError
-                ? 'bg-amber-950/60 border-amber-500/30 text-amber-200'
-                : 'bg-rose-950/60 border-rose-500/30 text-rose-200'
+                ? 'bg-amber-50 border-amber-200 text-amber-800'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}>
               <div className="flex items-center gap-3">
-                <AlertCircle size={20} className={hasPendingOrderError ? 'text-amber-400' : 'text-rose-400'} />
+                <AlertCircle size={20} className={hasPendingOrderError ? 'text-amber-600' : 'text-rose-600'} />
                 <span className="font-semibold">{error}</span>
               </div>
               {hasPendingOrderError && (
-                <div className="mt-2 pt-2 border-t border-amber-500/20 flex gap-4">
+                <div className="mt-2 pt-2 border-t border-amber-200/50 flex gap-4">
                   <a
                     href="#/orders"
                     className="inline-flex items-center gap-1.5 text-sm bg-amber-500 text-slate-950 px-3 py-1.5 rounded-lg font-bold hover:brightness-110 transition"
                   >
-                    <ShoppingBag size={14} /> Xem đơn hàng của tôi
+                    <ShoppingBag size={14} /> View My Orders
                   </a>
                 </div>
               )}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="bg-slate-950 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
             {/* Section 1: Company Profile */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2 pb-2 border-b border-slate-800">
-                <Building size={18} className="text-emerald-400" />
-                Thông Tin Doanh Nghiệp
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-100">
+                <Building size={18} className="text-blue-600" />
+                Company Profile
               </h3>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tên công ty / doanh nghiệp</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company / Enterprise Name</label>
                 <input
                   type="text"
                   required
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Công ty TNHH Manto Việt Nam"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  placeholder="Manto Vietnam LLC"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email liên hệ công ty</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Contact Email</label>
                   <input
                     type="email"
                     required
                     value={companyEmail}
                     onChange={(e) => setCompanyEmail(e.target.value)}
                     placeholder="contact@company.com"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                   {companyEmail && !isEmailValid(companyEmail) && (
-                    <p className="text-xs text-rose-400">Định dạng email liên hệ không hợp lệ</p>
+                    <p className="text-xs text-rose-650 font-medium">Invalid email format</p>
                   )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Số điện thoại liên hệ</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Phone Number</label>
                   <input
                     type="text"
                     value={companyPhone}
                     onChange={(e) => setCompanyPhone(e.target.value)}
-                    placeholder="024xxxxxxxx"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    placeholder="+84 24xxxxxxxx"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
               </div>
@@ -210,52 +210,52 @@ export default function CreateOrderPage() {
 
             {/* Section 2: Organization Administrator Credentials */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2 pb-2 border-b border-slate-800">
-                <User size={18} className="text-emerald-400" />
-                Tài Khoản Quản Trị Viên (Admin)
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-100">
+                <User size={18} className="text-blue-600" />
+                Administrator Account (Admin)
               </h3>
-              <p className="text-xs text-slate-400 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                ⚠️ <strong>Lưu ý quan trọng:</strong> Địa chỉ email này sẽ được dùng để đăng nhập vào trang quản trị doanh nghiệp sau khi đơn hàng được kích hoạt. Vui lòng nhập đúng email đang hoạt động.
+              <p className="text-xs text-blue-800 bg-blue-50/50 p-3.5 rounded-xl border border-blue-200/50 leading-relaxed">
+                ⚠️ <strong>Important Note:</strong> This email address will be used to log in to the enterprise admin panel once the order is active. Please enter a valid, active email.
               </p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Họ</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Last Name</label>
                   <input
                     type="text"
                     required
                     value={adminLastName}
                     onChange={(e) => setAdminLastName(e.target.value)}
-                    placeholder="Nguyễn"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    placeholder="Smith"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tên</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">First Name</label>
                   <input
                     type="text"
                     required
                     value={adminFirstName}
                     onChange={(e) => setAdminFirstName(e.target.value)}
-                    placeholder="Văn An"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    placeholder="John"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Quản trị viên</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Admin Login Email</label>
                 <input
                   type="email"
                   required
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="admin@company.com"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 />
                 {adminEmail && !isEmailValid(adminEmail) && (
-                  <p className="text-xs text-rose-400">Định dạng email quản trị không hợp lệ</p>
+                  <p className="text-xs text-rose-650 font-medium">Invalid email format</p>
                 )}
               </div>
             </div>
@@ -265,17 +265,17 @@ export default function CreateOrderPage() {
               <button
                 type="submit"
                 disabled={!isFormValid || submitting}
-                className="w-full bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 text-white font-extrabold py-4 px-6 rounded-2xl shadow-md hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Đang kết nối cổng thanh toán VNPay...
+                    Connecting to VNPay Payment Gateway...
                   </>
                 ) : (
                   <>
                     <CreditCard size={18} />
-                    Tiến Hành Thanh Toán Qua VNPay ({formatVND(amount)})
+                    Proceed to Payment via VNPay ({formatVND(amount)})
                   </>
                 )}
               </button>
@@ -285,56 +285,56 @@ export default function CreateOrderPage() {
 
         {/* Right: Summary Sidebar */}
         <div className="space-y-6">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6">
-            <h3 className="text-lg font-bold text-white pb-3 border-b border-slate-800">
-              Tóm tắt đơn hàng
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 pb-3 border-b border-slate-100">
+              Order Summary
             </h3>
 
             {loadingPlans ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 size={24} className="text-emerald-400 animate-spin" />
+                <Loader2 size={24} className="text-blue-600 animate-spin" />
               </div>
             ) : selectedPlan ? (
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-white text-base">{selectedPlan.name}</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Chu kỳ: {cycle === 'MONTHLY' ? 'Hàng tháng' : 'Hàng năm'}
+                    <h4 className="font-bold text-slate-900 text-base">{selectedPlan.name}</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Cycle: {cycle === 'MONTHLY' ? 'Monthly' : 'Yearly'}
                     </p>
                   </div>
-                  <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold">
+                  <span className="bg-blue-50 text-blue-700 border border-blue-100 text-xs px-2.5 py-1 rounded-full font-bold">
                     Active
                   </span>
                 </div>
 
-                <div className="border-t border-b border-slate-800/60 py-3.5 space-y-2 text-sm text-slate-300">
+                <div className="border-t border-b border-slate-100 py-3.5 space-y-2 text-sm text-slate-600">
                   <div className="flex justify-between">
-                    <span>Hạn mức tài khoản:</span>
-                    <span className="font-semibold text-white">{selectedPlan.maxUsers} thành viên</span>
+                    <span>Account Limit:</span>
+                    <span className="font-semibold text-slate-900">{selectedPlan.maxUsers} users</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Số phòng ban:</span>
-                    <span className="font-semibold text-white">{selectedPlan.maxDepartments} phòng</span>
+                    <span>Departments Limit:</span>
+                    <span className="font-semibold text-slate-900">{selectedPlan.maxDepartments} departments</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Số nhóm làm việc:</span>
-                    <span className="font-semibold text-white">{selectedPlan.maxTeams} nhóm</span>
+                    <span>Teams Limit:</span>
+                    <span className="font-semibold text-slate-900">{selectedPlan.maxTeams} teams</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-slate-400">
-                    <span>Giá niêm yết:</span>
+                  <div className="flex justify-between text-sm text-slate-500">
+                    <span>List Price:</span>
                     <span>{formatVND(amount)}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-slate-400">
-                    <span>Thuế GTGT (0%):</span>
+                  <div className="flex justify-between text-sm text-slate-500">
+                    <span>VAT (0%):</span>
                     <span>0 ₫</span>
                   </div>
-                  <div className="border-t border-slate-800 pt-3 flex justify-between items-baseline">
-                    <span className="text-sm font-bold text-white">Tổng cộng:</span>
-                    <span className="text-2xl font-extrabold text-emerald-400">
+                  <div className="border-t border-slate-100 pt-3 flex justify-between items-baseline">
+                    <span className="text-sm font-bold text-slate-900">Total Amount:</span>
+                    <span className="text-2xl font-extrabold text-blue-650 text-blue-600">
                       {formatVND(amount)}
                     </span>
                   </div>
@@ -342,21 +342,21 @@ export default function CreateOrderPage() {
               </div>
             ) : (
               <div className="text-center text-slate-500 py-6 text-sm">
-                Không tìm thấy thông tin gói dịch vụ. Vui lòng quay lại bảng giá.
-                <a href="#/pricing" className="block text-emerald-400 hover:underline mt-2">
-                  ← Xem bảng giá
+                Could not find plan details. Please return to the pricing page.
+                <a href="#/pricing" className="block text-blue-600 hover:underline mt-2">
+                  ← View Pricing
                 </a>
               </div>
             )}
           </div>
 
-          <div className="bg-slate-950/40 border border-slate-850 rounded-2xl p-4 text-xs text-slate-500 space-y-2">
-            <h4 className="font-bold text-slate-400">Điều khoản đăng ký:</h4>
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-500 space-y-2">
+            <h4 className="font-bold text-slate-700">Subscription Terms:</h4>
             <p>
-              - Thanh toán qua cổng VNPay hỗ trợ các loại thẻ nội địa, thẻ quốc tế hoặc quét mã QR.
+              - Payments via VNPay gateway support domestic & international cards, or QR code scan.
             </p>
             <p>
-              - Đơn hàng sẽ được xử lý kích hoạt tự động ngay sau khi hoàn tất giao dịch.
+              - Orders are processed and activated automatically immediately upon transaction completion.
             </p>
           </div>
         </div>

@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { registerCustomer } from '../api';
-import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, CheckCircle, Sparkles, CreditCard, ShieldCheck, ChevronLeft } from 'lucide-react';
+
+const backgroundVideo =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260325_094440_a3592600-bd1e-49e5-9bce-a73662061d83.mp4";
 
 export default function CustomerRegisterPage() {
   const [firstName, setFirstName] = useState('');
@@ -15,6 +18,7 @@ export default function CustomerRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Client-side validations
   const isEmailValid = useMemo(() => {
@@ -53,65 +57,74 @@ export default function CustomerRegisterPage() {
         window.location.hash = '#/customer/login?registered=true';
       }, 2500);
     } catch (err: any) {
-      setError(err.message || 'Đăng ký không thành công. Email này có thể đã được sử dụng.');
+      setError(err.message || 'Registration failed. This email may already be registered.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <main
-      className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center py-12 px-6 relative overflow-hidden"
-      style={{ fontFamily: "'Barlow', sans-serif" }}
-    >
-      {/* Background gradients */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -translate-x-12 -translate-y-12 pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl translate-x-12 translate-y-12 pointer-events-none" />
+    <main className="min-h-screen w-full flex bg-slate-950 text-white font-sans overflow-hidden">
+      {/* Left panel - Register form */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-between p-8 sm:p-12 relative z-10 bg-slate-950 border-r border-slate-900 shadow-2xl overflow-y-auto max-h-screen">
+        {/* Brand / Logo */}
+        <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Card wrapper */}
-        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 shadow-2xl">
-          {/* Brand header */}
-          <div className="text-center mb-8">
-            <a href="#/" className="inline-flex items-center gap-2.5 mb-4 group justify-center">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-400 to-cyan-400 p-2 flex items-center justify-center shadow-lg shadow-emerald-500/10 group-hover:scale-105 transition-all">
-                <span className="text-slate-950 font-black">M</span>
-              </div>
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-                MANTO Enterprise
-              </span>
-            </a>
-            <h2 className="text-2xl font-bold text-white">Đăng Ký Tài Khoản Khách Hàng</h2>
-            <p className="text-sm text-slate-400 mt-1">Đăng ký để xem và mua gói dịch vụ quản lý doanh nghiệp</p>
+            <span className="text-xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">MANTO</span>
+          </div>
+
+          <a
+            href="#/customer/login"
+            className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            <ChevronLeft size={16} />
+            <span>Sign In</span>
+          </a>
+        </div>
+
+        {/* Center - Register Form Container */}
+        <div className="my-auto max-w-md w-full mx-auto space-y-6 py-6 shrink-0">
+          <div>
+            <h2 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400">
+              Register Customer Account
+            </h2>
+            <p className="mt-2 text-sm text-slate-400">
+              Create an account to explore and purchase enterprise productivity services.
+            </p>
           </div>
 
           {success ? (
-            <div className="text-center py-6">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 mb-4 shadow-lg shadow-emerald-500/10 border border-emerald-500/20">
-                <CheckCircle size={28} />
+            <div className="text-center py-8 bg-slate-900/30 border border-slate-800 rounded-2xl p-6">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500 to-indigo-500 text-white shadow-[0_0_26px_rgba(139,92,246,0.22)]">
+                <CheckCircle size={18} />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Đăng ký thành công!</h3>
-              <p className="text-sm text-slate-300">
-                Tài khoản của bạn đã được tạo. Hệ thống sẽ tự động chuyển hướng đến trang đăng nhập trong giây lát...
+              <h4 className="mt-4 text-lg font-semibold tracking-tight">
+                Registration successful!
+              </h4>
+              <p className="mt-2 text-sm text-slate-400">
+                Your account has been created. Redirecting to login...
               </p>
               <div className="mt-6 flex items-center justify-center gap-1.5">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0s' }} />
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0.4s' }} />
+                <div className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0s' }} />
+                <div className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0.4s' }} />
               </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="bg-rose-950/50 border border-rose-500/20 text-rose-200 text-sm px-4 py-3 rounded-xl">
+                <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
                   {error}
                 </div>
               )}
 
-              {/* Name fields in grid */}
+              {/* Name Fields (First Name / Last Name) */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Họ</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-300">
+                    Last Name
+                  </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={15} />
                     <input
@@ -119,14 +132,16 @@ export default function CustomerRegisterPage() {
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Nguyễn"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                      placeholder="Smith"
+                      className="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none transition focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500/80"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tên</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-300">
+                    First Name
+                  </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={15} />
                     <input
@@ -134,16 +149,18 @@ export default function CustomerRegisterPage() {
                       required
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Văn An"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                      placeholder="John"
+                      className="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none transition focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500/80"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Địa chỉ Email</label>
+              {/* Email Address */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  Email Address
+                </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={15} />
                   <input
@@ -152,32 +169,36 @@ export default function CustomerRegisterPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none transition focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500/80"
                   />
                 </div>
                 {email && !isEmailValid && (
-                  <p className="text-xs text-rose-400">Định dạng email không hợp lệ</p>
+                  <p className="text-xs text-rose-400">Invalid email format</p>
                 )}
               </div>
 
-              {/* Phone */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Số điện thoại (tùy chọn)</label>
+              {/* Phone Number (Optional) */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  Phone Number <span className="text-slate-500 text-xs">(optional)</span>
+                </label>
                 <div className="relative">
                   <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={15} />
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="09xxxxxxxx"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    placeholder="e.g. +123456789"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none transition focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500/80"
                   />
                 </div>
               </div>
 
               {/* Password */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mật khẩu</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={15} />
                   <input
@@ -185,8 +206,8 @@ export default function CustomerRegisterPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Tối thiểu 6 ký tự"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    placeholder="At least 6 characters"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-600 outline-none transition focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500/80"
                   />
                   <button
                     type="button"
@@ -197,13 +218,15 @@ export default function CustomerRegisterPage() {
                   </button>
                 </div>
                 {password && password.length < 6 && (
-                  <p className="text-xs text-rose-400">Mật khẩu phải chứa ít nhất 6 ký tự</p>
+                  <p className="text-xs text-rose-400">Password must contain at least 6 characters</p>
                 )}
               </div>
 
               {/* Confirm Password */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Xác nhận mật khẩu</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  Confirm Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={15} />
                   <input
@@ -211,8 +234,8 @@ export default function CustomerRegisterPage() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Nhập lại mật khẩu"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    placeholder="Repeat your password"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-600 outline-none transition focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500/80"
                   />
                   <button
                     type="button"
@@ -223,28 +246,100 @@ export default function CustomerRegisterPage() {
                   </button>
                 </div>
                 {confirmPassword && password !== confirmPassword && (
-                  <p className="text-xs text-rose-400">Mật khẩu xác nhận không trùng khớp</p>
+                  <p className="text-xs text-rose-400">Passwords do not match</p>
                 )}
               </div>
 
-              {/* Submit button */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={!canSubmit || isLoading}
-                className="w-full mt-6 bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 font-semibold text-white shadow-[0_4px_20px_rgba(139,92,246,0.25)] hover:from-violet-500 hover:to-indigo-500 hover:shadow-[0_4px_30px_rgba(139,92,246,0.4)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isLoading && <Loader2 size={16} className="animate-spin" />}
-                {isLoading ? 'Đang tạo tài khoản...' : 'Đăng Ký Ngay'}
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                {isLoading ? "Creating account…" : "Register Now"}
               </button>
 
-              <div className="text-center mt-6 text-sm text-slate-400">
-                Đã có tài khoản?{' '}
-                <a href="#/customer/login" className="text-emerald-400 hover:underline">
-                  Đăng nhập tại đây
+              {/* Login Link */}
+              <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-900">
+                Already have an account?{' '}
+                <a
+                  className="text-violet-400 font-semibold hover:underline"
+                  href="#/customer/login"
+                >
+                  Sign in here
                 </a>
-              </div>
+              </p>
             </form>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-xs text-slate-600 flex justify-between items-center shrink-0">
+          <span>© 2026 MANTO Inc. All rights reserved.</span>
+          <span>v2.1.0</span>
+        </div>
+      </div>
+
+      {/* Right panel - Video & Features (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-between p-12 overflow-hidden bg-slate-950">
+        {/* Background Video */}
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover opacity-75"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src={backgroundVideo}
+        />
+
+        {/* Overlays to blend video into deep space / dark palette */}
+        <div className="absolute inset-0 bg-slate-950/70 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(201, 220, 243, 0.18),transparent_60%)]" />
+
+        {/* Top visual decoration */}
+        <div className="relative z-10 flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/5 w-fit">
+          <span className="text-xs font-semibold text-slate-300">Payment Portal & Subscriptions</span>
+        </div>
+
+        {/* Feature List & Headings */}
+        <div className="relative z-10 space-y-8 max-w-xl my-auto">
+          <div className="space-y-4">
+            <h1 className="text-4xl lg:text-5xl font-black leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-violet-200 to-indigo-200">
+              Elevate Your <br /> Enterprise Productivity
+            </h1>
+            <p className="text-slate-300 text-lg leading-relaxed">
+              Leading solution for smart task allocation, automated KPI tracking, and employee physical & mental well-being analytics.
+            </p>
+          </div>
+
+          {/* Grid of features */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-900/60 backdrop-blur-md border border-white/5 p-5 rounded-2xl space-y-2 hover:border-violet-500/20 transition-all duration-300 group">
+              <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400 group-hover:bg-violet-500/20 transition-colors">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <h4 className="font-semibold text-slate-200 text-sm">Secure Transactions</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">Integrated with VNPay Sandbox for safe, fast, and instant activation.</p>
+            </div>
+
+            <div className="bg-slate-900/60 backdrop-blur-md border border-white/5 p-5 rounded-2xl space-y-2 hover:border-violet-500/20 transition-all duration-300 group">
+              <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400 group-hover:bg-violet-500/20 transition-colors">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <h4 className="font-semibold text-slate-200 text-sm">Enterprise Privacy</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">Industry-standard encryption, strict GDPR compliance, and SSO integration.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="relative z-10 text-xs text-slate-400 flex justify-between items-center border-t border-white/5 pt-4">
+          <span>24/7 transaction processing supporting international & domestic cards.</span>
         </div>
       </div>
     </main>

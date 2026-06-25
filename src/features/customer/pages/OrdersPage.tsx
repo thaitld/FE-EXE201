@@ -28,9 +28,9 @@ export default function OrdersPage() {
     const hashQuestionIndex = hash.indexOf('?');
     if (hashQuestionIndex !== -1) {
       const hashParams = new URLSearchParams(hash.substring(hashQuestionIndex + 1));
-      for (const [key, value] of hashParams.entries()) {
+      hashParams.forEach((value, key) => {
         params.set(key, value);
-      }
+      });
     }
     return params;
   }, []);
@@ -47,7 +47,7 @@ export default function OrdersPage() {
       setOrders(sorted);
     } catch (err: any) {
       console.warn('Failed to load orders:', err);
-      setError(err.message || 'Không thể tải danh sách đơn hàng.');
+      setError(err.message || 'Unable to load orders list.');
     } finally {
       setLoading(false);
     }
@@ -75,10 +75,10 @@ export default function OrdersPage() {
       if (data && data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {
-        throw new Error('Không nhận được link thanh toán mới.');
+        throw new Error('Could not retrieve new payment link.');
       }
     } catch (err: any) {
-      showToast(err.message || 'Lấy link thanh toán thất bại. Vui lòng thử lại.', 'error');
+      showToast(err.message || 'Failed to get payment link. Please try again.', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -88,11 +88,11 @@ export default function OrdersPage() {
     try {
       setActionLoading(orderId);
       await cancelOrder(orderId);
-      showToast('Hủy đơn hàng thành công.');
+      showToast('Order cancelled successfully.');
       setCancelConfirmId(null);
       loadOrders();
     } catch (err: any) {
-      showToast(err.message || 'Hủy đơn hàng thất bại.', 'error');
+      showToast(err.message || 'Failed to cancel order.', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -102,9 +102,9 @@ export default function OrdersPage() {
     try {
       setActionLoading(orderId);
       await downloadInvoice(orderId);
-      showToast('Bắt đầu tải hóa đơn...');
+      showToast('Downloading invoice...');
     } catch (err: any) {
-      showToast(err.message || 'Tải hóa đơn thất bại.', 'error');
+      showToast(err.message || 'Failed to download invoice.', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -118,45 +118,45 @@ export default function OrdersPage() {
     const s = status.toUpperCase();
     if (s === 'PAID') {
       return (
-        <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-emerald-500/10">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          ĐÃ THANH TOÁN
+        <span className="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-emerald-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          PAID
         </span>
       );
     }
     if (s === 'PENDING_PAYMENT') {
       return (
-        <span className="bg-amber-500/20 text-amber-400 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-amber-500/10">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-          CHỜ THANH TOÁN
+        <span className="bg-amber-50 text-amber-700 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-amber-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+          PENDING
         </span>
       );
     }
     if (s === 'CANCELLED') {
       return (
-        <span className="bg-slate-800 text-slate-400 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-slate-700/50">
-          ĐÃ HỦY
+        <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-slate-200">
+          CANCELLED
         </span>
       );
     }
     return (
-      <span className="bg-rose-500/20 text-rose-400 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-rose-500/10">
-        THẤT BẠI
+      <span className="bg-rose-50 text-rose-700 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-rose-200">
+        FAILED
       </span>
     );
   };
 
   return (
-    <CustomerLayout pageTitle="Đơn Hàng Của Tôi">
+    <CustomerLayout pageTitle="My Orders">
       {/* Toast popup */}
       {toast && (
         <div className="fixed bottom-5 right-5 z-50 animate-bounce">
-          <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border shadow-xl ${
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border shadow-xl bg-white text-slate-800 ${
             toast.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/30 text-rose-200'
-              : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
+              ? 'border-rose-200'
+              : 'border-emerald-200'
           }`}>
-            <AlertCircle size={18} />
+            <AlertCircle size={18} className={toast.type === 'error' ? 'text-rose-500' : 'text-emerald-500'} />
             <span className="text-sm font-semibold">{toast.message}</span>
           </div>
         </div>
@@ -164,46 +164,46 @@ export default function OrdersPage() {
 
       {/* VNPay redirect banners */}
       {paymentStatus === 'success' && (
-        <div className="mb-8 p-5 bg-emerald-950/40 border border-emerald-500/25 rounded-3xl flex items-start gap-4">
-          <CheckCircle size={24} className="text-emerald-400 shrink-0 mt-0.5" />
+        <div className="mb-8 p-5 bg-emerald-50 border border-emerald-200 rounded-3xl flex items-start gap-4 text-emerald-800">
+          <CheckCircle size={24} className="text-emerald-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="font-bold text-white text-lg">Thanh toán thành công!</h4>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Đội ngũ MANTO đã kích hoạt tài khoản doanh nghiệp của bạn. Vui lòng kiểm tra hộp thư đến của bạn để nhận thông tin đăng nhập tài khoản Admin quản trị.
+            <h4 className="font-bold text-slate-900 text-lg">Payment successful!</h4>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              The MANTO team has activated your enterprise account. Please check your inbox for credentials to log in to your Admin Dashboard.
             </p>
           </div>
         </div>
       )}
 
       {paymentStatus === 'fail' && (
-        <div className="mb-8 p-5 bg-rose-950/40 border border-rose-500/25 rounded-3xl flex items-start gap-4">
-          <AlertCircle size={24} className="text-rose-400 shrink-0 mt-0.5" />
+        <div className="mb-8 p-5 bg-rose-50 border border-rose-200 rounded-3xl flex items-start gap-4 text-rose-800">
+          <AlertCircle size={24} className="text-rose-600 shrink-0 mt-0.5" />
           <div className="space-y-2 flex-1">
-            <h4 className="font-bold text-white text-lg">Thanh toán thất bại!</h4>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Giao dịch qua VNPay không thành công {errorCode ? `(Mã lỗi: ${errorCode})` : ''}. Bạn có thể thử thanh toán lại hoặc hủy đơn cũ để tạo mới.
+            <h4 className="font-bold text-slate-900 text-lg">Payment failed!</h4>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              The VNPay transaction was unsuccessful {errorCode ? `(Error code: ${errorCode})` : ''}. You can try again or cancel the pending order to create a new one.
             </p>
             {latestOrder && (latestOrder.status === 'PENDING_PAYMENT' || latestOrder.status === 'FAILED') && (
               <div className="pt-2 flex gap-3">
                 <button
                   onClick={() => handleRepay(latestOrder.id)}
                   disabled={actionLoading !== null}
-                  className="bg-rose-500 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-1.5"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-1.5"
                 >
                   {actionLoading === latestOrder.id ? (
                     <Loader2 size={12} className="animate-spin" />
                   ) : (
                     <CreditCard size={12} />
                   )}
-                  Thanh toán lại ngay
+                  Pay Now
                 </button>
                 <button
                   onClick={() => setCancelConfirmId(latestOrder.id)}
                   disabled={actionLoading !== null}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-1.5"
+                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-1.5"
                 >
                   <Trash2 size={12} />
-                  Hủy đơn hàng
+                  Cancel Order
                 </button>
               </div>
             )}
@@ -213,26 +213,26 @@ export default function OrdersPage() {
 
       {/* Confirmation Modal */}
       {cancelConfirmId && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-2">Hủy Đơn Hàng?</h3>
-            <p className="text-sm text-slate-400 mb-6">
-              Bạn có chắc chắn muốn hủy đơn hàng #{cancelConfirmId} không? Hành động này không thể hoàn tác.
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Cancel Order?</h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Are you sure you want to cancel order #{cancelConfirmId}? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setCancelConfirmId(null)}
-                className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 text-sm font-semibold rounded-xl transition"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition"
               >
-                Hủy bỏ
+                No, Keep it
               </button>
               <button
                 onClick={() => handleCancelOrder(cancelConfirmId)}
                 disabled={actionLoading !== null}
-                className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5"
               >
                 {actionLoading === cancelConfirmId && <Loader2 size={14} className="animate-spin" />}
-                Xác nhận hủy
+                Confirm Cancel
               </button>
             </div>
           </div>
@@ -241,49 +241,49 @@ export default function OrdersPage() {
 
       {/* Loading state */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <Loader2 size={40} className="text-emerald-400 animate-spin" />
-          <p className="text-slate-400">Đang tải danh sách đơn hàng...</p>
+        <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white border border-slate-200 rounded-3xl">
+          <Loader2 size={40} className="text-blue-600 animate-spin" />
+          <p className="text-slate-500 font-medium">Loading your orders...</p>
         </div>
       ) : error ? (
-        <div className="max-w-md mx-auto text-center py-16 bg-slate-950/50 rounded-2xl border border-slate-800 p-8">
-          <AlertCircle size={40} className="text-rose-400 mx-auto mb-4" />
-          <p className="text-rose-200 font-semibold mb-4">{error}</p>
+        <div className="max-w-md mx-auto text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          <AlertCircle size={40} className="text-rose-500 mx-auto mb-4" />
+          <p className="text-slate-800 font-semibold mb-4">{error}</p>
           <button
             onClick={loadOrders}
-            className="px-5 py-2.5 bg-slate-850 hover:bg-slate-800 text-white rounded-xl font-medium transition"
+            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition"
           >
-            Thử lại
+            Try Again
           </button>
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-20 bg-slate-950/50 border border-slate-800 rounded-3xl p-8">
-          <HelpCircle size={40} className="text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400 font-semibold mb-2">Bạn chưa có đơn hàng nào.</p>
-          <p className="text-sm text-slate-500 mb-6">Hãy tham khảo bảng giá dịch vụ để bắt đầu nâng cấp doanh nghiệp của bạn.</p>
+        <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl p-8">
+          <HelpCircle size={40} className="text-slate-400 mx-auto mb-4" />
+          <p className="text-slate-700 font-semibold mb-2">You haven't placed any orders yet.</p>
+          <p className="text-sm text-slate-500 mb-6">Browse our pricing plans to get started upgrading your business.</p>
           <a
             href="#/pricing"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm shadow-md hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md hover:bg-blue-700 transition-all"
           >
-            <CreditCard size={16} /> Xem Bảng Giá Gói Dịch Vụ
+            <CreditCard size={16} /> View Pricing Plans
           </a>
         </div>
       ) : (
-        <div className="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+        <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/50 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                   <th className="py-4 px-6">ID</th>
-                  <th className="py-4 px-6">Doanh nghiệp</th>
-                  <th className="py-4 px-6">Gói dịch vụ</th>
-                  <th className="py-4 px-6">Chu kỳ</th>
-                  <th className="py-4 px-6">Tổng tiền</th>
-                  <th className="py-4 px-6">Trạng thái</th>
-                  <th className="py-4 px-6 text-center">Hành động</th>
+                  <th className="py-4 px-6">Company</th>
+                  <th className="py-4 px-6">Service Plan</th>
+                  <th className="py-4 px-6">Billing Cycle</th>
+                  <th className="py-4 px-6">Total Amount</th>
+                  <th className="py-4 px-6">Status</th>
+                  <th className="py-4 px-6 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-sm">
+              <tbody className="divide-y divide-slate-100 text-sm">
                 {orders.map((order) => {
                   const isPending = order.status === 'PENDING_PAYMENT';
                   const isFailed = order.status === 'FAILED';
@@ -292,21 +292,21 @@ export default function OrdersPage() {
                   return (
                     <tr
                       key={order.id}
-                      className="hover:bg-slate-900/40 transition duration-150 cursor-pointer"
+                      className="hover:bg-slate-50/50 transition duration-150 cursor-pointer"
                       onClick={() => {
                         window.location.hash = `#/orders/${order.id}`;
                       }}
                     >
-                      <td className="py-4 px-6 font-semibold text-white">#{order.id}</td>
+                      <td className="py-4 px-6 font-semibold text-slate-900">#{order.id}</td>
                       <td className="py-4 px-6">
-                        <div className="font-semibold text-slate-200">{order.companyName}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">Ngày tạo: {new Date(order.createdAt).toLocaleDateString('vi-VN')}</div>
+                        <div className="font-semibold text-slate-900">{order.companyName}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Created: {new Date(order.createdAt).toLocaleDateString('en-US')}</div>
                       </td>
-                      <td className="py-4 px-6 text-slate-300">{order.planName}</td>
-                      <td className="py-4 px-6 text-slate-400">
-                        {order.billingCycle === 'MONTHLY' ? 'Tháng' : 'Năm'}
+                      <td className="py-4 px-6 text-slate-700">{order.planName}</td>
+                      <td className="py-4 px-6 text-slate-600 font-medium">
+                        {order.billingCycle === 'MONTHLY' ? 'Monthly' : 'Yearly'}
                       </td>
-                      <td className="py-4 px-6 font-bold text-white">{formatVND(order.amount)}</td>
+                      <td className="py-4 px-6 font-bold text-slate-900">{formatVND(order.amount)}</td>
                       <td className="py-4 px-6">{getStatusBadge(order.status)}</td>
                       <td
                         className="py-4 px-6 text-center"
@@ -318,8 +318,8 @@ export default function OrdersPage() {
                               <button
                                 onClick={() => handleRepay(order.id)}
                                 disabled={actionLoading !== null}
-                                title="Thanh toán lại"
-                                className="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 rounded-lg transition"
+                                title="Pay Now"
+                                className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition"
                               >
                                 {actionLoading === order.id ? (
                                   <Loader2 size={15} className="animate-spin" />
@@ -330,8 +330,8 @@ export default function OrdersPage() {
                               <button
                                 onClick={() => setCancelConfirmId(order.id)}
                                 disabled={actionLoading !== null}
-                                title="Hủy đơn hàng"
-                                className="p-2 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white rounded-lg transition"
+                                title="Cancel Order"
+                                className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition"
                               >
                                 <Trash2 size={15} />
                               </button>
@@ -341,21 +341,21 @@ export default function OrdersPage() {
                             <button
                               onClick={() => handleDownloadInvoice(order.id)}
                               disabled={actionLoading !== null}
-                              title="Tải hóa đơn"
-                              className="p-2 bg-blue-500/10 hover:bg-blue-50 text-blue-400 hover:text-slate-950 rounded-lg transition flex items-center gap-1"
+                              title="Download Invoice"
+                              className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition flex items-center gap-1.5"
                             >
                               {actionLoading === order.id ? (
                                 <Loader2 size={15} className="animate-spin" />
                               ) : (
                                 <Download size={15} />
                               )}
-                              <span className="text-xs font-medium">Hóa đơn</span>
+                              <span className="text-xs font-semibold">Invoice</span>
                             </button>
                           )}
                           <a
                             href={`#/orders/${order.id}`}
-                            title="Xem chi tiết"
-                            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition"
+                            title="View Details"
+                            className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition"
                           >
                             <ExternalLink size={15} />
                           </a>
