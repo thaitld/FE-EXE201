@@ -31,19 +31,16 @@ export default function CustomerLayout({ children, pageTitle }: CustomerLayoutPr
 
   return (
     <div
-      className="min-h-screen bg-slate-900 text-slate-100 flex flex-col"
+      className="min-h-screen bg-slate-100 text-slate-800 flex flex-col"
       style={{ fontFamily: "'Barlow', sans-serif" }}
     >
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-950/70 backdrop-blur-md sticky top-0 z-30">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
             {/* Logo */}
             <a href="#/" className="flex items-center gap-2.5 group">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-400 to-cyan-400 p-2 flex items-center justify-center shadow-lg shadow-emerald-500/10 group-hover:scale-105 transition-all">
-                <CreditCard size={18} className="text-slate-950 font-bold" />
-              </div>
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+              <span className="text-xl font-bold tracking-tight text-slate-900">
                 MANTO
               </span>
             </a>
@@ -52,7 +49,7 @@ export default function CustomerLayout({ children, pageTitle }: CustomerLayoutPr
             <nav className="hidden md:flex items-center gap-1">
               <a
                 href="#/pricing"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
               >
                 <CreditCard size={15} />
                 {t("customer_layout.pricing")}
@@ -60,7 +57,7 @@ export default function CustomerLayout({ children, pageTitle }: CustomerLayoutPr
               {isAuthenticated && (
                 <a
                   href="#/orders"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
                 >
                   <ShoppingBag size={15} />
                   {t("customer_layout.my_orders")}
@@ -84,13 +81,13 @@ export default function CustomerLayout({ children, pageTitle }: CustomerLayoutPr
               <div className="flex items-center gap-3">
                 <a
                   href="#/customer/login"
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white transition"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
                 >
                   {t("customer_layout.login")}
                 </a>
                 <a
                   href="#/customer/register"
-                  className="bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm shadow-md hover:brightness-110 active:scale-[0.98] transition-all"
+                  className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl text-sm shadow-sm hover:bg-blue-700 active:scale-[0.98] transition-all"
                 >
                   {t("customer_layout.register_trial")}
                 </a>
@@ -104,21 +101,21 @@ export default function CustomerLayout({ children, pageTitle }: CustomerLayoutPr
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8 flex flex-col">
         {pageTitle && (
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">{pageTitle}</h1>
-            <div className="h-1 w-12 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full" />
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 mb-2">{pageTitle}</h1>
+            <div className="h-1 w-12 bg-blue-600 rounded-full" />
           </div>
         )}
         <div className="flex-1">{children}</div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950/40 py-8">
+      <footer className="border-t border-slate-200 bg-slate-50 py-8">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div>© {new Date().getFullYear()} MANTO Platform. All rights reserved.</div>
           <div className="flex gap-6">
-            <a href="#/pricing" className="hover:text-slate-300 transition">{t("customer_layout.pricing")}</a>
-            <a href="#" className="hover:text-slate-300 transition">{t("customer_layout.terms_of_use")}</a>
-            <a href="#" className="hover:text-slate-300 transition">{t("customer_layout.privacy_policy")}</a>
+            <a href="#/pricing" className="hover:text-slate-800 transition">{t("customer_layout.pricing")}</a>
+            <a href="#" className="hover:text-slate-800 transition">{t("customer_layout.terms_of_use")}</a>
+            <a href="#" className="hover:text-slate-800 transition">{t("customer_layout.privacy_policy")}</a>
           </div>
         </div>
       </footer>
