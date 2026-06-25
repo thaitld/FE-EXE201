@@ -1,0 +1,225 @@
+import { useEffect, useState } from 'react';
+import { getSuperPlans, renewSubscription } from '../api';
+import type { SubscriptionPlanDto } from '../types';
+import { X, Calendar, AlertCircle } from 'lucide-react';
+
+interface RenewModalProps {
+  orgId: number;
+  orgName: string;
+  activePlanId: number;
+  currentEndDate: string;
+  daysRemaining: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function RenewModal({
+  orgId,
+  orgName,
+  activePlanId,
+  currentEndDate,
+  daysRemaining,
+  onClose,
+  onSuccess
+}: RenewModalProps) {
+  const [plans, setPlans] = useState<SubscriptionPlanDto[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<number>(activePlanId);
+  const [billingCycle, setBillingCycle] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
+  
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setLoadingPlans(true);
+        const allPlans = await getSuperPlans();
+        const activePlans = allPlans.filter((p) => p.isActive);
+        setPlans(activePlans);
+        // Default to activePlanId if active, otherwise fallback to first
+        if (activePlans.some((p) => p.id === activePlanId)) {
+          setSelectedPlanId(activePlanId);
+        } else if (activePlans.length > 0) {
+          setSelectedPlanId(activePlans[0].id);
+        }
+      } catch (err) {
+        console.warn('Failed to load plans:', err);
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+    fetchPlans();
+  }, [activePlanId]);
+
+  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+
+  const getCalculatedEndDate = () => {
+    const startFrom = (daysRemaining > 0 && currentEndDate) ? new Date(currentEndDate) : new Date();
+    const result = new Date(startFrom);
+    if (billingCycle === 'MONTHLY') {
+      result.setMonth(result.getMonth() + 1);
+    } else {
+      result.setFullYear(result.getFullYear() + 1);
+    }
+    return result.toLocaleDateString('vi-VN');
+  };
+
+  const getPricePreview = () => {
+    if (!selectedPlan) return '0đ';
+    const amount = billingCycle === 'MONTHLY' ? selectedPlan.priceMonthly : selectedPlan.priceYearly;
+    return `${amount.toLocaleString('vi-VN')}đ`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!selectedPlanId) {
+      setError('Vui lòng chọn gói để gia hạn.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await renewSubscription(orgId, {
+        planId: selectedPlanId,
+        billingCycle
+      });
+      alert(`Đã gia hạn gói "${selectedPlan?.name}" thành công!`);
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || 'Lỗi khi thực hiện gia hạn gói dịch vụ.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl transition-all animate-in fade-in zoom-in duration-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4.5">
+          <div className="flex items-center gap-2">
+            <Calendar className="text-blue-600" size={20} />
+            <h3 className="text-lg font-bold text-slate-800">Gia Hạn Gói Dịch Vụ</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && (
+            <div className="flex gap-2 rounded-xl bg-rose-50 border border-rose-200 p-3.5 text-xs font-semibold text-rose-800">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Org details alert */}
+          <div className="rounded-xl bg-blue-50 border border-blue-150 px-4 py-3 text-xs text-blue-800 leading-relaxed">
+            Gia hạn gói cho tổ chức: <strong className="text-blue-900">{orgName}</strong>.  
+            {daysRemaining > 0 ? (
+              <span> Gói hiện tại của tổ chức vẫn còn hạn, thời gian gia hạn mới sẽ được cộng dồn tiếp tục.</span>
+            ) : (
+              <span> Gói hiện tại đã hết hạn, chu kỳ mới sẽ được tính bắt đầu từ hôm nay.</span>
+            )}
+          </div>
+
+          {/* Plan Dropdown */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-semibold">
+              Gói Subscription Gia Hạn
+            </label>
+            {loadingPlans ? (
+              <div className="h-10 w-full rounded-xl bg-slate-100 animate-pulse" />
+            ) : (
+              <select
+                value={selectedPlanId}
+                onChange={(e) => setSelectedPlanId(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm appearance-none focus:border-blue-500 focus:outline-none focus:bg-white"
+              >
+                {plans.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} {p.id === activePlanId ? ' (Hiện tại)' : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Billing Cycle */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 font-semibold">
+              Chu Kỳ Thanh Toán
+            </label>
+            <div className="flex rounded-xl bg-slate-100 p-1">
+              <button
+                type="button"
+                onClick={() => setBillingCycle('MONTHLY')}
+                className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
+                  billingCycle === 'MONTHLY' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Hàng Tháng
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingCycle('YEARLY')}
+                className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
+                  billingCycle === 'YEARLY' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Hàng Năm
+              </button>
+            </div>
+          </div>
+
+          {/* Calculations Review Block */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-2 text-xs">
+            <div className="flex items-center justify-between text-slate-500">
+              <span>Đơn giá tương ứng:</span>
+              <strong className="text-slate-800">{getPricePreview()}</strong>
+            </div>
+            <div className="flex items-center justify-between text-slate-500 border-t border-slate-100 pt-2">
+              <span>Ngày hết hạn mới dự kiến:</span>
+              <strong className="text-blue-900 font-extrabold">{getCalculatedEndDate()}</strong>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 hover:from-blue-600 hover:to-blue-400 transition flex items-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Đang Gia Hạn...
+                </>
+              ) : (
+                'Gia Hạn Ngay'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

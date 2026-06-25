@@ -51,6 +51,42 @@ export function getRoleFromJwt(token: string): string | null {
   }
 }
 
+/**
+ * Check if a JWT token is expired (or malformed/missing exp claim → treated as invalid)
+ */
+export function isTokenExpired(token: string | null | undefined): boolean {
+  if (!token) return true;
+
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return true;
+
+    const payload = parts[1];
+    const padded = payload + "=".repeat((4 - (payload.length % 4)) % 4);
+    const decoded = JSON.parse(atob(padded));
+
+    if (!decoded.exp) return false;
+
+    // exp is in seconds since epoch
+    return Date.now() >= decoded.exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Custom event dispatched when the session becomes invalid (401/403 from API,
+ * or token expired). AuthContext listens for this to clear state and redirect
+ * to /login without causing a hard page reload loop.
+ */
+export const AUTH_SESSION_EXPIRED_EVENT = "manto:session-expired";
+
+function clearSessionStorage() {
+  localStorage.removeItem("auth_token");
+  localStorage.removeItem("user_email");
+  localStorage.removeItem("user_profile");
+}
+
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token");
 
@@ -62,10 +98,33 @@ apiClient.interceptors.request.use((config) => {
 });
 
 // Response interceptor: extract meaningful error message from ApiResponse body
+// and handle session expiration (401/403) by clearing storage and notifying
+// the app to log the user out / redirect to login.
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error?.response?.status;
     const backendMessage = error?.response?.data?.message;
+
+    // Check for plan limit feature gate error
+    if (status === 403 && backendMessage && (
+      backendMessage.includes("không hỗ trợ tính năng") ||
+      backendMessage.includes("nâng cấp gói") ||
+      backendMessage.includes("Giới hạn gói")
+    )) {
+      window.dispatchEvent(new CustomEvent("manto:show-upgrade-modal", { detail: { message: backendMessage } }));
+    } else if (status === 401 || status === 403) {
+      const hadToken = Boolean(localStorage.getItem("auth_token"));
+
+      if (hadToken) {
+        clearSessionStorage();
+
+        // Notify the app (AuthContext) that the session is no longer valid.
+        // AuthContext will update its state and the router will redirect to /login.
+        window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
+      }
+    }
+
     if (backendMessage) {
       error.message = backendMessage;
     }
@@ -1185,5 +1244,3 @@ export const getCustomSurveyDetail = (id: number) =>
 
 export const submitCustomSurveyAnswers = (id: number, data: SubmitCustomSurveyAnswersDto) =>
   apiClient.post<ApiResponse<boolean>>(`/custom-surveys/${id}/answers`, data);
-
-

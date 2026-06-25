@@ -40,7 +40,8 @@ export default function UserMenu({
   }, [profileName]);
 
   const profileRole = useMemo(() => {
-    return role ?? user?.roleName ?? user?.role ?? "User";
+    const rawRole = role ?? user?.roleName ?? user?.role ?? "User";
+    return Array.isArray(rawRole) ? rawRole.join(", ") : rawRole;
   }, [role, user]);
 
   useEffect(() => {
@@ -65,7 +66,9 @@ export default function UserMenu({
     setProfileOpen(false);
   };
 
-  const roleLower = role?.toLowerCase();
+  const roleLower = Array.isArray(role)
+    ? (role[0]?.toLowerCase() ?? "")
+    : (typeof role === "string" ? role.toLowerCase() : "");
   const showMyPerformance = roleLower === "employee" || roleLower === "manager" || roleLower === "hr";
   const showSettings = roleLower === "admin";
 

@@ -49,6 +49,7 @@
       "about": "About",
       "services": "Services",
       "contact": "Contact",
+      "pricing": "Pricing",
       "get_dashboard": "Get a Dashboard"
     },
     "hero": {
@@ -57,6 +58,7 @@
       "title_sub": "Reduce burnout with a system teams actually use.",
       "desc": "Manto is an employee experience platform that makes wellbeing a part of the daily workflow — not another task on the to-do list.",
       "btn_start": "Start Your Dashboard",
+      "view_pricing": "View pricing & buy plan",
       "stat_value": "85%",
       "stat_desc": "Of employees feel more supported when they have simple tools for check-ins, Recognition, and wellbeing.",
       "stat_detail": "Organizations with strong wellbeing cultures see up to 45% lower turnover and 60% higher productivity. Manto gives you a lightweight system to embed care into your daily operations.",
@@ -209,5 +211,13 @@
       "subscribe": "Subscribe",
       "copyright": "© Copyright 2026 MANTO. All rights reserved."
     }
+  },
+  "customer_layout": {
+    "pricing": "Pricing",
+    "my_orders": "My Orders",
+    "login": "Login",
+    "register_trial": "Register Trial",
+    "terms_of_use": "Terms of Use",
+    "privacy_policy": "Privacy Policy"
   }
 }

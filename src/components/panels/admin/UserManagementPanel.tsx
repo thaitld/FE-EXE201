@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { apiClient, type AiExecutionLogDto, type ApiResponse, type AdminUserFilter, type CreateUserDto, type PagedResult, type RoleDto, type TeamDetailDto, type UpdateUserDto, type UserDto } from '@/lib/api'
-import { Plus, RefreshCw, Search, Pencil, ShieldCheck, UserRound } from 'lucide-react'
+import { Plus, RefreshCw, Search, Pencil, ShieldCheck, UserRound, AlertCircle } from 'lucide-react'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -25,6 +25,13 @@ export function UserManagementPanel() {
   const [editUserId, setEditUserId] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<UserDto | null>(null)
   const [savingUserId, setSavingUserId] = useState<string | null>(null)
+  const [confirmUser, setConfirmUser] = useState<UserDto | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const [jobName, setJobName] = useState('')
   const [fromDate, setFromDate] = useState('')
@@ -159,11 +166,17 @@ export function UserManagementPanel() {
       const response = await apiClient.put<ApiResponse<UserDto>>(`/admin/users/${user.id}`, payload)
       if (response.data.succeeded) {
         await loadUsers()
+        showToast(
+          user.isActive
+            ? 'Vô hiệu hóa tài khoản thành công!'
+            : 'Kích hoạt tài khoản thành công!',
+          'success'
+        )
       } else {
-        setError(response.data.message || 'Không thể cập nhật user.')
+        showToast(response.data.message || 'Không thể cập nhật trạng thái user.', 'error')
       }
     } catch {
-      setError('Không thể cập nhật user.')
+      showToast('Không thể cập nhật trạng thái user.', 'error')
     } finally {
       setSavingUserId(null)
     }
@@ -337,7 +350,7 @@ export function UserManagementPanel() {
                         <button
                           type="button"
                           disabled={savingUserId === user.id}
-                          onClick={() => toggleUserActive(user)}
+                          onClick={() => setConfirmUser(user)}
                           className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {user.isActive ? 'Deactivate' : 'Activate'}
@@ -510,6 +523,67 @@ export function UserManagementPanel() {
           setSelectedUser(null)
         }}
       />
+
+      {/* Confirmation Modal */}
+      {confirmUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm animate-fade-in" onClick={() => setConfirmUser(null)} />
+          <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 transform transition-all scale-100">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {confirmUser.isActive ? 'Vô hiệu hóa tài khoản?' : 'Kích hoạt tài khoản?'}
+            </h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              Bạn có chắc chắn muốn {confirmUser.isActive ? 'vô hiệu hóa' : 'kích hoạt'} tài khoản của{' '}
+              <span className="font-semibold text-slate-800">
+                {`${confirmUser.firstName} ${confirmUser.lastName}`.trim() || confirmUser.email}
+              </span>{' '}
+              không?
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmUser(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const targetUser = confirmUser
+                  setConfirmUser(null)
+                  toggleUserActive(targetUser)
+                }}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition ${
+                  confirmUser.isActive
+                    ? 'bg-rose-600 hover:bg-rose-700 shadow-sm shadow-rose-100'
+                    : 'bg-slate-900 hover:bg-slate-800 shadow-sm shadow-slate-200'
+                }`}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-5 right-5 z-50 transition-all duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border shadow-xl ${
+            toast.type === 'error'
+              ? 'bg-rose-50 border-rose-200 text-rose-800'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+          }`}>
+            {toast.type === 'error' ? (
+              <AlertCircle size={18} className="text-rose-600 shrink-0" />
+            ) : (
+              <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
+            )}
+            <span className="text-sm font-semibold">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

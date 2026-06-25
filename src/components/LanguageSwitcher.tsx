@@ -34,6 +34,12 @@ export default function LanguageSwitcher() {
     };
   }, []);
 
+  // Update html lang attribute when language changes
+  useEffect(() => {
+    document.documentElement.lang = currentLang;
+  }, [currentLang]);
+
+
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button

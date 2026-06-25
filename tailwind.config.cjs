@@ -5,7 +5,7 @@ module.exports = {
       fontFamily: {
         body: ['Barlow', 'sans-serif'],
         display: ['Inter', 'sans-serif'],
-        serif: ['Instrument Serif', 'serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
       },
       colors: {
         form: {

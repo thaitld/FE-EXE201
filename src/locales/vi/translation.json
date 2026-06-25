@@ -49,6 +49,7 @@
       "about": "Giới thiệu",
       "services": "Dịch vụ",
       "contact": "Liên hệ",
+      "pricing": "Bảng giá",
       "get_dashboard": "Đến bảng điều khiển"
     },
     "hero": {
@@ -57,6 +58,7 @@
       "title_sub": "Giảm thiểu kiệt sức với hệ thống các đội ngũ thực sự tin dùng.",
       "desc": "Manto là nền tảng trải nghiệm nhân viên giúp việc chăm sóc sức khỏe tinh thần trở thành một phần trong quy trình làm việc hàng ngày — không phải là một nhiệm vụ khác trong danh sách việc cần làm.",
       "btn_start": "Bắt đầu Bảng điều khiển",
+      "view_pricing": "Xem bảng giá & mua gói",
       "stat_value": "85%",
       "stat_desc": "Nhân viên cảm thấy được hỗ trợ nhiều hơn khi họ có các công cụ đơn giản để điểm danh, ghi nhận và chăm sóc sức khỏe.",
       "stat_detail": "Các tổ chức có văn hóa chăm sóc sức khỏe tốt giảm tới 45% tỷ lệ nghỉ việc và tăng 60% năng suất. Manto cung cấp cho bạn một hệ thống gọn nhẹ để lồng ghép sự quan tâm vào hoạt động hàng ngày.",
@@ -209,5 +211,13 @@
       "subscribe": "Đăng ký",
       "copyright": "© Copyright 2026 MANTO. All rights reserved."
     }
+  },
+  "customer_layout": {
+    "pricing": "Bảng giá",
+    "my_orders": "Đơn hàng của tôi",
+    "login": "Đăng nhập",
+    "register_trial": "Đăng ký dùng thử",
+    "terms_of_use": "Điều khoản sử dụng",
+    "privacy_policy": "Chính sách bảo mật"
   }
 }
