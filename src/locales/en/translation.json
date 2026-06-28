@@ -215,6 +215,8 @@
   "customer_layout": {
     "pricing": "Pricing",
     "my_orders": "My Orders",
+    "refunds": "Refund Requests",
+    "profile": "My Account",
     "login": "Login",
     "register_trial": "Register Trial",
     "terms_of_use": "Terms of Use",

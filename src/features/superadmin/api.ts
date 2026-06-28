@@ -1,4 +1,4 @@
-import { apiClient, type ApiResponse, type PagedResult } from '@/lib/api';
+import { apiClient, type ApiResponse, type PaginatedResult } from '@/lib/api';
 import type {
   SuperAdminStatsDto,
   OrganizationDto,
@@ -15,7 +15,9 @@ import type {
   OrderDetailDto,
   FulfillOrderResponseDto,
   RevenueDto,
-  PaymentHistoryDto
+  PaymentHistoryDto,
+  RefundRequestDto,
+  ReviewRefundRequestDto
 } from './types';
 
 const unwrap = <T>(response: { data: ApiResponse<T> }) => {
@@ -30,34 +32,28 @@ export async function getSuperAdminStats(): Promise<SuperAdminStatsDto> {
   return unwrap(response)!;
 }
 
-export async function getOrganizations(page = 1, pageSize = 20): Promise<PagedResult<OrganizationDto>> {
-  const response = await apiClient.get<ApiResponse<PagedResult<OrganizationDto>>>('/super/organizations', {
+const emptyPage = <T,>(pageSize: number): PaginatedResult<T> => ({
+  items: [],
+  totalCount: 0,
+  page: 1,
+  pageSize,
+  totalPages: 1,
+  hasPrevious: false,
+  hasNext: false
+});
+
+export async function getOrganizations(page = 1, pageSize = 20): Promise<PaginatedResult<OrganizationDto>> {
+  const response = await apiClient.get<ApiResponse<PaginatedResult<OrganizationDto>>>('/super/organizations', {
     params: { page, pageSize }
   });
-  return unwrap(response) ?? {
-    items: [],
-    totalCount: 0,
-    pageNumber: 1,
-    pageSize: 20,
-    totalPages: 1,
-    hasPreviousPage: false,
-    hasNextPage: false
-  };
+  return unwrap(response) ?? emptyPage(pageSize);
 }
 
-export async function searchOrganizations(search: string, status?: string, page = 1, pageSize = 20): Promise<PagedResult<OrganizationDto>> {
-  const response = await apiClient.get<ApiResponse<PagedResult<OrganizationDto>>>('/super/organizations/search', {
+export async function searchOrganizations(search: string, status?: string, page = 1, pageSize = 20): Promise<PaginatedResult<OrganizationDto>> {
+  const response = await apiClient.get<ApiResponse<PaginatedResult<OrganizationDto>>>('/super/organizations/search', {
     params: { search, status, page, pageSize },
   });
-  return unwrap(response) ?? {
-    items: [],
-    totalCount: 0,
-    pageNumber: 1,
-    pageSize: 20,
-    totalPages: 1,
-    hasPreviousPage: false,
-    hasNextPage: false
-  };
+  return unwrap(response) ?? emptyPage(pageSize);
 }
 
 export async function getOrganizationById(id: number): Promise<OrganizationDto> {
@@ -114,19 +110,11 @@ export async function updatePlan(id: number, body: UpdateSubscriptionPlanDto): P
   return unwrap(response)!;
 }
 
-export async function getOrders(status?: string, planId?: number, page = 1, pageSize = 20): Promise<PagedResult<OrderDetailDto>> {
-  const response = await apiClient.get<ApiResponse<PagedResult<OrderDetailDto>>>('/orders', {
+export async function getOrders(status?: string, planId?: number, page = 1, pageSize = 20): Promise<PaginatedResult<OrderDetailDto>> {
+  const response = await apiClient.get<ApiResponse<PaginatedResult<OrderDetailDto>>>('/orders', {
     params: { status, planId, page, pageSize },
   });
-  return unwrap(response) ?? {
-    items: [],
-    totalCount: 0,
-    pageNumber: 1,
-    pageSize: 20,
-    totalPages: 1,
-    hasPreviousPage: false,
-    hasNextPage: false
-  };
+  return unwrap(response) ?? emptyPage(pageSize);
 }
 
 export async function getOrderById(id: number): Promise<OrderDetailDto> {
@@ -172,13 +160,32 @@ export async function getRevenueStats(year: number): Promise<RevenueDto> {
 }
 
 export async function getPaymentHistory(orgId?: number): Promise<PaymentHistoryDto[]> {
-  const response = await apiClient.get<ApiResponse<PaymentHistoryDto[]>>('/payment/history', {
-    params: { orgId },
-  });
-  return unwrap(response) ?? [];
+  try {
+    const response = await apiClient.get<ApiResponse<PaymentHistoryDto[]>>('/payment/history', {
+      params: { orgId },
+    });
+    return unwrap(response) ?? [];
+  } catch (err: any) {
+    if (err?.response?.status === 403) {
+      throw new Error('Không có quyền truy cập lịch sử thanh toán.');
+    }
+    throw err;
+  }
 }
 
 export async function getPublicPlans(): Promise<SubscriptionPlanDto[]> {
   const response = await apiClient.get<ApiResponse<SubscriptionPlanDto[]>>('/plans');
   return unwrap(response) ?? [];
+}
+
+export async function getRefundRequests(status?: string, page = 1, pageSize = 20): Promise<PaginatedResult<RefundRequestDto>> {
+  const response = await apiClient.get<ApiResponse<PaginatedResult<RefundRequestDto>>>('/super/refund-requests', {
+    params: { status, page, pageSize },
+  });
+  return unwrap(response) ?? emptyPage(pageSize);
+}
+
+export async function reviewRefundRequest(id: number, body: ReviewRefundRequestDto): Promise<RefundRequestDto> {
+  const response = await apiClient.patch<ApiResponse<RefundRequestDto>>(`/super/refund-requests/${id}`, body);
+  return unwrap(response)!;
 }

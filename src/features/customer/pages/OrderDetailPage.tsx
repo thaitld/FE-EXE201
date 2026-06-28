@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getOrderById, cancelOrder, repayOrder, downloadInvoice } from '../api';
-import type { OrderDetailDto } from '../types';
+import { getOrderById, cancelOrder, repayOrder, downloadInvoice, getMyRefundRequests } from '../api';
+import type { OrderDetailDto, RefundRequestDto } from '../types';
 import CustomerLayout from '../components/CustomerLayout';
+import RefundRequestModal from '../components/RefundRequestModal';
 import {
   Loader2,
   AlertCircle,
@@ -17,6 +18,7 @@ import {
   Trash2,
   Shield,
   HelpCircle,
+  Undo2,
 } from 'lucide-react';
 
 export default function OrderDetailPage() {
@@ -25,6 +27,8 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundRequest, setRefundRequest] = useState<RefundRequestDto | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Extract orderId from hash url: #/orders/:id
@@ -44,6 +48,8 @@ export default function OrderDetailPage() {
       setLoading(true);
       const data = await getOrderById(orderId);
       setOrder(data);
+      const refunds = await getMyRefundRequests();
+      setRefundRequest(refunds.find((r) => r.orderId === orderId) ?? null);
     } catch (err: any) {
       console.warn('Failed to load order details:', err);
       setError(err.message || 'Unable to load order details.');
@@ -130,6 +136,13 @@ export default function OrderDetailPage() {
       return (
         <span className="bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full font-bold border border-slate-200">
           CANCELLED
+        </span>
+      );
+    }
+    if (s === 'REFUNDED') {
+      return (
+        <span className="bg-purple-50 text-purple-700 text-xs px-3 py-1 rounded-full font-bold border border-purple-200">
+          REFUNDED
         </span>
       );
     }
@@ -249,17 +262,55 @@ export default function OrderDetailPage() {
               )}
 
               {order.status === 'PAID' && (
-                <button
-                  onClick={handleDownloadInvoice}
-                  disabled={actionLoading}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
-                >
-                  {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
-                  Download Invoice (HTML)
-                </button>
+                <>
+                  <button
+                    onClick={handleDownloadInvoice}
+                    disabled={actionLoading}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
+                  >
+                    {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+                    Download Invoice (HTML)
+                  </button>
+                  {!refundRequest && (
+                    <button
+                      onClick={() => setShowRefundModal(true)}
+                      disabled={actionLoading}
+                      className="bg-slate-100 hover:bg-slate-200 text-rose-600 border border-slate-200 text-sm font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-1.5"
+                    >
+                      <Undo2 size={15} />
+                      Request Refund
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
+
+          {refundRequest && (
+            <div className={`rounded-2xl p-4 text-xs leading-relaxed flex items-start gap-2.5 border ${
+              refundRequest.status === 'REJECTED'
+                ? 'bg-rose-50 border-rose-200 text-rose-800'
+                : refundRequest.status === 'APPROVED'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-amber-50 border-amber-200 text-amber-800'
+            }`}>
+              <Undo2 size={16} className="shrink-0 mt-0.5" />
+              <p>
+                {refundRequest.status === 'PENDING' &&
+                  'You have a pending refund request for this order. Please wait for review.'}
+                {refundRequest.status === 'REJECTED' &&
+                  'Your refund request for this order has been rejected. Please contact support for further assistance.'}
+                {refundRequest.status === 'APPROVED' &&
+                  'Your refund request for this order has been approved.'}
+                {refundRequest.reviewNotes && (
+                  <>
+                    {' '}
+                    <strong>Notes:</strong> {refundRequest.reviewNotes}
+                  </>
+                )}
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Left panels: profiles */}
@@ -385,6 +436,18 @@ export default function OrderDetailPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showRefundModal && orderId && (
+        <RefundRequestModal
+          orderId={orderId}
+          onClose={() => setShowRefundModal(false)}
+          onSuccess={() => {
+            setShowRefundModal(false);
+            showToast('Refund request submitted successfully.');
+            loadOrderDetail();
+          }}
+        />
       )}
     </CustomerLayout>
   );

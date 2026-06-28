@@ -55,7 +55,7 @@ export interface OrderDetailDto {
   planName: string;
   billingCycle: 'MONTHLY' | 'YEARLY';
   amount: number;
-  status: 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'FAILED';
+  status: 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'FAILED' | 'REFUNDED';
   createdAt: string;
   paidAt: string | null;
   companyName: string;
@@ -68,4 +68,37 @@ export interface OrderDetailDto {
   organizationName?: string | null;
   vnpayTxnRef?: string | null;
   paymentUrl?: string | null;
+}
+
+export interface CustomerProfileDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string | null;
+  createdAt: string;
+}
+
+export interface UpdateCustomerProfileDto {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}
+
+export interface RefundRequestDto {
+  id: number;
+  orderId: number;
+  customerEmail: string;
+  customerName: string;
+  companyName: string;
+  planName: string;
+  amount: number;
+  reason: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  paidAt: string | null;
+  daysSincePaid: number;
+  reviewedAt: string | null;
+  reviewedByEmail: string | null;
+  reviewNotes: string | null;
 }

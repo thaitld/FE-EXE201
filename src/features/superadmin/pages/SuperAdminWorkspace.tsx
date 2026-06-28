@@ -9,6 +9,7 @@ import PlansManagementPage from './PlansManagementPage';
 import OrdersPage from './OrdersPage';
 import RevenuePage from './RevenuePage';
 import PaymentHistoryPage from './PaymentHistoryPage';
+import RefundRequestsPage from './RefundRequestsPage';
 
 interface SuperAdminTabItem {
   id: string;
@@ -21,6 +22,7 @@ const tabs: SuperAdminTabItem[] = [
   { id: 'organizations', label: 'Quản Lý Tổ Chức', description: 'Danh sách doanh nghiệp, người dùng và kích hoạt/gia hạn gói.' },
   { id: 'plans', label: 'Quản Lý Gói Dịch Vụ', description: 'Thiết lập hạn mức và các tính năng mở khóa cho từng gói subscription.' },
   { id: 'orders', label: 'Quản Lý Đơn Hàng', description: 'Xử lý đơn thanh toán, thực hiện fulfill thủ công và tải hóa đơn.' },
+  { id: 'refunds', label: 'Yêu Cầu Hoàn Tiền', description: 'Duyệt/từ chối các yêu cầu hoàn tiền từ khách hàng.' },
   { id: 'revenue', label: 'Thống Kê Doanh Thu', description: 'Biểu đồ chi tiết doanh thu theo tháng và phân bổ theo gói.' },
   { id: 'payments', label: 'Lịch Sử Giao Dịch', description: 'Logs chi tiết tất cả giao dịch thanh toán qua cổng.' }
 ];
@@ -30,6 +32,7 @@ const routeByTab: Record<string, string> = {
   organizations: '#/super/organizations',
   plans: '#/super/plans',
   orders: '#/super/orders',
+  refunds: '#/super/refunds',
   revenue: '#/super/revenue',
   payments: '#/super/payments'
 };
@@ -102,6 +105,8 @@ export default function SuperAdminWorkspace() {
         return <PlansManagementPage />;
       case 'orders':
         return <OrdersPage />;
+      case 'refunds':
+        return <RefundRequestsPage />;
       case 'revenue':
         return <RevenuePage />;
       case 'payments':

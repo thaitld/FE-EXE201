@@ -44,7 +44,7 @@ export default function OrganizationsPage() {
       setOrganizations(data.items || []);
       setTotalPages(data.totalPages || 1);
       setTotalCount(data.totalCount || 0);
-      setPage(data.pageNumber || 1);
+      setPage(data.page || 1);
       setError('');
     } catch (err: any) {
       setError(err.message || 'Không thể tải danh sách tổ chức');

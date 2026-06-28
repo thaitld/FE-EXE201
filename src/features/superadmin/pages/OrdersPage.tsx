@@ -56,7 +56,7 @@ export default function OrdersPage() {
       setOrders(ordersData.items || []);
       setTotalPages(ordersData.totalPages || 1);
       setTotalCount(ordersData.totalCount || 0);
-      setPage(ordersData.pageNumber || 1);
+      setPage(ordersData.page || 1);
       setPlans(plansData);
       setError('');
     } catch (err: any) {
@@ -146,6 +146,13 @@ export default function OrdersPage() {
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-500">
             <XCircle size={12} />
             Đã Hủy
+          </span>
+        );
+      case 'REFUNDED':
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-1 text-xs font-semibold text-purple-700">
+            <XCircle size={12} />
+            Đã Hoàn Tiền
           </span>
         );
       default:

@@ -1,10 +1,13 @@
-import { apiClient, type ApiResponse } from '@/lib/api';
+import { apiClient, type ApiResponse, type PaginatedResult } from '@/lib/api';
 import type {
   RegisterCustomerDto,
   SubscriptionPlanDto,
   CreateOrderDto,
   OrderSummaryDto,
   OrderDetailDto,
+  CustomerProfileDto,
+  UpdateCustomerProfileDto,
+  RefundRequestDto,
 } from './types';
 
 const unwrap = <T>(response: { data: ApiResponse<T> }) => {
@@ -41,10 +44,19 @@ export async function createOrder(body: CreateOrderDto): Promise<{
   return unwrap(response)!;
 }
 
-export async function getMyOrders(): Promise<OrderSummaryDto[]> {
-  const response = await apiClient.get<ApiResponse<{ items: OrderSummaryDto[] }>>('/orders/my');
-  const data = unwrap(response);
-  return data?.items ?? [];
+export async function getMyOrders(page = 1, pageSize = 20): Promise<PaginatedResult<OrderSummaryDto>> {
+  const response = await apiClient.get<ApiResponse<PaginatedResult<OrderSummaryDto>>>('/orders/my', {
+    params: { page, pageSize },
+  });
+  return unwrap(response) ?? {
+    items: [],
+    totalCount: 0,
+    page: 1,
+    pageSize,
+    totalPages: 1,
+    hasPrevious: false,
+    hasNext: false,
+  };
 }
 
 export async function getOrderById(id: number): Promise<OrderDetailDto> {
@@ -74,6 +86,26 @@ export async function repayOrder(id: number): Promise<{
     billingCycle: string;
   }>>(`/orders/${id}/repay`);
   return unwrap(response)!;
+}
+
+export async function getMyProfile(): Promise<CustomerProfileDto> {
+  const response = await apiClient.get<ApiResponse<CustomerProfileDto>>('/customer/profile');
+  return unwrap(response)!;
+}
+
+export async function updateMyProfile(body: UpdateCustomerProfileDto): Promise<CustomerProfileDto> {
+  const response = await apiClient.put<ApiResponse<CustomerProfileDto>>('/customer/profile', body);
+  return unwrap(response)!;
+}
+
+export async function requestRefund(orderId: number, reason: string): Promise<RefundRequestDto> {
+  const response = await apiClient.post<ApiResponse<RefundRequestDto>>(`/orders/${orderId}/refund-request`, { reason });
+  return unwrap(response)!;
+}
+
+export async function getMyRefundRequests(): Promise<RefundRequestDto[]> {
+  const response = await apiClient.get<ApiResponse<RefundRequestDto[]>>('/orders/my-refund-requests');
+  return unwrap(response) ?? [];
 }
 
 export async function downloadInvoice(orderId: number): Promise<void> {

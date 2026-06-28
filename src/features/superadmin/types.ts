@@ -146,7 +146,7 @@ export interface OrderDetailDto {
   planName: string;
   billingCycle: 'MONTHLY' | 'YEARLY';
   amount: number;
-  status: 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'FAILED';
+  status: 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'FAILED' | 'REFUNDED';
   createdAt: string;
   paidAt: string | null;
   notes: string | null;
@@ -176,6 +176,29 @@ export interface RevenueDto {
   totalOrders: number;
   monthly: MonthlyRevenueDto[];
   byPlan: PlanRevenueDto[];
+}
+
+export interface RefundRequestDto {
+  id: number;
+  orderId: number;
+  customerEmail: string;
+  customerName: string;
+  companyName: string;
+  planName: string;
+  amount: number;
+  reason: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  paidAt: string | null;
+  daysSincePaid: number;
+  reviewedAt: string | null;
+  reviewedByEmail: string | null;
+  reviewNotes: string | null;
+}
+
+export interface ReviewRefundRequestDto {
+  action: 'APPROVE' | 'REJECT';
+  reviewNotes?: string;
 }
 
 export interface PaymentHistoryDto {

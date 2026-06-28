@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getSuperAdminStats } from '../api';
+import { getSuperAdminStats, getRefundRequests } from '../api';
 import {
   Grid,
   Users,
@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   TrendingUp,
   CreditCard,
+  Undo2,
   X
 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export default function SuperAdminSidebar({
   const { user } = useAuth();
   const [pendingOrders, setPendingOrders] = useState(0);
   const [expiringOrgs, setExpiringOrgs] = useState(0);
+  const [pendingRefunds, setPendingRefunds] = useState(0);
 
   useEffect(() => {
     // Load stats immediately and then poll every 60s
@@ -35,6 +37,8 @@ export default function SuperAdminSidebar({
         const stats = await getSuperAdminStats();
         setPendingOrders(stats.pendingOrders || 0);
         setExpiringOrgs(stats.expiringIn30Days || 0);
+        const refunds = await getRefundRequests('PENDING', 1, 1);
+        setPendingRefunds(refunds.totalCount || 0);
       } catch (err) {
         console.warn('Failed to load sidebar indicator counts:', err);
       }
@@ -122,6 +126,20 @@ export default function SuperAdminSidebar({
               {pendingOrders > 0 && (
                 <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white animate-pulse">
                   {pendingOrders}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onTabChange('refunds')}
+              className={`${navItemClass} ${activeTab === 'refunds' ? activeNavItemClass : ''}`}
+            >
+              <Undo2 size={18} />
+              <span className="text-sm font-semibold">Hoàn Tiền</span>
+              {pendingRefunds > 0 && (
+                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white animate-pulse">
+                  {pendingRefunds}
                 </span>
               )}
             </button>

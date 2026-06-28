@@ -328,6 +328,7 @@ export interface UpdateProfileDto {
   lastName?: string;
 }
 
+// Backend's older PagedResult<T> class (used by /admin/users, /admin/job-logs, burnout, task-instance lists).
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;
@@ -336,6 +337,18 @@ export interface PagedResult<T> {
   totalPages: number;
   hasPreviousPage: boolean;
   hasNextPage: boolean;
+}
+
+// Backend's newer PaginatedResult<T> class (used by /super/organizations, /orders, /super/refund-requests).
+// Field names differ from PagedResult above: `page` (not pageNumber), `hasNext`/`hasPrevious` (not hasNextPage/hasPreviousPage).
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 
 export interface AdminUserFilter {

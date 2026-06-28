@@ -20,6 +20,8 @@ import CustomerLoginPage from "@/features/customer/pages/CustomerLoginPage";
 import CreateOrderPage from "@/features/customer/pages/CreateOrderPage";
 import OrdersPage from "@/features/customer/pages/OrdersPage";
 import OrderDetailPage from "@/features/customer/pages/OrderDetailPage";
+import CustomerProfilePage from "@/features/customer/pages/ProfilePage";
+import RefundHistoryPage from "@/features/customer/pages/RefundHistoryPage";
 
 function isAdminRoute(route: string) {
   return route.startsWith("#/admin");
@@ -34,7 +36,7 @@ function isSuperAdminRoute(route: string) {
 }
 
 function isCustomerRoute(route: string) {
-  return route.startsWith("#/orders");
+  return route.startsWith("#/orders") || route.startsWith("#/customer/profile") || route.startsWith("#/customer/refunds");
 }
 
 function AdminRoute({ route }: { route: string }) {
@@ -145,6 +147,12 @@ export default function AppRouter() {
     // Customer route sub-mappings
     if (route.startsWith("#/orders/new")) {
       return <CreateOrderPage />;
+    }
+    if (route.startsWith("#/customer/profile")) {
+      return <CustomerProfilePage />;
+    }
+    if (route.startsWith("#/customer/refunds")) {
+      return <RefundHistoryPage />;
     }
     const matchDetail = route.match(/#\/orders\/(\d+)/);
     if (matchDetail) {

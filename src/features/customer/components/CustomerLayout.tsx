@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/features/auth/AuthContext';
 import UserMenu from '@/features/auth/UserMenu';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { CreditCard, ShoppingBag, LayoutDashboard } from 'lucide-react';
+import { CreditCard, ShoppingBag, LayoutDashboard, UserCircle, Undo2 } from 'lucide-react';
 
 interface CustomerLayoutProps {
   children: ReactNode;
@@ -55,13 +55,29 @@ export default function CustomerLayout({ children, pageTitle }: CustomerLayoutPr
                 {t("customer_layout.pricing")}
               </a>
               {isAuthenticated && (
-                <a
-                  href="#/orders"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
-                >
-                  <ShoppingBag size={15} />
-                  {t("customer_layout.my_orders")}
-                </a>
+                <>
+                  <a
+                    href="#/orders"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+                  >
+                    <ShoppingBag size={15} />
+                    {t("customer_layout.my_orders")}
+                  </a>
+                  <a
+                    href="#/customer/refunds"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+                  >
+                    <Undo2 size={15} />
+                    {t("customer_layout.refunds")}
+                  </a>
+                  <a
+                    href="#/customer/profile"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+                  >
+                    <UserCircle size={15} />
+                    {t("customer_layout.profile")}
+                  </a>
+                </>
               )}
             </nav>
           </div>

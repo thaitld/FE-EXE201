@@ -215,6 +215,8 @@
   "customer_layout": {
     "pricing": "Bảng giá",
     "my_orders": "Đơn hàng của tôi",
+    "refunds": "Yêu cầu hoàn tiền",
+    "profile": "Tài khoản của tôi",
     "login": "Đăng nhập",
     "register_trial": "Đăng ký dùng thử",
     "terms_of_use": "Điều khoản sử dụng",

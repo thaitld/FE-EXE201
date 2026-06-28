@@ -11,6 +11,8 @@ import {
   Download,
   ExternalLink,
   HelpCircle,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 export default function OrdersPage() {
@@ -20,6 +22,11 @@ export default function OrdersPage() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Parse query parameters
   const queryParams = useMemo(() => {
@@ -38,13 +45,16 @@ export default function OrdersPage() {
   const paymentStatus = useMemo(() => queryParams.get('payment'), [queryParams]);
   const errorCode = useMemo(() => queryParams.get('code'), [queryParams]);
 
-  const loadOrders = async () => {
+  const loadOrders = async (pageNum: number = 1) => {
     try {
       setLoading(true);
-      const data = await getMyOrders();
+      const data = await getMyOrders(pageNum, pageSize);
       // Sort orders by id descending (latest first)
-      const sorted = [...data].sort((a, b) => b.id - a.id);
+      const sorted = [...data.items].sort((a, b) => b.id - a.id);
       setOrders(sorted);
+      setTotalPages(data.totalPages || 1);
+      setTotalCount(data.totalCount || 0);
+      setPage(data.page || 1);
     } catch (err: any) {
       console.warn('Failed to load orders:', err);
       setError(err.message || 'Unable to load orders list.');
@@ -53,8 +63,13 @@ export default function OrdersPage() {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    loadOrders(newPage);
+  };
+
   useEffect(() => {
-    loadOrders();
+    loadOrders(1);
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -90,7 +105,7 @@ export default function OrdersPage() {
       await cancelOrder(orderId);
       showToast('Order cancelled successfully.');
       setCancelConfirmId(null);
-      loadOrders();
+      loadOrders(page);
     } catch (err: any) {
       showToast(err.message || 'Failed to cancel order.', 'error');
     } finally {
@@ -136,6 +151,13 @@ export default function OrdersPage() {
       return (
         <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-slate-200">
           CANCELLED
+        </span>
+      );
+    }
+    if (s === 'REFUNDED') {
+      return (
+        <span className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 border border-purple-200">
+          REFUNDED
         </span>
       );
     }
@@ -250,7 +272,7 @@ export default function OrdersPage() {
           <AlertCircle size={40} className="text-rose-500 mx-auto mb-4" />
           <p className="text-slate-800 font-semibold mb-4">{error}</p>
           <button
-            onClick={loadOrders}
+            onClick={() => loadOrders(1)}
             className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition"
           >
             Try Again
@@ -366,6 +388,33 @@ export default function OrdersPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {!loading && orders.length > 0 && (
+        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row mt-4">
+          <p className="text-xs text-slate-500 font-medium">
+            Showing <span className="font-bold text-slate-800">{((page - 1) * pageSize) + 1}</span> to{' '}
+            <span className="font-bold text-slate-800">{Math.min(page * pageSize, totalCount)}</span> of{' '}
+            <span className="font-bold text-slate-800">{totalCount}</span> orders
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page <= 1}
+              className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="px-2 text-xs font-semibold text-slate-600">Page {page} / {totalPages}</span>
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page >= totalPages}
+              className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
         </div>
       )}
