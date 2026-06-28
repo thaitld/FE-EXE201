@@ -31,6 +31,12 @@ export default function OrderDetailPage() {
   const [refundRequest, setRefundRequest] = useState<RefundRequestDto | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  const daysSincePaid = useMemo(() => {
+    if (!order || !order.paidAt) return null;
+    const diffTime = Date.now() - new Date(order.paidAt).getTime();
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  }, [order]);
+
   // Extract orderId from hash url: #/orders/:id
   const orderId = useMemo(() => {
     const hash = window.location.hash;
@@ -271,7 +277,7 @@ export default function OrderDetailPage() {
                     {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
                     Download Invoice (HTML)
                   </button>
-                  {!refundRequest && (
+                  {!refundRequest && daysSincePaid !== null && daysSincePaid <= 7 && (
                     <button
                       onClick={() => setShowRefundModal(true)}
                       disabled={actionLoading}
@@ -438,9 +444,9 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      {showRefundModal && orderId && (
+      {showRefundModal && order && (
         <RefundRequestModal
-          orderId={orderId}
+          order={order}
           onClose={() => setShowRefundModal(false)}
           onSuccess={() => {
             setShowRefundModal(false);

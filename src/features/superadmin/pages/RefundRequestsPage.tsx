@@ -15,7 +15,27 @@ export default function RefundRequestsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  const [counts, setCounts] = useState({ all: 0, pending: 0, approved: 0, rejected: 0 });
   const [selectedRequest, setSelectedRequest] = useState<RefundRequestDto | null>(null);
+
+  const fetchCounts = async () => {
+    try {
+      const [allRes, pendingRes, approvedRes, rejectedRes] = await Promise.all([
+        getRefundRequests(undefined, 1, 1),
+        getRefundRequests('PENDING', 1, 1),
+        getRefundRequests('APPROVED', 1, 1),
+        getRefundRequests('REJECTED', 1, 1)
+      ]);
+      setCounts({
+        all: allRes.totalCount || 0,
+        pending: pendingRes.totalCount || 0,
+        approved: approvedRes.totalCount || 0,
+        rejected: rejectedRes.totalCount || 0
+      });
+    } catch (err) {
+      console.warn('Failed to load counts:', err);
+    }
+  };
 
   const fetchRequests = async (statusVal: string, pageNum: number = 1) => {
     try {
@@ -35,6 +55,7 @@ export default function RefundRequestsPage() {
 
   useEffect(() => {
     fetchRequests('', 1);
+    fetchCounts();
   }, []);
 
   const handleStatusChange = (val: string) => {
@@ -50,6 +71,7 @@ export default function RefundRequestsPage() {
   const handleReviewSuccess = () => {
     setSelectedRequest(null);
     fetchRequests(statusFilter, page);
+    fetchCounts();
   };
 
   const formatVND = (price: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -78,18 +100,40 @@ export default function RefundRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="w-full sm:w-56">
-        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Lọc Trạng Thái</label>
-        <select
-          value={statusFilter}
-          onChange={(e) => handleStatusChange(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm appearance-none focus:border-blue-500 focus:outline-none"
-        >
-          <option value="">Tất cả</option>
-          <option value="PENDING">Chờ duyệt</option>
-          <option value="APPROVED">Đã duyệt</option>
-          <option value="REJECTED">Đã từ chối</option>
-        </select>
+      {/* Tab Filter Group */}
+      <div>
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Lọc Trạng Thái</label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { key: '', label: 'Tất cả', count: counts.all },
+            { key: 'PENDING', label: 'Chờ duyệt', count: counts.pending },
+            { key: 'APPROVED', label: 'Đã duyệt', count: counts.approved },
+            { key: 'REJECTED', label: 'Từ từ chối', count: counts.rejected }
+          ].map((tab) => {
+            const isActive = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => handleStatusChange(tab.key)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border transition-all duration-200 ${
+                  isActive
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/10'
+                    : 'bg-white text-slate-650 hover:bg-slate-50 border-slate-200 text-slate-600'
+                }`}
+              >
+                <span>{tab.label === 'Từ từ chối' ? 'Từ chối' : tab.label}</span>
+                <span className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors duration-200 ${
+                  isActive
+                    ? 'bg-white/20 text-white'
+                    : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {error && (
@@ -118,7 +162,7 @@ export default function RefundRequestsPage() {
                 <p className="text-xs text-slate-500">{req.companyName} · {req.customerEmail}</p>
                 <p className="text-sm text-slate-600">{req.reason}</p>
                 <p className="text-xs text-slate-400">
-                  {formatVND(req.amount)} · Thanh toán {req.daysSincePaid} ngày trước
+                  {formatVND(req.amount)} · {req.daysSincePaid === 0 ? 'Thanh toán hôm nay' : `Thanh toán ${req.daysSincePaid} ngày trước`}
                 </p>
               </div>
               {req.status === 'PENDING' && (
