@@ -13,6 +13,8 @@ import {
 import { getTaskDetail, getTaskComments, getTaskAttachments } from "@/lib/api";
 import TimeTracker from "@/features/time-tracking/TimeTracker";
 import CommentThread from "@/features/tasks/CommentThread";
+import TaskSubmitModal from "@/features/tasks/TaskSubmitModal";
+import { useAuth } from "@/features/auth/AuthContext";
 import type {
   TaskInstanceDto,
   TaskCommentDto,
@@ -45,6 +47,7 @@ const priorityMeta: Record<string, { cls: string }> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function TaskDetail() {
+  const { user } = useAuth();
   const taskId = getTaskIdFromHash();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -52,6 +55,7 @@ export default function TaskDetail() {
   const [comments, setComments] = useState<TaskCommentDto[]>([]);
   const [attachments, setAttachments] = useState<TaskAttachmentDto[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "comments" | "attachments">("details");
+  const [isSubmitOpen, setIsSubmitOpen] = useState(false);
 
   const fetchData = async (isSilent = false) => {
     if (!taskId) return;
@@ -124,6 +128,7 @@ export default function TaskDetail() {
 
   const sm = statusMeta[task.status] ?? { label: task.status, cls: "bg-slate-100 text-slate-600" };
   const pm = priorityMeta[task.priority] ?? priorityMeta.LOW;
+  const isAssignee = task && user && task.assignedUserId === user.id;
 
   const tabs = [
     { key: "details" as const,     label: "Chi tiết",    icon: FileText,     count: null },
@@ -152,7 +157,16 @@ export default function TaskDetail() {
             </p>
             <h1 className="mt-1 text-2xl font-bold text-slate-900">{task.title}</h1>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            {isAssignee && task.status === "IN_PROGRESS" && (
+              <button
+                type="button"
+                onClick={() => setIsSubmitOpen(true)}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-1.5 text-xs font-bold text-white shadow transition active:scale-95 mr-2"
+              >
+                Nộp bài
+              </button>
+            )}
             <span className={`rounded-full px-3 py-1 text-sm font-semibold ${sm.cls}`}>
               {sm.label}
             </span>
@@ -258,16 +272,22 @@ export default function TaskDetail() {
               )}
 
               {/* Time Tracker */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <TimeTracker
-                  taskId={task.id}
-                  status={task.status}
-                  onStopped={() => void fetchData(true)}
-                  onStarted={() => void fetchData(true)}
-                  onPaused={() => void fetchData(true)}
-                  onResumed={() => void fetchData(true)}
-                />
-              </div>
+              {isAssignee ? (
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <TimeTracker
+                    taskId={task.id}
+                    status={task.status}
+                    onStopped={() => void fetchData(true)}
+                    onStarted={() => void fetchData(true)}
+                    onPaused={() => void fetchData(true)}
+                    onResumed={() => void fetchData(true)}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-xs font-semibold text-slate-500 font-sans text-center">
+                  Bạn đang xem nhiệm vụ này với vai trò giám sát. Chỉ người được giao việc mới được phép bấm đếm giờ hoặc nộp bài.
+                </div>
+              )}
             </div>
           )}
 
@@ -317,6 +337,14 @@ export default function TaskDetail() {
           )}
         </div>
       </div>
+      {isSubmitOpen && (
+        <TaskSubmitModal
+          isOpen={isSubmitOpen}
+          onClose={() => setIsSubmitOpen(false)}
+          taskId={task.id}
+          onSubmitted={() => void fetchData(true)}
+        />
+      )}
     </div>
   );
 }

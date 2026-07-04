@@ -255,7 +255,7 @@ export default function NotificationsPanel({
             <div className="divide-y divide-slate-200">
               {notifications.map((notification) => (
                 <div
-                  key={notification.id}
+                  key={`${(notification as any).isAlert ? "alert" : "notif"}-${notification.id}`}
                   className={`p-4 border-l-4 cursor-pointer transition hover:bg-slate-50 ${
                     notification.severity === "high"
                       ? "border-rose-400"

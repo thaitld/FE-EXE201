@@ -13,6 +13,7 @@ import type {
 
 export function useTimeTracking(taskId?: number) {
   const [session, setSession] = useState<TimeTrackingSessionDto | null>(null);
+  const [activeSessionOnOtherTask, setActiveSessionOnOtherTask] = useState<TimeTrackingSessionDto | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -37,6 +38,7 @@ export function useTimeTracking(taskId?: number) {
         setElapsedSeconds(0);
         setIsRunning(true);
         setIsPaused(false);
+        setActiveSessionOnOtherTask(null);
       }
     } catch (err) {
       console.error(err);
@@ -54,6 +56,47 @@ export function useTimeTracking(taskId?: number) {
       if (res.data.succeeded && res.data.data) {
         setIsRunning(false);
         setIsPaused(true);
+      }
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pauseOtherTask = async () => {
+    if (!activeSessionOnOtherTask) return null;
+    try {
+      setLoading(true);
+      const res = await pauseTimeTracking(
+        activeSessionOnOtherTask.taskInstanceId,
+        activeSessionOnOtherTask.sessionId
+      );
+      if (res.data.succeeded) {
+        setActiveSessionOnOtherTask(null);
+      }
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stopOtherTask = async (note?: string) => {
+    if (!activeSessionOnOtherTask) return null;
+    try {
+      setLoading(true);
+      const res = await stopTimeTracking(
+        activeSessionOnOtherTask.taskInstanceId,
+        activeSessionOnOtherTask.sessionId,
+        note
+      );
+      if (res.data.succeeded) {
+        setActiveSessionOnOtherTask(null);
       }
       return res.data;
     } catch (err) {
@@ -92,7 +135,6 @@ export function useTimeTracking(taskId?: number) {
         setIsRunning(false);
         setIsPaused(false);
         setElapsedSeconds(dto.cumulativeDurationSeconds);
-        // clear session
         setSession(null);
       }
       return res.data;
@@ -110,20 +152,33 @@ export function useTimeTracking(taskId?: number) {
       const res = await getActiveTimeSession();
       if (res.data.succeeded) {
         const s = res.data.data;
-        if (s && (taskId === undefined || s.taskInstanceId === taskId)) {
-          setSession(s);
-          setElapsedSeconds(s.elapsedSeconds || 0);
-          const action = s.currentAction?.toUpperCase() || "";
-          setIsRunning(
-            action === "STARTED" ||
-            action === "RESUMED" ||
-            action === "START" ||
-            action === "RESUME"
-          );
-          setIsPaused(
-            action === "PAUSED" ||
-            action === "PAUSE"
-          );
+        if (s) {
+          if (taskId === undefined || s.taskInstanceId === taskId) {
+            setSession(s);
+            setActiveSessionOnOtherTask(null);
+            setElapsedSeconds(s.elapsedSeconds || 0);
+            const action = s.currentAction?.toUpperCase() || "";
+            setIsRunning(
+              action === "STARTED" ||
+              action === "RESUMED" ||
+              action === "START" ||
+              action === "RESUME"
+            );
+            setIsPaused(
+              action === "PAUSED" ||
+              action === "PAUSE"
+            );
+          } else {
+            setActiveSessionOnOtherTask(s);
+            setSession(null);
+            setIsRunning(false);
+            setIsPaused(false);
+          }
+        } else {
+          setSession(null);
+          setActiveSessionOnOtherTask(null);
+          setIsRunning(false);
+          setIsPaused(false);
         }
       }
     } catch (err) {
@@ -164,12 +219,15 @@ export function useTimeTracking(taskId?: number) {
 
   return {
     session,
+    activeSessionOnOtherTask,
     elapsedSeconds,
     isRunning,
     isPaused,
     loading,
     start,
     pause,
+    pauseOtherTask,
+    stopOtherTask,
     resume,
     stop,
     restore,

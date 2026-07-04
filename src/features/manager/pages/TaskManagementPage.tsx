@@ -10,6 +10,7 @@ import {
   CheckCircle2, Clock, XCircle, Copy, UserCheck, Trash2,
 } from 'lucide-react'
 import ManagerCreateTaskModal from '../components/ManagerCreateTaskModal'
+import ManagerReassignTaskModal from '../components/ManagerReassignTaskModal'
 
 const statusOptions = ['ALL', 'PENDING', 'IN_PROGRESS', 'WAITING_FOR_APPROVAL', 'COMPLETED']
 const priorityOptions = ['ALL', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
@@ -41,6 +42,7 @@ export default function TaskManagementPage() {
   const [totalCount, setTotalCount] = useState(0)
   const [exporting, setExporting] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [reassigningTask, setReassigningTask] = useState<TaskInstanceDto | null>(null)
 
   const handleExport = async () => {
     setExporting(true)
@@ -92,7 +94,9 @@ export default function TaskManagementPage() {
   const onCancel = async (id: number) => { await cancelTask(id); await load() }
   const onDelete = async (id: number) => { await deleteTask(id); await load() }
   const onClone = async (id: number) => { await cloneTask(id, {}); await load() }
-  const onReassign = async (id: number) => { const u = window.prompt('New assigned user GUID'); if (!u) return; await reassignTask(id, { newAssignedUserId: u }); await load() }
+  const onReassign = (task: TaskInstanceDto) => {
+    setReassigningTask(task)
+  }
 
   const overdue = tasks.filter(t => t.isOverdue).length
   const pending = tasks.filter(t => t.status === 'WAITING_FOR_APPROVAL').length
@@ -413,7 +417,7 @@ export default function TaskManagementPage() {
                           <button
                             className="action-btn"
                             style={{ color: '#374151', background: '#f9fafb', borderColor: '#e5e7eb' }}
-                            onClick={() => void onReassign(task.id)}
+                            onClick={() => onReassign(task)}
                           >
                             <UserCheck size={10} /> Giao lại
                           </button>
@@ -482,6 +486,14 @@ export default function TaskManagementPage() {
       {showCreateModal && (
         <ManagerCreateTaskModal
           onClose={() => setShowCreateModal(false)}
+          onSuccess={() => void load()}
+        />
+      )}
+
+      {reassigningTask && (
+        <ManagerReassignTaskModal
+          task={reassigningTask}
+          onClose={() => setReassigningTask(null)}
           onSuccess={() => void load()}
         />
       )}

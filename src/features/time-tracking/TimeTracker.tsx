@@ -22,11 +22,14 @@ export default function TimeTracker({
 }: Props) {
   const {
     session,
+    activeSessionOnOtherTask,
     isRunning,
     isPaused,
     loading,
     start,
     pause,
+    pauseOtherTask,
+    stopOtherTask,
     resume,
     stop,
     timeLabel,
@@ -35,7 +38,29 @@ export default function TimeTracker({
   const [error, setError] = useState<string | null>(null);
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopNote, setStopNote] = useState("");
+  const [showOtherStopModal, setShowOtherStopModal] = useState(false);
+  const [otherStopNote, setOtherStopNote] = useState("");
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  const confirmStopOther = async () => {
+    setError(null);
+    try {
+      if (stopOtherTask) {
+        const res = await stopOtherTask(otherStopNote.trim() || undefined);
+        if (res && res.succeeded === false) {
+          setError(res.message || "Không thể kết thúc đếm giờ task kia.");
+          showToast(res.message || "Không thể dừng phiên đếm giờ task kia", "error");
+          return;
+        }
+        setShowOtherStopModal(false);
+        showToast("Đã dừng đếm giờ task kia thành công!");
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Không thể kết thúc đếm giờ task kia.";
+      setError(msg);
+      showToast("Lỗi: Không thể dừng đếm giờ task kia!", "error");
+    }
+  };
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToast({ text, type });
@@ -224,6 +249,99 @@ export default function TimeTracker({
       {error && (
         <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700">
           Lỗi: {error}
+        </div>
+      )}
+
+      {activeSessionOnOtherTask && (
+        <div className="mt-3 p-4 rounded-xl border border-amber-200 bg-amber-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3 font-sans">
+          <div className="flex gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-bold text-amber-800">Đang có phiên đếm giờ ở task khác</p>
+              <p className="text-[11px] text-amber-700 mt-0.5">
+                Bạn đang có phiên đếm giờ cho task <strong>{activeSessionOnOtherTask.taskCode}</strong> ({activeSessionOnOtherTask.taskTitle}) ở trạng thái <strong>{activeSessionOnOtherTask.currentAction}</strong>. Vui lòng tạm dừng hoặc dừng hẳn để thực hiện task này.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            {(activeSessionOnOtherTask.currentAction === "STARTED" ||
+              activeSessionOnOtherTask.currentAction === "RESUMED" ||
+              activeSessionOnOtherTask.currentAction === "START" ||
+              activeSessionOnOtherTask.currentAction === "RESUME") && (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={async () => {
+                  try {
+                    if (pauseOtherTask) {
+                      await pauseOtherTask();
+                      showToast("Đã tạm dừng đếm giờ ở task kia!");
+                    }
+                  } catch (err) {
+                    showToast("Không thể tạm dừng task kia.", "error");
+                  }
+                }}
+                className="rounded-xl bg-amber-600 hover:bg-amber-700 px-3.5 py-1.5 text-xs font-bold text-white transition active:scale-95 disabled:opacity-50"
+              >
+                Tạm dừng task kia
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => {
+                setOtherStopNote("");
+                setShowOtherStopModal(true);
+              }}
+              className="rounded-xl bg-rose-600 hover:bg-rose-700 px-3.5 py-1.5 text-xs font-bold text-white transition active:scale-95 disabled:opacity-50"
+            >
+              Dừng task kia
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for stopping other task */}
+      {showOtherStopModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowOtherStopModal(false)}
+          />
+          <div className="relative z-10 w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-2xl transition-all border border-slate-100">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Dừng task kia</h3>
+                <p className="mt-1 text-sm text-slate-500 font-sans">
+                  Nhập ghi chú nộp bài cho task <strong>{activeSessionOnOtherTask?.taskCode}</strong>.
+                </p>
+              </div>
+
+              <textarea
+                value={otherStopNote}
+                onChange={(e) => setOtherStopNote(e.target.value)}
+                placeholder="Nhập ghi chú nộp bài cho task kia..."
+                className="w-full h-28 rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none"
+              />
+
+              <div className="flex items-center justify-end gap-3 font-sans">
+                <button
+                  type="button"
+                  onClick={() => setShowOtherStopModal(false)}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmStopOther}
+                  className="rounded-xl bg-rose-600 hover:bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition"
+                >
+                  Xác nhận dừng
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

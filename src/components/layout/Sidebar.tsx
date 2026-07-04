@@ -373,19 +373,6 @@ export default function Sidebar({
                       </button>
                     )}
 
-                    {/* Wellbeing Analytics - visible to HR, CEO, Admin */}
-                    {(isHR() || isCEO() || isAdmin()) && (
-                      <button
-                        type="button"
-                        onClick={() => handleTabClick("wellbeing-analytics")}
-                        className={`${subItemClass} ${activeTab === "wellbeing-analytics" ? activeSubItemClass : ""}`}
-                      >
-                        <Activity size={17} />
-                        <span className="text-sm font-medium">
-                          {t("nav.wellbeing_analytics")}
-                        </span>
-                      </button>
-                    )}
 
                     {/* Survey Analytics - visible to Manager, HR, CEO, Admin */}
                     {(isManager() || isHR() || isCEO() || isAdmin()) && (
@@ -497,7 +484,7 @@ export default function Sidebar({
               </>
             )}
 
-            {(isAdmin() || isCEO() || isManager() || isHR()) && (
+            {(isAdmin() || isManager()) && (
               <>
                 <button
                   type="button"
@@ -525,20 +512,6 @@ export default function Sidebar({
                         <Building2 size={17} />
                         <span className="text-sm font-medium">
                           {t("nav.department_analytics")}
-                        </span>
-                      </button>
-                    )}
-
-                    {/* Workforce Trends - HR, CEO, Admin */}
-                    {(isHR() || isCEO() || isAdmin()) && (
-                      <button
-                        type="button"
-                        onClick={() => handleTabClick("workforce-trends")}
-                        className={`${subItemClass} ${activeTab === "workforce-trends" ? activeSubItemClass : ""}`}
-                      >
-                        <Zap size={17} />
-                        <span className="text-sm font-medium">
-                          {t("nav.workforce_trends")}
                         </span>
                       </button>
                     )}

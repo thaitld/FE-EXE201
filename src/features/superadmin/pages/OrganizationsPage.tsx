@@ -14,11 +14,32 @@ import {
   Calendar,
   Layers,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  AlertCircle,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 export default function OrganizationsPage() {
   const [organizations, setOrganizations] = useState<OrganizationDto[]>([]);
+
+  // Custom alert/confirm dialog state
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "confirm";
+    onConfirm?: () => void | Promise<void>;
+  } | null>(null);
+
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "warning" | "confirm" = "success",
+    onConfirm?: () => void | Promise<void>
+  ) => {
+    setAlertConfig({ isOpen: true, title, message, type, onConfirm });
+  };
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
@@ -81,21 +102,27 @@ export default function OrganizationsPage() {
     fetchOrgs(search, val, 1);
   };
 
-  const toggleOrgStatus = async (org: OrganizationDto, e: React.MouseEvent) => {
+  const toggleOrgStatus = (org: OrganizationDto, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent drawer trigger
     const newStatus = org.status === 'Suspended' ? 'Active' : 'Suspended';
     const message = org.status === 'Suspended' 
       ? `Bạn có chắc chắn muốn mở khóa cho tổ chức "${org.name}"?`
       : `Bạn có chắc chắn muốn KHÓA tổ chức "${org.name}"? Quá trình đăng nhập của quản trị viên và nhân viên thuộc tổ chức này sẽ bị chặn.`;
 
-    if (!window.confirm(message)) return;
-
-    try {
-      await updateOrganizationStatus(org.id, newStatus);
-      fetchOrgs(search, status, page);
-    } catch (err: any) {
-      alert(err.message || 'Lỗi cập nhật trạng thái tổ chức');
-    }
+    showAlert(
+      org.status === 'Suspended' ? "Mở khóa tổ chức" : "Khóa tổ chức",
+      message,
+      "confirm",
+      async () => {
+        try {
+          await updateOrganizationStatus(org.id, newStatus);
+          fetchOrgs(search, status, page);
+          showAlert("Thành công", "Đã cập nhật trạng thái tổ chức thành công.", "success");
+        } catch (err: any) {
+          showAlert("Lỗi", err.message || 'Lỗi cập nhật trạng thái tổ chức', "error");
+        }
+      }
+    );
   };
 
   const handleCreateSuccess = () => {
@@ -360,6 +387,82 @@ export default function OrganizationsPage() {
           onClose={() => setSelectedOrgId(null)}
           onRefresh={() => fetchOrgs(search, status, page)}
         />
+      )}
+
+      {/* Premium Notification Dialog */}
+      {alertConfig && alertConfig.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"
+            onClick={() => {
+              if (alertConfig.type !== "confirm") {
+                setAlertConfig(null);
+              }
+            }}
+          />
+
+          {/* Modal Container */}
+          <div className="relative z-10 w-full max-w-sm transform overflow-hidden rounded-3xl bg-white p-6 shadow-2xl transition-all border border-slate-100/50 font-sans">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {/* Icon */}
+              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
+                alertConfig.type === "success" ? "bg-emerald-50 text-emerald-600" :
+                alertConfig.type === "error" ? "bg-rose-50 text-rose-600" :
+                alertConfig.type === "warning" ? "bg-amber-50 text-amber-600" :
+                "bg-blue-50 text-blue-600"
+              }`}>
+                {alertConfig.type === "success" && <CheckCircle size={24} />}
+                {alertConfig.type === "error" && <XCircle size={24} />}
+                {alertConfig.type === "warning" && <AlertCircle size={24} />}
+                {alertConfig.type === "confirm" && <AlertCircle size={24} />}
+              </div>
+
+              {/* Title & Message */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">{alertConfig.title}</h4>
+                <p className="mt-1.5 text-xs text-slate-500 leading-relaxed px-2">
+                  {alertConfig.message}
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex items-center justify-center gap-3 w-full pt-2">
+                {alertConfig.type === "confirm" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setAlertConfig(null)}
+                      className="flex-1 rounded-2xl border border-slate-200 hover:bg-slate-50 py-2.5 text-xs font-bold text-slate-700 transition active:scale-95"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (alertConfig.onConfirm) {
+                          await alertConfig.onConfirm();
+                        }
+                        setAlertConfig(null);
+                      }}
+                      className="flex-1 rounded-2xl bg-slate-900 hover:bg-slate-800 py-2.5 text-xs font-bold text-white transition active:scale-95"
+                    >
+                      Xác nhận
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAlertConfig(null)}
+                    className="w-full rounded-2xl bg-slate-900 hover:bg-slate-800 py-2.5 text-xs font-bold text-white transition active:scale-95"
+                  >
+                    Đóng
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

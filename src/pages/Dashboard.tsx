@@ -19,7 +19,6 @@ import { AIPredictionsPanel } from "@/components/panels/admin/AIPredictionsPanel
 import { AIRecommendationsPanel } from "@/components/panels/admin/AIRecommendationsPanel";
 import { DepartmentAnalyticsPanel } from "@/components/panels/admin/DepartmentAnalyticsPanel";
 import { UserManagementPanel } from "@/components/panels/admin/UserManagementPanel";
-import { WorkforceTrendsPanel } from "@/components/panels/admin/WorkforceTrendsPanel";
 import { SettingsPanel } from "@/components/panels/admin/SettingsPanel";
 import DepartmentsPanel from "@/components/panels/admin/DepartmentsPanel";
 import { HrReportPanel } from "@/components/panels/admin/HrReportPanel";
@@ -77,10 +76,6 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
     title: "Burnout Risk",
     subtitle: "Risk classification based on recent signals.",
   },
-  "wellbeing-analytics": {
-    title: "Wellbeing Analytics",
-    subtitle: "Mental wellbeing trends and score changes.",
-  },
   "survey-analytics": {
     title: "Survey Analytics",
     subtitle: "Thống kê kết quả khảo sát tinh thần theo tháng và xu hướng nhiều tháng.",
@@ -112,10 +107,6 @@ const TAB_META: Record<string, { title: string; subtitle: string }> = {
   "user-management": {
     title: "User Management",
     subtitle: "Create, update, search, and review users.",
-  },
-  "workforce-trends": {
-    title: "Workforce Trends",
-    subtitle: "Headcount, churn, and productivity trends over time.",
   },
   settings: {
     title: "Settings",
@@ -195,8 +186,6 @@ const getPanelComponent = (
       return <WorkloadPanel />;
     case "burnout-risk":
       return isManager ? <BurnoutMonitorPanel /> : <BurnoutRiskPanel />;
-    case "wellbeing-analytics":
-      return <WellbeingAnalyticsPanel />;
     case "survey-analytics":
       return <WellbeingAnalyticsPanel />;
     case "custom-surveys":
@@ -213,8 +202,6 @@ const getPanelComponent = (
       return <DepartmentsPanel />;
     case "user-management":
       return <UserManagementPanel />;
-    case "workforce-trends":
-      return <WorkforceTrendsPanel />;
     case "settings":
       return <SettingsPanel />;
     case "hr-report":

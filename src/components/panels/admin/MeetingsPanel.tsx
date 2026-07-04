@@ -71,6 +71,24 @@ export function MeetingsPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Custom alert/confirm dialog state
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "confirm";
+    onConfirm?: () => void | Promise<void>;
+  } | null>(null);
+
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "warning" | "confirm" = "success",
+    onConfirm?: () => void | Promise<void>
+  ) => {
+    setAlertConfig({ isOpen: true, title, message, type, onConfirm });
+  };
+
   // Google Calendar Integration State
   const [gcalConnected, setGcalConnected] = useState(false);
   const [gcalEmail, setGcalEmail] = useState<string | null>(null);
@@ -184,20 +202,24 @@ export function MeetingsPanel() {
   };
 
   useEffect(() => {
-    loadDepartments();
+    if (canSeeDept) {
+      loadDepartments();
+    }
     checkGcalStatus();
     loadPersonalMeetingLoad();
-    loadUsersAndTeams();
+    if (canCreate) {
+      loadUsersAndTeams();
+    }
 
     // Check if redirected with status=connected
     const params = new URLSearchParams(window.location.search || window.location.hash.split("?")[1] || "");
     if (params.get("status") === "connected") {
-      alert("Kết nối Google Calendar thành công!");
+      showAlert("Kết nối thành công", "Kết nối Google Calendar thành công!", "success");
       // Clean query params so alert doesn't show again on refresh
       const hashOnly = window.location.hash.split("?")[0];
       window.history.replaceState({}, document.title, window.location.pathname + hashOnly);
     }
-  }, []);
+  }, [canSeeDept, canCreate]);
 
   useEffect(() => {
     loadMeetings();
@@ -211,24 +233,30 @@ export function MeetingsPanel() {
         window.location.href = res.data.data.authUrl;
       }
     } catch {
-      alert("Không lấy được URL kết nối Google Calendar.");
+      showAlert("Lỗi kết nối", "Không lấy được URL kết nối Google Calendar.", "error");
     }
   };
 
-  const handleDisconnectGcal = async () => {
-    if (!confirm("Bạn có chắc chắn muốn ngắt kết nối Google Calendar?")) return;
-    try {
-      const res = await disconnectGoogleCalendar();
-      if (res.data.succeeded) {
-        setGcalConnected(false);
-        setGcalEmail(null);
-        alert("Đã ngắt kết nối thành công.");
-      } else {
-        alert(res.data.message || "Không thể ngắt kết nối.");
+  const handleDisconnectGcal = () => {
+    showAlert(
+      "Ngắt kết nối Google Calendar",
+      "Bạn có chắc chắn muốn ngắt kết nối Google Calendar?",
+      "confirm",
+      async () => {
+        try {
+          const res = await disconnectGoogleCalendar();
+          if (res.data.succeeded) {
+            setGcalConnected(false);
+            setGcalEmail(null);
+            showAlert("Đã ngắt kết nối", "Đã ngắt kết nối thành công.", "success");
+          } else {
+            showAlert("Lỗi", res.data.message || "Không thể ngắt kết nối.", "error");
+          }
+        } catch {
+          showAlert("Lỗi", "Lỗi khi gửi yêu cầu ngắt kết nối.", "error");
+        }
       }
-    } catch {
-      alert("Lỗi khi gửi yêu cầu ngắt kết nối.");
-    }
+    );
   };
 
   const handleSyncGcal = async () => {
@@ -236,13 +264,13 @@ export function MeetingsPanel() {
     try {
       const res = await syncGoogleCalendar();
       if (res.data.succeeded) {
-        alert("Đồng bộ Google Calendar thành công!");
+        showAlert("Đồng bộ thành công", "Đồng bộ Google Calendar thành công!", "success");
         loadMeetings();
       } else {
-        alert(res.data.message || "Đồng bộ thất bại.");
+        showAlert("Đồng bộ thất bại", res.data.message || "Đồng bộ thất bại.", "error");
       }
     } catch {
-      alert("Lỗi kết nối khi đồng bộ.");
+      showAlert("Lỗi kết nối", "Lỗi kết nối khi đồng bộ.", "error");
     } finally {
       setSyncingGcal(false);
     }
@@ -251,7 +279,7 @@ export function MeetingsPanel() {
   // Create Meeting Submit
   const handleCreateMeeting = async () => {
     if (!title.trim() || !startTime || !endTime) {
-      alert("Vui lòng điền đầy đủ tiêu đề, thời gian bắt đầu và kết thúc.");
+      showAlert("Thông tin thiếu", "Vui lòng điền đầy đủ tiêu đề, thời gian bắt đầu và kết thúc.", "warning");
       return;
     }
 
@@ -275,7 +303,7 @@ export function MeetingsPanel() {
 
       const res = await createMeeting(dto);
       if (res.data.succeeded) {
-        alert("Đã đặt lịch cuộc họp thành công!");
+        showAlert("Đặt lịch thành công", "Đã đặt lịch cuộc họp thành công!", "success");
         setCreateModalOpen(false);
         // Reset form
         setTitle("");
@@ -290,10 +318,10 @@ export function MeetingsPanel() {
         loadMeetings();
         loadPersonalMeetingLoad();
       } else {
-        alert(res.data.message || "Không thể tạo cuộc họp.");
+        showAlert("Thất bại", res.data.message || "Không thể tạo cuộc họp.", "error");
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Lỗi khi tạo cuộc họp.");
+      showAlert("Lỗi", err.response?.data?.message || "Lỗi khi tạo cuộc họp.", "error");
     } finally {
       setSavingMeeting(false);
     }
@@ -881,6 +909,82 @@ export function MeetingsPanel() {
                 >
                   {savingMeeting ? "Đang lưu..." : "Đặt lịch họp"}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Premium Notification Dialog */}
+      {alertConfig && alertConfig.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"
+            onClick={() => {
+              if (alertConfig.type !== "confirm") {
+                setAlertConfig(null);
+              }
+            }}
+          />
+
+          {/* Modal Container */}
+          <div className="relative z-10 w-full max-w-sm transform overflow-hidden rounded-3xl bg-white p-6 shadow-2xl transition-all border border-slate-100/50 font-sans">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {/* Icon */}
+              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
+                alertConfig.type === "success" ? "bg-emerald-50 text-emerald-600" :
+                alertConfig.type === "error" ? "bg-rose-50 text-rose-600" :
+                alertConfig.type === "warning" ? "bg-amber-50 text-amber-600" :
+                "bg-blue-50 text-blue-600"
+              }`}>
+                {alertConfig.type === "success" && <CheckCircle size={24} />}
+                {alertConfig.type === "error" && <XCircle size={24} />}
+                {alertConfig.type === "warning" && <AlertCircle size={24} />}
+                {alertConfig.type === "confirm" && <AlertCircle size={24} />}
+              </div>
+
+              {/* Title & Message */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">{alertConfig.title}</h4>
+                <p className="mt-1.5 text-xs text-slate-500 leading-relaxed px-2">
+                  {alertConfig.message}
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex items-center justify-center gap-3 w-full pt-2">
+                {alertConfig.type === "confirm" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setAlertConfig(null)}
+                      className="flex-1 rounded-2xl border border-slate-200 hover:bg-slate-50 py-2.5 text-xs font-bold text-slate-700 transition active:scale-95"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (alertConfig.onConfirm) {
+                          await alertConfig.onConfirm();
+                        }
+                        setAlertConfig(null);
+                      }}
+                      className="flex-1 rounded-2xl bg-slate-900 hover:bg-slate-800 py-2.5 text-xs font-bold text-white transition active:scale-95"
+                    >
+                      Xác nhận
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAlertConfig(null)}
+                    className="w-full rounded-2xl bg-slate-900 hover:bg-slate-800 py-2.5 text-xs font-bold text-white transition active:scale-95"
+                  >
+                    Đóng
+                  </button>
+                )}
               </div>
             </div>
           </div>
