@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getMyOrders, cancelOrder, repayOrder, downloadInvoice } from '../api';
+import { getMyOrders, cancelOrder, repayOrder, downloadInvoice, getOrderById, getPublicPlans, createOrder } from '../api';
 import type { OrderSummaryDto } from '../types';
 import CustomerLayout from '../components/CustomerLayout';
 import {
@@ -86,14 +86,59 @@ export default function OrdersPage() {
   const handleRepay = async (orderId: number) => {
     try {
       setActionLoading(orderId);
-      const data = await repayOrder(orderId);
-      if (data && data.paymentUrl) {
-        window.location.href = data.paymentUrl;
+      
+      // Fetch details of the existing order
+      const detail = (await getOrderById(orderId)) as any;
+      
+      const companyName = detail.companyInfo?.companyName || detail.companyName || '';
+      const companyEmail = detail.companyInfo?.companyEmail || detail.companyEmail || '';
+      const companyPhone = detail.companyInfo?.companyPhone || detail.companyPhone || '';
+      
+      const adminEmail = detail.adminInfo?.adminEmail || detail.adminEmail || '';
+      const adminFullName = detail.adminInfo?.adminFullName || '';
+      
+      let adminFirstName = detail.adminFirstName || '';
+      let adminLastName = detail.adminLastName || '';
+      
+      if (!adminFirstName && adminFullName) {
+        const nameParts = adminFullName.trim().split(/\s+/);
+        adminFirstName = nameParts[0] || '';
+        adminLastName = nameParts.slice(1).join(' ') || 'Admin';
+      }
+
+      const billingCycle = detail.billingCycle || 'MONTHLY';
+      
+      // Get public plans list to resolve the plan ID
+      const plans = await getPublicPlans();
+      const planName = detail.plan?.name || detail.planName || '';
+      const matchedPlan = plans.find(p => p.name.toLowerCase() === planName.toLowerCase());
+      if (!matchedPlan) {
+        throw new Error('Gói dịch vụ đã chọn hiện tại không còn khả dụng.');
+      }
+      
+      // Cancel the old order first so we can create a new one without overlapping PENDING orders
+      await cancelOrder(orderId);
+      
+      // Create new order with identical details
+      const newOrder = await createOrder({
+        planId: matchedPlan.id,
+        billingCycle,
+        companyName,
+        companyEmail,
+        companyPhone: companyPhone || undefined,
+        adminEmail,
+        adminFirstName,
+        adminLastName
+      });
+      
+      if (newOrder && newOrder.paymentUrl) {
+        showToast('Đang tạo lại liên kết thanh toán...', 'success');
+        window.location.href = newOrder.paymentUrl;
       } else {
-        throw new Error('Could not retrieve new payment link.');
+        throw new Error('Không nhận được liên kết thanh toán mới.');
       }
     } catch (err: any) {
-      showToast(err.message || 'Failed to get payment link. Please try again.', 'error');
+      showToast(err.message || 'Lỗi khi tạo lại liên kết thanh toán. Vui lòng thử lại.', 'error');
     } finally {
       setActionLoading(null);
     }

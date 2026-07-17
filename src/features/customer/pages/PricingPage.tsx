@@ -145,7 +145,7 @@ export default function PricingPage() {
             <p className="text-slate-600 font-semibold mb-4">No active service plans are currently available.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
             {plans.map((plan) => {
               const isYearly = billingCycle === 'YEARLY';
               const price = isYearly ? plan.priceYearly : plan.priceMonthly;
@@ -174,7 +174,7 @@ export default function PricingPage() {
 
                   <div className="mb-6">
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
-                    <p className="text-sm text-slate-500 h-12 overflow-hidden">{plan.description || 'Premium service plan for enterprise management.'}</p>
+                    <p className="text-sm text-slate-500 min-h-[5.5rem] line-clamp-4">{plan.description || 'Premium service plan for enterprise management.'}</p>
                   </div>
 
                   <div className="mb-6 flex flex-col justify-end">

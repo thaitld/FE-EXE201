@@ -26,13 +26,13 @@ export function BorderBeam({
           y={borderWidth / 2}
           width={`calc(100% - ${borderWidth}px)`}
           height={`calc(100% - ${borderWidth}px)`}
-          rx="inherit"
-          ry="inherit"
           stroke={`url(#${gradientId})`}
           strokeWidth={borderWidth}
           style={{
             strokeDasharray: "150 400",
             animation: `border-beam-svg-anim ${duration}s linear infinite`,
+            rx: "inherit",
+            ry: "inherit",
           }}
         />
         <defs>
