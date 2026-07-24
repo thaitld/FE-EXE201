@@ -133,7 +133,7 @@ export default function RevenuePage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
           <h5 className="text-sm font-bold text-slate-800 mb-4">Biểu Đồ Doanh Thu 12 Tháng</h5>
           <div className="h-72 text-xs">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <BarChart data={monthlyChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" />
@@ -151,7 +151,7 @@ export default function RevenuePage() {
           <h5 className="text-sm font-bold text-slate-800 mb-4">Doanh Thu Theo Gói Dịch Vụ</h5>
           <div className="h-72 text-xs">
             {planChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
                     data={planChartData}

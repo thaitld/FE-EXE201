@@ -9,7 +9,16 @@ let connection: signalR.HubConnection | null = null;
  */
 export function createSignalRConnection(token: string): signalR.HubConnection {
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:5211/api";
-  const hubUrl = apiBase.replace(/\/api\/?$/, "/hubs/notifications");
+  
+  // Cleanly extract base origin / root path and attach /hubs/notifications
+  let hubUrl = apiBase.trim();
+  if (hubUrl.endsWith("/")) {
+    hubUrl = hubUrl.slice(0, -1);
+  }
+  if (hubUrl.toLowerCase().endsWith("/api")) {
+    hubUrl = hubUrl.substring(0, hubUrl.length - 4);
+  }
+  hubUrl = `${hubUrl}/hubs/notifications`;
 
   connection = new signalR.HubConnectionBuilder()
     .withUrl(hubUrl, {
