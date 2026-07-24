@@ -211,10 +211,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       const status = err?.response?.status;
 
-      // 401/403 already triggers AUTH_SESSION_EXPIRED_EVENT via the API
+      // 401 already triggers AUTH_SESSION_EXPIRED_EVENT via the API
       // interceptor (which clears state). For any other error, just clear
       // the cached profile but keep the session as-is.
-      if (status === 401 || status === 403) {
+      if (status === 401) {
         return;
       }
 

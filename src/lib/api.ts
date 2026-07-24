@@ -113,7 +113,7 @@ apiClient.interceptors.response.use(
       backendMessage.includes("Giới hạn gói")
     )) {
       window.dispatchEvent(new CustomEvent("manto:show-upgrade-modal", { detail: { message: backendMessage } }));
-    } else if (status === 401 || status === 403) {
+    } else if (status === 401) {
       const hadToken = Boolean(localStorage.getItem("auth_token"));
 
       if (hadToken) {

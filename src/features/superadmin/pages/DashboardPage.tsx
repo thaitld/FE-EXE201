@@ -173,7 +173,7 @@ export default function DashboardPage() {
           
           <div className="mt-4 h-64">
             {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
                     data={chartData}
